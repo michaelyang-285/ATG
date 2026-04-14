@@ -22,7 +22,7 @@ export default {
       title: 'Sidebar stories (Also today)',
       type: 'array',
       of: [{ type: 'reference', to: [{ type: 'story' }] }],
-      validation: Rule => Rule.max(4),
+      validation: (Rule: any) => Rule.max(4),
     },
     {
       name: 'newsletterHeadline',
