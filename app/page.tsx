@@ -44,7 +44,7 @@ export default async function HomePage() {
         </div>
       )}
       <div className="bg-paper border-b-2 border-ink w-full">
-        <div className="max-w-[1200px] mx-auto grid grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+        <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
           <StoryFeed stories={stories} />
           <Rail events={events} lists={lists} />
         </div>
