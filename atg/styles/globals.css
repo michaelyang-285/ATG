@@ -1,0 +1,49 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #F4EFE4;
+  }
+  body {
+    @apply bg-paper text-ink font-inter;
+  }
+}
+
+@layer components {
+  /* Nav link */
+  .nav-link {
+    @apply text-[10px] font-semibold text-[#777] uppercase tracking-[0.6px]
+           px-[14px] flex items-center h-full no-underline whitespace-nowrap
+           hover:text-yellow transition-colors;
+  }
+
+  /* Category pill — inactive */
+  .cat-pill {
+    @apply inline-block font-inter text-[10px] font-bold uppercase tracking-[0.8px]
+           px-[14px] py-[8px] border-2 border-ink bg-paper text-ink
+           leading-none cursor-pointer select-none;
+  }
+
+  /* Category pill — active */
+  .cat-pill-active {
+    @apply inline-block font-inter text-[10px] font-bold uppercase tracking-[0.8px]
+           px-[14px] py-[8px] border-2 border-ink bg-ink text-yellow
+           leading-none cursor-pointer select-none;
+  }
+
+  /* Story tag base */
+  .story-tag {
+    @apply inline-block font-inter text-[8px] font-bold uppercase tracking-[1px]
+           px-2 py-[3px] mb-2;
+  }
+
+  /* Brutalist button */
+  .btn-brutalist {
+    @apply inline-block font-inter font-bold uppercase tracking-[1px]
+           cursor-pointer select-none whitespace-nowrap;
+  }
+}
