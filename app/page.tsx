@@ -30,7 +30,7 @@ export default async function HomePage() {
   const { homepage, stories, events, lists, businesses } = await getData()
 
   return (
-    <main className="max-w-[920px] mx-auto">
+    <main className="w-full">
 
       <Nav />
 
