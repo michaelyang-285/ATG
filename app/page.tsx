@@ -7,7 +7,6 @@ import CategoryBar from '@/components/CategoryBar'
 import { StoryFeed, Rail } from '@/components/ContentGrid'
 import { BusinessSpotlight, PromoBar, Footer } from '@/components/Misc'
 
-// Revalidate every 60 seconds (ISR)
 export const revalidate = 60
 
 async function getData() {
@@ -21,7 +20,6 @@ async function getData() {
     ])
     return { homepage, stories, events, lists, businesses }
   } catch {
-    // Returns nulls — components fall back to placeholder content
     return { homepage: null, stories: [], events: [], lists: [], businesses: [] }
   }
 }
@@ -31,51 +29,29 @@ export default async function HomePage() {
 
   return (
     <main className="w-full">
-
       <Nav />
-
       <Ticker items={homepage?.ticker ?? []} />
-
-      <Hero
-        heroStory={homepage?.heroStory}
-        sidebarStories={homepage?.sidebarStories ?? []}
-      />
-
-      <NewsletterStrip
-        headline={homepage?.newsletterHeadline}
-        sub={homepage?.newsletterSub}
-        subscriberCount={homepage?.subscriberCount}
-      />
-
+      <Hero heroStory={homepage?.heroStory} sidebarStories={homepage?.sidebarStories ?? []} />
+      <NewsletterStrip headline={homepage?.newsletterHeadline} sub={homepage?.newsletterSub} subscriberCount={homepage?.subscriberCount} />
       <CategoryBar />
-
-      {/* Community quote */}
       {homepage?.communityQuote && (
-        <div className="bg-yellow border-b-2 border-ink px-5 py-[14px]">
-          <p className="font-inter text-[8px] font-bold uppercase tracking-[1.5px] text-black/35 mb-[6px]">
-            From the group
-          </p>
-          <p className="font-archivo text-[17px] text-ink leading-[1.2] tracking-[-0.3px]">
-            "{homepage.communityQuote}"
-          </p>
-          <p className="font-inter text-[10px] text-black/40 mt-[6px]">
-            {homepage.communityQuoteSource}
-          </p>
+        <div className="bg-yellow border-b-2 border-ink w-full">
+          <div className="max-w-[1200px] mx-auto px-6 py-[14px]">
+            <p className="font-inter text-[8px] font-bold uppercase tracking-[1.5px] text-black/35 mb-[6px]">From the group</p>
+            <p className="font-archivo text-[17px] text-ink leading-[1.2] tracking-[-0.3px]">"{homepage.communityQuote}"</p>
+            <p className="font-inter text-[10px] text-black/40 mt-[6px]">{homepage.communityQuoteSource}</p>
+          </div>
         </div>
       )}
-
-      {/* Content grid */}
-      <div className="grid grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] border-b-2 border-ink">
-        <StoryFeed stories={stories} />
-        <Rail events={events} lists={lists} />
+      <div className="bg-paper border-b-2 border-ink w-full">
+        <div className="max-w-[1200px] mx-auto grid grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+          <StoryFeed stories={stories} />
+          <Rail events={events} lists={lists} />
+        </div>
       </div>
-
       <BusinessSpotlight businesses={businesses} />
-
       <PromoBar />
-
       <Footer />
-
     </main>
   )
 }
