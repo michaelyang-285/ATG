@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Nav from '@/components/Nav'
 import { Footer } from '@/components/Misc'
 
@@ -8,6 +8,7 @@ const CATS   = ['Restaurant', 'Auto', 'Retail', 'Health & Wellness', 'Profession
 
 export default function SubmitBusinessPage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  const formRef = useRef<HTMLFormElement | null>(null)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -44,12 +45,12 @@ export default function SubmitBusinessPage() {
           {status === 'done' ? (
             <div className="bg-ink text-white p-8 border-2 border-ink shadow-brutalist">
               <p className="font-archivo text-[22px] text-yellow mb-2">Submitted. We'll review it soon.</p>
-              <p className="font-georgia text-[15px] text-[#aaa]">
+              <p className="font-georgia text-[15px] text-paper/50">
                 We review all submissions within 48 hours. Once approved it'll appear in the directory and on the homepage.
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-6">
 
               {/* Business name */}
               <div>
@@ -131,14 +132,29 @@ export default function SubmitBusinessPage() {
                 <p className="font-inter text-[12px] text-orange">Something went wrong. Try again or email us directly.</p>
               )}
 
-              <button type="submit" disabled={status === 'sending'}
+              <span
+                role="button"
+                tabIndex={0}
+                aria-disabled={status === 'sending'}
+                onClick={() => {
+                  if (status === 'sending') return
+                  formRef.current?.requestSubmit()
+                }}
+                onKeyDown={(e) => {
+                  if (status === 'sending') return
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    formRef.current?.requestSubmit()
+                  }
+                }}
                 className="inline-block bg-orange text-white font-inter text-[12px] font-bold
                            uppercase tracking-[1px] px-8 py-4 border-2 border-ink
-                           shadow-brutalist cursor-pointer self-start
-                           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brutalist-sm
-                           transition-all disabled:opacity-50">
+                           shadow-brutalist cursor-pointer self-start select-none
+                           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none
+                           transition-all aria-disabled:opacity-50"
+              >
                 {status === 'sending' ? 'Submitting...' : 'Submit business →'}
-              </button>
+              </span>
 
             </form>
           )}

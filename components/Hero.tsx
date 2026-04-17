@@ -26,17 +26,24 @@ export default function Hero({ heroStory, sidebarStories = [] }: { heroStory?: S
   ]
   return (
     <div className="bg-paper border-b-2 border-ink w-full">
-    <div className="max-w-[1200px] mx-auto grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
       <div className="p-8 border-r-2 border-ink">
         <div className="flex items-center gap-[10px] mb-[14px]">
           <span className="font-inter text-[9px] font-bold uppercase tracking-[1.5px] bg-orange text-white px-[10px] py-1">Today's lead</span>
-          <span className="font-inter text-[11px] text-[#888]">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+          <span className="font-inter text-[11px] text-ink/50">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
         </div>
         <h1 className="font-archivo text-[34px] leading-[1.05] text-ink tracking-[-1px] mb-[14px]">{story.title}</h1>
-        <p className="font-georgia text-[15px] text-[#444] leading-relaxed mb-5 pl-[14px] border-l-[3px] border-orange">{story.deck}</p>
+        <p className="font-georgia text-[15px] text-ink/70 leading-relaxed mb-5 pl-[14px] border-l-[3px] border-orange">{story.deck}</p>
         <div className="flex items-center gap-[14px]">
-          <Link href={`/stories/${story.slug.current}`} className="inline-block bg-orange text-white font-inter text-[11px] font-bold uppercase tracking-[1px] px-[22px] py-3 border-2 border-ink shadow-brutalist-sm cursor-pointer">Read the story →</Link>
-          <span className="font-inter text-[11px] text-[#888]">{story.readTime} min read · {story.author ?? 'ATG Staff'}</span>
+          <Link
+            href={`/stories/${story.slug.current}`}
+            className="inline-block bg-orange text-white font-inter text-[11px] font-bold uppercase tracking-[1px]
+                       px-[22px] py-3 border-2 border-ink shadow-brutalist-dk-sm cursor-pointer select-none no-underline
+                       hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+          >
+            Read the story →
+          </Link>
+          <span className="font-inter text-[11px] text-ink/50">{story.readTime} min read · {story.author ?? 'ATG Staff'}</span>
         </div>
       </div>
       <div className="flex flex-col">
@@ -50,8 +57,8 @@ export default function Hero({ heroStory, sidebarStories = [] }: { heroStory?: S
         </div>
         <div className="flex-1">
           {sidebar.map((s) => (
-            <Link key={s.slug.current} href={`/stories/${s.slug.current}`} className="block px-4 py-[13px] border-b border-[#ddd] last:border-b-0 hover:bg-card group">
-              <p className="font-inter text-[8px] font-bold uppercase tracking-[1px] text-[#999] mb-[3px]">{s.category?.name}</p>
+            <Link key={s.slug.current} href={`/stories/${s.slug.current}`} className="block px-4 py-[13px] border-b border-ink/15 last:border-b-0 hover:bg-card group no-underline">
+              <p className="font-inter text-[8px] font-bold uppercase tracking-[1px] text-ink/50 mb-[3px]">{s.category?.name}</p>
               <p className="font-space text-[13px] font-bold text-ink leading-[1.3] group-hover:underline underline-offset-2">{s.title}</p>
             </Link>
           ))}

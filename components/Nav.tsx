@@ -23,9 +23,7 @@ export default function Nav() {
         <div className="flex items-center flex-1 h-full">
           {NAV_LINKS.map((link) => (
             <Link key={link.href} href={link.href}
-              className="relative text-[10px] font-semibold text-[#777] uppercase tracking-[0.6px]
-                         px-4 flex items-center h-full no-underline whitespace-nowrap
-                         hover:text-yellow transition-colors group">
+              className="nav-link relative group">
               {link.label}
               <span className="absolute bottom-0 left-4 h-[2px] bg-yellow w-0 group-hover:w-[calc(100%-32px)] transition-all duration-200" />
             </Link>
@@ -33,7 +31,10 @@ export default function Nav() {
           <Link href="/newsletter"
             className="ml-2 flex-shrink-0 bg-orange text-white font-inter
                        text-[10px] font-semibold uppercase tracking-[0.6px]
-                       px-4 py-[7px] leading-none no-underline hover:bg-[#e55a20] transition-colors">
+                       px-4 py-[7px] leading-none no-underline select-none
+                       border-2 border-ink shadow-brutalist-dk-sm
+                       hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none
+                       transition-all">
             Newsletter
           </Link>
         </div>

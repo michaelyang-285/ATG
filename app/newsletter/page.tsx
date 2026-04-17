@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Nav from '@/components/Nav'
 import { Footer } from '@/components/Misc'
 import ATGPin from '@/components/ATGPin'
@@ -7,6 +7,7 @@ import ATGPin from '@/components/ATGPin'
 export default function NewsletterPage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [email, setEmail] = useState('')
+  const formRef = useRef<HTMLFormElement | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -39,7 +40,7 @@ export default function NewsletterPage() {
           <p className="font-archivo text-[32px] text-white tracking-[-1px] leading-tight mb-6">
             Every Thursday morning.
           </p>
-          <p className="font-georgia text-[17px] text-[#666] italic leading-relaxed mb-10 max-w-[500px] mx-auto">
+          <p className="font-georgia text-[17px] text-paper/60 italic leading-relaxed mb-10 max-w-[500px] mx-auto">
             No fluff. No tourism board energy. Just what actually happened in Gwinnett County this week — news, food, events, and community.
           </p>
 
@@ -51,27 +52,42 @@ export default function NewsletterPage() {
               </p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col items-center gap-3 max-w-[400px] mx-auto">
+            <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col items-center gap-3 max-w-[400px] mx-auto">
               <input
                 type="email" required value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="your@email.com"
-                className="w-full h-12 px-4 bg-[#1c1c1c] border-2 border-[#444]
-                           text-white font-inter text-[14px] outline-none
-                           focus:border-yellow transition-colors placeholder:text-[#555]"
+                className="w-full h-12 px-4 bg-mid border-2 border-yellow/30
+                           text-paper font-inter text-[14px] outline-none
+                           focus:border-yellow transition-colors placeholder:text-paper/40"
               />
-              <button type="submit" disabled={status === 'sending'}
+              <span
+                role="button"
+                tabIndex={0}
+                aria-disabled={status === 'sending'}
+                onClick={() => {
+                  if (status === 'sending') return
+                  formRef.current?.requestSubmit()
+                }}
+                onKeyDown={(e) => {
+                  if (status === 'sending') return
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    formRef.current?.requestSubmit()
+                  }
+                }}
                 className="w-full bg-orange text-white font-inter text-[13px] font-bold
-                           uppercase tracking-[1px] h-12 border-2 border-orange
-                           shadow-[4px_4px_0_#7A2800] cursor-pointer
-                           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brutalist-sm
-                           transition-all disabled:opacity-50">
+                           uppercase tracking-[1px] h-12 border-2 border-ink
+                           shadow-brutalist-dk-sm cursor-pointer select-none
+                           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none
+                           transition-all aria-disabled:opacity-50 flex items-center justify-center"
+              >
                 {status === 'sending' ? 'Signing you up...' : 'I\'m in →'}
-              </button>
+              </span>
               {status === 'error' && (
                 <p className="font-inter text-[11px] text-orange">Something went wrong. Try again.</p>
               )}
-              <p className="font-inter text-[10px] text-[#555]">
+              <p className="font-inter text-[10px] text-paper/40">
                 Free. Unsubscribe any time. No spam.
               </p>
             </form>
@@ -92,7 +108,7 @@ export default function NewsletterPage() {
                 {String(i + 1).padStart(2, '0')}
               </div>
               <p className="font-space text-[18px] font-bold text-ink mb-2">{item.label}</p>
-              <p className="font-georgia text-[14px] text-[#555] leading-relaxed">{item.desc}</p>
+              <p className="font-georgia text-[14px] text-ink/60 leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>

@@ -1,0 +1,273 @@
+# All Things Gwinnett — Cursor Rules
+
+## Project Overview
+All Things Gwinnett (ATG) is a hyperlocal media brand for Gwinnett County, Georgia.
+Stack: Next.js 14 (App Router) + Tailwind CSS + Sanity CMS + Vercel
+Live site: allthingsgwinnett.com
+
+---
+
+## Brand Identity
+
+### Aesthetic
+Neo-brutalist. Zine-inspired. Think Thrillist meets a local newspaper.
+- Hard edges everywhere. No border radius on any interactive element.
+- Offset box shadows only (never drop shadows): `box-shadow: 5px 5px 0 #111`
+- No gradients. No blur. No rounded corners.
+- Dense, editorial layout. Every pixel earns its place.
+
+### Color Palette
+```
+--paper:     #F4EFE4  /* page background */
+--ink:       #111111  /* text, borders, nav bg */
+--yellow:    #F2E93E  /* ticker, newsletter, active states, pin mark */
+--orange:    #FF6B35  /* primary accent, CTAs, "Gwinnett" in wordmark */
+--dk-orange: #7A2800  /* shadows on dark/colored surfaces only */
+--card:      #EDEADF  /* hover states, secondary surface */
+--mid:       #2A2A2A  /* dark gray subbars */
+```
+
+Never use: purple, blue, rounded corners, gradients, generic grays.
+Shadow color rule: `#111` on light surfaces, `#7A2800` on dark/orange surfaces.
+
+### Typography
+```
+font-archivo  → Archivo Black    → display, hero headlines, nav wordmark
+font-space    → Space Grotesk 700 → article headlines, card headlines
+font-georgia  → Georgia (serif)   → body copy, decks, reviews
+font-inter    → Inter 500/700     → UI, navigation, metadata, buttons
+```
+
+Google Fonts import:
+`https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@700&family=Inter:wght@400;500;600;700&display=swap`
+
+### Tailwind Brand Tokens
+These are already configured in `tailwind.config.js`:
+```js
+colors: { paper, ink, yellow, orange, 'dk-orange', card, mid }
+fontFamily: { archivo, space, inter, georgia }
+boxShadow: { brutalist, 'brutalist-sm', 'brutalist-dk', 'brutalist-dk-sm' }
+animation: { ticker: '28s linear infinite' }
+```
+
+---
+
+## Layout System
+
+### Full-Bleed Pattern (CRITICAL)
+Every section uses full-bleed background with contained inner content.
+ALWAYS use this pattern — never put max-width on the page wrapper:
+
+```tsx
+/* Full-bleed color bar — stretches edge to edge */
+<div className="bg-ink border-b-2 border-ink w-full">
+  {/* Contained content — centered, max 1200px, with gutters */}
+  <div className="max-w-[1200px] mx-auto px-6">
+    {/* content */}
+  </div>
+</div>
+```
+
+The `<main>` tag always has `className="w-full"` — never `max-w-*` on main.
+
+### Spacing
+- Section padding: `py-6` or `py-8` for most sections
+- Inner gutters: `px-6` on all inner containers
+- Column gaps: `gap-6` or `gap-8`
+- Card padding: `p-6` (24px all sides)
+
+---
+
+## Component Patterns
+
+### Buttons & CTAs
+NEVER use `<button>` elements — browser defaults override styles.
+Always use `<span>` or `<a>` with inline styles or Tailwind:
+
+```tsx
+<span className="inline-block bg-orange text-white font-inter text-[11px] font-bold
+                 uppercase tracking-[1px] px-6 py-3 border-2 border-ink
+                 shadow-brutalist-sm cursor-pointer
+                 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none
+                 transition-all">
+  Read the story →
+</span>
+```
+
+### Category Pills
+```tsx
+/* Inactive */
+<span className="inline-block font-inter text-[10px] font-bold uppercase tracking-[0.8px]
+                 px-[14px] py-[8px] border-2 border-ink bg-paper text-ink
+                 leading-none cursor-pointer">
+  Food & drink
+</span>
+
+/* Active */
+<span className="inline-block font-inter text-[10px] font-bold uppercase tracking-[0.8px]
+                 px-[14px] py-[8px] border-2 border-ink bg-ink text-yellow
+                 leading-none cursor-pointer">
+  Everything
+</span>
+```
+
+### Story Tags (color by category)
+```tsx
+const tagColors = {
+  orange:  'bg-orange text-white',          // Food & drink
+  yellow:  'bg-yellow text-ink',            // Roads & traffic
+  ink:     'bg-ink text-paper',             // Business
+  mid:     'bg-mid text-yellow',            // Development
+  outline: 'border-2 border-ink text-ink',  // Community/default
+}
+```
+
+### Nav
+- Black background, 50px height
+- Logo: ATG pin SVG + "All Things Gwinnett" wordmark ("Gwinnett" in orange)
+- Links: 10px, font-inter, semibold, uppercase, gray (#777), yellow on hover
+- Newsletter: orange inline button, no dividers between links
+- Subtle 1px separator between logo and nav links
+
+### ATG Logo Pin
+Single SVG polygon — never composite HTML elements:
+```tsx
+<svg width="24" viewBox="-7 -7 78 98" xmlns="http://www.w3.org/2000/svg">
+  <polygon fill="#7A2800" points="0,0 64,0 64,52 42,52 32,80 22,52 0,52" transform="translate(5,5)"/>
+  <polygon fill="#FF6B35" points="0,0 64,0 64,52 42,52 32,80 22,52 0,52"/>
+  <text fill="#fff" x="32" y="30" text-anchor="middle" dominant-baseline="middle"
+        font-family="'Archivo Black', sans-serif" font-size="22" letter-spacing="-1">ATG</text>
+</svg>
+```
+
+---
+
+## Editorial Voice & Copy Rules
+
+### Tone
+Direct. Specific. Warm. Punchy. Local first.
+Write like a smart neighbor, not a journalist trying to sound neutral.
+
+### NEVER use these words/phrases
+- vibrant
+- nestled
+- hidden gem
+- world-class
+- charming
+- bustling
+- community-driven
+- at the end of the day
+- in today's world
+- It's worth noting
+- Dive in
+- Em dashes (—) in headlines
+- "All Things Gwinnett is proud to..."
+
+### Headline rules
+- Specific over vague: "Duluth gets a 14-table izakaya" not "New restaurant opens"
+- Active voice always
+- Numbers over words: "14 stops" not "fourteen stops"
+- No question headlines
+- No "Here's why" or "This is why"
+
+### Deck/subhead rules
+- One sentence, max two
+- Should add information the headline doesn't have
+- Georgia serif, italic feel — conversational not formal
+
+### Story tag naming
+```
+Food & drink  (not "Food", not "Eats")
+Roads & traffic
+Development
+Crime & safety
+Schools
+Community
+Business
+Events
+```
+
+---
+
+## Sanity CMS
+
+### Content Types
+- `homepage` — singleton: ticker, hero story ref, newsletter copy, community quote
+- `story` — articles: title, deck, slug, category ref, body (Portable Text), thumbnail
+- `category` — taxonomy: name, slug, parent section, color
+- `section` — nav sections: News | Eats | Events | Opinions | Businesses
+- `event` — upcoming events: name, date, location, price
+- `list` — listicles: title, subtitle, ranked items with tip fields
+- `business` — directory: name, type, city, status (opened/soon/pending)
+
+### GROQ Query Pattern
+```ts
+// Always centralize queries in lib/sanity.ts
+const query = `*[_type == "story"] | order(publishedAt desc)[0...12]{
+  title, deck, slug, publishedAt, readTime, location,
+  "category": category->{ name, color },
+  "thumb": thumbnail.asset->url
+}`
+```
+
+### ISR Revalidation
+```ts
+export const revalidate = 60 // All pages revalidate every 60 seconds
+```
+
+---
+
+## Page Structure
+
+```
+allthingsgwinnett.com/           → Homepage
+allthingsgwinnett.com/news       → All news stories
+allthingsgwinnett.com/eats       → Food & drink
+allthingsgwinnett.com/events     → Events calendar
+allthingsgwinnett.com/opinions   → Community voices
+allthingsgwinnett.com/businesses → Business directory
+allthingsgwinnett.com/stories/[slug]    → Individual story
+allthingsgwinnett.com/events/[slug]     → Individual event
+allthingsgwinnett.com/lists/[slug]      → Listicle
+allthingsgwinnett.com/businesses/[slug] → Business page
+allthingsgwinnett.com/newsletter        → Newsletter signup
+allthingsgwinnett.com/submit-a-business → Public submission form
+allthingsgwinnett.com/submit-a-tip      → Tip submission
+allthingsgwinnett.com/about             → About ATG
+allthingsgwinnett.com/advertise         → Advertising packages
+```
+
+---
+
+## Common Mistakes to Avoid
+
+1. Never put `max-w-*` on `<main>` — always `w-full`
+2. Never use `<button>` — use `<span>` or `<a>` for all clickable elements
+3. Never add border-radius to interactive elements
+4. Never use drop-shadow — only offset box-shadow
+5. Never hardcode colors outside Tailwind tokens
+6. Always wrap section content in `max-w-[1200px] mx-auto px-6`
+7. Never use `grid-template-columns` without `minmax(0, 1fr)` to prevent overflow
+8. Always use `font-archivo` for display text, never for body text
+9. Category pills must be `<span>` not `<button>` to avoid browser style overrides
+10. Shadow on dark/orange surfaces must be `#7A2800`, not `#111`
+
+---
+
+## Environment Variables
+```
+NEXT_PUBLIC_SANITY_PROJECT_ID=zl7y53re
+NEXT_PUBLIC_SANITY_DATASET=production
+SANITY_WRITE_TOKEN=sk...
+```
+
+---
+
+## Deploy Workflow
+```bash
+git add .
+git commit -m "describe change"
+git push
+# Vercel auto-deploys from GitHub push
+# OR manual: vercel --prod
+```

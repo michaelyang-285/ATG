@@ -41,8 +41,8 @@ export function BusinessSpotlight({ businesses = [] }: { businesses?: Business[]
               {b.status === 'opened' ? 'Just opened' : 'Coming soon'}
             </span>
             <p className="font-space text-[15px] font-bold text-ink mb-[3px]">{b.name}</p>
-            <p className="font-inter text-[11px] text-[#999] mb-2">{b.businessType}</p>
-            <p className="font-georgia text-[13px] text-[#555] leading-relaxed">{b.description}</p>
+            <p className="font-inter text-[11px] text-ink/50 mb-2">{b.businessType}</p>
+            <p className="font-georgia text-[13px] text-ink/60 leading-relaxed">{b.description}</p>
           </Link>
         ))}
       </div>
@@ -67,9 +67,10 @@ export function PromoBar() {
           href="/newsletter"
           className="inline-block bg-white text-orange font-inter text-[11px] font-bold
                      uppercase tracking-[1px] px-6 py-3
-                     shadow-[3px_3px_0_#7A2800] whitespace-nowrap flex-shrink-0
-                     no-underline hover:translate-x-[1px] hover:translate-y-[1px]
-                     transition-transform"
+                     border-2 border-ink shadow-brutalist-dk-sm whitespace-nowrap flex-shrink-0
+                     no-underline select-none
+                     hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none
+                     transition-all"
         >
           Join the newsletter →
         </Link>
@@ -94,13 +95,13 @@ export function Footer() {
         <div className="flex gap-5">
           {FOOTER_LINKS.map((l) => (
             <Link key={l} href={`/${l.toLowerCase().replace(/\s/g, '-')}`}
-              className="font-inter text-[10px] text-[#555] uppercase tracking-[0.8px]
+              className="font-inter text-[10px] text-paper/40 uppercase tracking-[0.8px]
                          font-semibold no-underline hover:text-yellow transition-colors">
               {l}
             </Link>
           ))}
         </div>
-        <p className="font-inter text-[10px] text-[#444]">Gwinnett County, GA</p>
+        <p className="font-inter text-[10px] text-paper/30">Gwinnett County, GA</p>
       </div>
     </footer>
   )

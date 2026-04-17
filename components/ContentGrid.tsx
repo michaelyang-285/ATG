@@ -34,13 +34,13 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
             <p className="font-space text-[16px] font-bold leading-[1.25] text-ink mb-[5px] group-hover:underline underline-offset-2">
               {s.title}
             </p>
-            <p className="font-georgia text-[13px] text-[#555] leading-[1.55] mb-[6px]">{s.deck}</p>
-            <p className="font-inter text-[10px] text-[#999]">
+            <p className="font-georgia text-[13px] text-ink/60 leading-[1.55] mb-[6px]">{s.deck}</p>
+            <p className="font-inter text-[10px] text-ink/50">
               {s.location} · {s.readTime} min read
             </p>
           </div>
           {/* Thumbnail placeholder */}
-          <div className="w-[110px] flex-shrink-0 bg-card border-l-2 border-ink flex items-center justify-center font-inter text-[10px] text-[#bbb]">
+          <div className="w-[110px] flex-shrink-0 bg-card border-l-2 border-ink flex items-center justify-center font-inter text-[10px] text-ink/30">
             {s.thumb ? (
               <img src={s.thumb} alt={s.title} className="w-full h-full object-cover" />
             ) : (
@@ -87,14 +87,14 @@ export function Rail({ events = [], lists = [] }: { events?: Event[]; lists?: Li
         {evts.map((e) => {
           const d = new Date(e.date)
           return (
-            <a key={e.slug.current} href={`/events/${e.slug.current}`} className="flex gap-3 py-[10px] border-b border-[#ddd] last:border-b-0 last:pb-0 hover:no-underline group">
-              <div className="w-[42px] h-[42px] flex-shrink-0 bg-orange flex flex-col items-center justify-center border-[1.5px] border-ink shadow-[2px_2px_0_#111]">
+            <a key={e.slug.current} href={`/events/${e.slug.current}`} className="flex gap-3 py-[10px] border-b border-ink/15 last:border-b-0 last:pb-0 hover:no-underline group">
+              <div className="w-[42px] h-[42px] flex-shrink-0 bg-orange flex flex-col items-center justify-center border-[1.5px] border-ink shadow-brutalist-dk-sm">
                 <span className="font-inter text-[7px] font-bold uppercase text-white/70">{d.toLocaleString('en-US', { month: 'short' })}</span>
                 <span className="font-archivo text-[18px] text-white leading-none">{d.getDate()}</span>
               </div>
               <div>
                 <p className="font-space text-[13px] font-bold text-ink leading-[1.3] mb-[2px] group-hover:underline underline-offset-2">{e.name}</p>
-                <p className="font-inter text-[10px] text-[#999]">{e.location} · {e.price}</p>
+                <p className="font-inter text-[10px] text-ink/50">{e.location} · {e.price}</p>
               </div>
             </a>
           )
@@ -108,13 +108,13 @@ export function Rail({ events = [], lists = [] }: { events?: Event[]; lists?: Li
           <a href="/lists" className="font-inter text-[9px] text-orange font-bold uppercase tracking-[0.8px] no-underline">All →</a>
         </div>
         {lsts.map((l) => (
-          <a key={l.slug.current} href={`/lists/${l.slug.current}`} className="flex border-2 border-ink shadow-brutalist-sm mb-[10px] last:mb-0 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[1px_1px_0_#111] transition-all cursor-pointer group">
+          <a key={l.slug.current} href={`/lists/${l.slug.current}`} className="flex border-2 border-ink shadow-brutalist-sm mb-[10px] last:mb-0 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all cursor-pointer group">
             <div className="bg-ink text-yellow font-archivo text-[18px] min-w-[44px] flex items-center justify-center border-r-2 border-ink flex-shrink-0">
               {String(l.order).padStart(2, '0')}
             </div>
             <div className="p-[10px_12px]">
               <p className="font-space text-[13px] font-bold text-ink leading-[1.3] group-hover:underline underline-offset-2">{l.title}</p>
-              <p className="font-inter text-[10px] text-[#999] mt-[2px]">{l.subtitle}</p>
+              <p className="font-inter text-[10px] text-ink/50 mt-[2px]">{l.subtitle}</p>
             </div>
           </a>
         ))}

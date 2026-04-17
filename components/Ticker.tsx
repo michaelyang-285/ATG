@@ -16,7 +16,7 @@ export default function Ticker({ items = [] }: { items: string[] }) {
         <div className="flex items-center gap-[5px] bg-ink text-yellow font-archivo text-[9px]
                         px-3 py-1 tracking-[1.5px] whitespace-nowrap flex-shrink-0
                         leading-none border-r-2 border-ink">
-          <span className="w-[5px] h-[5px] rounded-full bg-yellow animate-pulse" />
+          <span className="w-[5px] h-[5px] bg-yellow animate-pulse" />
           Right now
         </div>
         {/* Scroll wrapper — overflow hidden, starts after badge */}
