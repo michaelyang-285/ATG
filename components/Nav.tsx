@@ -28,14 +28,16 @@ export default function Nav() {
 
   return (
     <nav className="bg-ink border-b-2 border-ink w-full relative">
-      <div className="max-w-[1200px] mx-auto px-6 flex items-center h-[50px]">
+      <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between gap-3 h-[50px]">
         <Link href="/" className="flex items-center gap-2 flex-shrink-0 no-underline">
           <ATGPin variant="dark" size={24} />
-          <span className="font-archivo text-[15px] text-white tracking-[-0.5px] leading-none whitespace-nowrap">
-            All Things <em className="not-italic text-orange">Gwinnett</em>
+          <span className="font-archivo text-[13px] sm:text-[15px] text-white tracking-[-0.5px] leading-none whitespace-nowrap">
+            <span className="hidden sm:inline">All Things </span>
+            <span className="sm:hidden">ATG </span>
+            <em className="not-italic text-orange">Gwinnett</em>
           </span>
         </Link>
-        <div className="flex items-center flex-1 h-full justify-end">
+        <div className="flex items-center flex-1 h-full justify-end min-w-0">
           {/* Desktop nav */}
           <div className="hidden md:flex items-center h-full">
             <div className="w-px h-6 bg-mid flex-shrink-0 mx-2" />
@@ -59,7 +61,7 @@ export default function Nav() {
           </div>
 
           {/* Mobile hamburger */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-3 flex-shrink-0">
             <Link
               href="/newsletter"
               className="flex-shrink-0 bg-orange text-white font-inter

@@ -6,7 +6,7 @@
 
 @layer base {
   html {
-    @apply bg-paper;
+    @apply bg-paper overflow-x-hidden;
   }
   body {
     @apply bg-paper text-ink font-inter overflow-x-hidden;
