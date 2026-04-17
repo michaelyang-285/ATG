@@ -26,15 +26,19 @@ export default function Hero({ heroStory, sidebarStories = [] }: { heroStory?: S
   ]
   return (
     <div className="bg-paper border-b-2 border-ink w-full">
-    <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-      <div className="p-8 border-r-2 border-ink">
-        <div className="flex items-center gap-[10px] mb-[14px]">
+    <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+      <div className="p-6 md:p-8 md:border-r-2 md:border-ink">
+        <div className="flex flex-wrap items-center gap-[10px] mb-[14px]">
           <span className="font-inter text-[9px] font-bold uppercase tracking-[1.5px] bg-orange text-white px-[10px] py-1">Today's lead</span>
           <span className="font-inter text-[11px] text-ink/50">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
         </div>
-        <h1 className="font-archivo text-[34px] leading-[1.05] text-ink tracking-[-1px] mb-[14px]">{story.title}</h1>
-        <p className="font-georgia text-[15px] text-ink/70 leading-relaxed mb-5 pl-[14px] border-l-[3px] border-orange">{story.deck}</p>
-        <div className="flex items-center gap-[14px]">
+        <h1 className="font-archivo text-[30px] sm:text-[34px] leading-[1.02] text-ink tracking-[-1px] mb-[14px]">
+          {story.title}
+        </h1>
+        <p className="font-georgia text-[14px] sm:text-[15px] text-ink/70 leading-relaxed mb-5 pl-[14px] border-l-[3px] border-orange">
+          {story.deck}
+        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-[14px]">
           <Link
             href={`/stories/${story.slug.current}`}
             className="inline-block bg-orange text-white font-inter text-[11px] font-bold uppercase tracking-[1px]
@@ -47,7 +51,7 @@ export default function Hero({ heroStory, sidebarStories = [] }: { heroStory?: S
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="bg-orange border-b-2 border-ink grid grid-cols-3">
+        <div className="bg-orange border-t-2 border-ink md:border-t-0 border-b-2 border-ink grid grid-cols-3">
           {[{ num: '4K+', lbl: 'Members' },{ num: '12', lbl: 'Stories today' },{ num: '4', lbl: 'Events this week' }].map(({ num, lbl }) => (
             <div key={lbl} className="text-center py-[14px] px-2 border-r border-white/20 last:border-r-0">
               <span className="font-archivo text-[24px] text-white block leading-none">{num}</span>

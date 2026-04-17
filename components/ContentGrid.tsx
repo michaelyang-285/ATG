@@ -22,7 +22,7 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
   const display = stories.length > 0 ? stories : FALLBACK_STORIES
 
   return (
-    <div className="border-r-2 border-ink">
+    <div className="md:border-r-2 md:border-ink border-b-2 border-ink md:border-b-0">
       {display.map((s) => (
         <a
           key={s.slug.current}
@@ -40,7 +40,7 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
             </p>
           </div>
           {/* Thumbnail placeholder */}
-          <div className="w-[110px] flex-shrink-0 bg-card border-l-2 border-ink flex items-center justify-center font-inter text-[10px] text-ink/30">
+          <div className="w-[110px] h-[110px] flex-shrink-0 bg-card border-l-2 border-ink overflow-hidden flex items-center justify-center font-inter text-[10px] text-ink/30">
             {s.thumb ? (
               <img src={s.thumb} alt={s.title} className="w-full h-full object-cover" />
             ) : (
