@@ -29,7 +29,8 @@ export default function Hero({ heroStory, sidebarStories = [] }: { heroStory?: S
     <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
       {/* Left column wrapper keeps the vertical rule aligned to column boundary */}
       <div className="md:border-r-2 md:border-ink">
-        <div className="p-6 md:p-8">
+        {/* Match feed baseline: outer px-6 + inner px-4 = 40px */}
+        <div className="px-4 py-6 md:px-4 md:py-8 lg:p-8">
           <div className="flex flex-wrap items-center gap-[10px] mb-[14px]">
             <span className="font-inter text-[9px] font-bold uppercase tracking-[1.5px] bg-orange text-white px-[10px] py-1">Today's lead</span>
             <span className="font-inter text-[11px] text-ink/50">{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>

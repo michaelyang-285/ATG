@@ -22,16 +22,18 @@ export function BusinessSpotlight({ businesses = [] }: { businesses?: Business[]
     /* Full-bleed paper */
     <div className="bg-paper border-b-2 border-ink w-full">
       {/* Contained — 3 cols with proper gutters */}
-      <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-3">
+      <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-3">
         {display.map((b, i) => (
           <Link
             key={b.slug.current}
             href={`/businesses/${b.slug.current}`}
-            className={`
-              block py-6 no-underline hover:bg-card transition-colors cursor-pointer
-              ${i < display.length - 1 ? 'border-r-2 border-ink pr-6' : ''}
-              ${i > 0 ? 'pl-6' : ''}
-            `}
+            className={[
+              'block p-6 no-underline hover:bg-card transition-colors cursor-pointer',
+              // Mobile: stack with dividers
+              i < display.length - 1 ? 'border-b-2 border-ink md:border-b-0' : '',
+              // Desktop: column dividers
+              i < display.length - 1 ? 'md:border-r-2 md:border-ink' : '',
+            ].filter(Boolean).join(' ')}
           >
             <span className={`inline-block font-inter text-[8px] font-bold uppercase tracking-[1px]
                               px-[10px] py-1 border mb-[10px]
