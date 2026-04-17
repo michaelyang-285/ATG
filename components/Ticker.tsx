@@ -12,7 +12,7 @@ export default function Ticker({ items = [] }: { items: string[] }) {
     /* Full-bleed yellow bar */
     <div className="bg-yellow border-b-2 border-ink h-[34px] flex items-center overflow-hidden w-full">
       {/* Contained inner — badge stays aligned with content */}
-      <div className="max-w-[1200px] mx-auto px-6 flex items-center w-full">
+      <div className="max-w-[1200px] mx-auto px-0 sm:px-6 flex items-center w-full">
         <div className="flex items-center gap-[5px] bg-ink text-yellow font-archivo text-[9px]
                         px-3 py-1 tracking-[1.5px] whitespace-nowrap flex-shrink-0
                         leading-none border-r-2 border-ink">

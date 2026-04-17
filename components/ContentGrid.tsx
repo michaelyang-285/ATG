@@ -34,7 +34,7 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
             <p className="font-space text-[16px] font-bold leading-[1.25] text-ink mb-[5px] group-hover:underline underline-offset-2">
               {s.title}
             </p>
-            <p className="font-georgia text-[13px] text-ink/60 leading-[1.55] mb-[6px]">{s.deck}</p>
+            <p className="hidden sm:block font-georgia text-[13px] text-ink/60 leading-[1.55] mb-[6px]">{s.deck}</p>
             <p className="font-inter text-[10px] text-ink/50">
               {s.location} · {s.readTime} min read
             </p>

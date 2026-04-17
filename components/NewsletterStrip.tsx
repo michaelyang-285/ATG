@@ -11,7 +11,7 @@ export default function NewsletterStrip({
 }) {
   return (
     <div className="bg-ink border-b-2 border-ink w-full">
-      <div className="max-w-[1200px] mx-auto px-6 py-6">
+      <div className="max-w-[1200px] mx-auto px-0 sm:px-6 py-6">
         <div className="max-w-[980px] mx-auto grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_340px] md:items-center gap-6 md:gap-8">
           <div className="min-w-0">
             <p className="font-archivo text-[20px] text-yellow leading-tight mb-1">{headline}</p>
