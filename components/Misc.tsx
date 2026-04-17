@@ -90,20 +90,19 @@ export function Footer() {
     /* Full-bleed ink */
     <footer className="bg-ink w-full">
       {/* Contained */}
-      <div className="max-w-[1200px] mx-auto px-6 py-5 flex items-center justify-between">
-        <p className="font-archivo text-[14px] text-white">
+      <div className="max-w-[1200px] mx-auto px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <p className="font-archivo text-[14px] text-white text-center md:text-left">
           All Things <em className="not-italic text-orange">Gwinnett</em> · Built by locals.
         </p>
-        <div className="flex gap-5">
+        <div className="grid grid-cols-2 md:flex gap-x-6 gap-y-3 md:gap-5 justify-items-center md:justify-items-start">
           {FOOTER_LINKS.map((l) => (
             <Link key={l} href={`/${l.toLowerCase().replace(/\s/g, '-')}`}
-              className="font-inter text-[10px] text-paper/40 uppercase tracking-[0.8px]
+              className="font-inter text-[9px] md:text-[10px] text-paper/40 uppercase tracking-[0.8px]
                          font-semibold no-underline hover:text-yellow transition-colors">
               {l}
             </Link>
           ))}
         </div>
-        <p className="font-inter text-[10px] text-paper/30">Gwinnett County, GA</p>
       </div>
     </footer>
   )
