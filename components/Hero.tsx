@@ -44,8 +44,8 @@ export default function Hero({ heroStory, sidebarStories = [] }: { heroStory?: S
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-[14px]">
             <Link
               href={`/stories/${story.slug.current}`}
-              className="inline-block bg-orange text-white font-inter text-[11px] font-bold uppercase tracking-[1px]
-                         px-[22px] py-3 border-2 border-ink shadow-brutalist-dk-sm cursor-pointer select-none no-underline
+              className="inline-block self-start bg-orange text-white font-inter text-[10px] sm:text-[11px] font-bold uppercase tracking-[1px]
+                         px-5 py-[10px] sm:px-[22px] sm:py-3 border-2 border-ink shadow-brutalist-dk-sm cursor-pointer select-none no-underline
                          hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
             >
               Read the story →

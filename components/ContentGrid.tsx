@@ -41,7 +41,7 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
           </div>
           {/* Thumbnail placeholder */}
           <div className="flex-shrink-0 self-stretch bg-card border-l-2 border-ink flex items-center justify-center">
-            <div className="w-[96px] sm:w-[120px] md:w-[150px] aspect-square overflow-hidden flex items-center justify-center font-inter text-[10px] text-ink/30">
+            <div className="w-[96px] h-[96px] sm:w-[120px] sm:h-[120px] md:w-[150px] md:h-[150px] overflow-hidden flex items-center justify-center font-inter text-[10px] text-ink/30">
               {s.thumb ? (
                 <img src={s.thumb} alt={s.title} className="w-full h-full object-cover" />
               ) : (
