@@ -27,9 +27,9 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
         <a
           key={s.slug.current}
           href={`/stories/${s.slug.current}`}
-          className="flex items-stretch border-b-2 border-ink last:border-b-0 hover:bg-card group cursor-pointer"
+          className="flex items-stretch border-b-2 border-ink last:border-b-0 hover:bg-card group cursor-pointer min-w-0"
         >
-          <div className="p-4 flex-1">
+          <div className="p-4 flex-1 min-w-0">
             <StoryTag color={s.category?.color} name={s.category?.name ?? ''} />
             <p className="font-space text-[16px] font-bold leading-[1.25] text-ink mb-[5px] group-hover:underline underline-offset-2">
               {s.title}
@@ -40,7 +40,7 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
             </p>
           </div>
           {/* Thumbnail placeholder */}
-          <div className="w-[110px] h-[110px] flex-shrink-0 bg-card border-l-2 border-ink overflow-hidden flex items-center justify-center font-inter text-[10px] text-ink/30">
+          <div className="w-[88px] h-[88px] sm:w-[110px] sm:h-[110px] flex-shrink-0 bg-card border-l-2 border-ink overflow-hidden flex items-center justify-center font-inter text-[10px] text-ink/30">
             {s.thumb ? (
               <img src={s.thumb} alt={s.title} className="w-full h-full object-cover" />
             ) : (

@@ -12,6 +12,7 @@ const NAV_LINKS = [
 export default function Nav() {
   return (
     <nav className="bg-ink border-b-2 border-ink w-full">
+      {/* Top row */}
       <div className="max-w-[1200px] mx-auto px-6 flex items-center h-[50px]">
         <Link href="/" className="flex items-center gap-2 flex-shrink-0 no-underline">
           <ATGPin variant="dark" size={24} />
@@ -40,6 +41,25 @@ export default function Nav() {
           >
             Newsletter
           </Link>
+        </div>
+      </div>
+
+      {/* Mobile link row (scrollable, no overlap) */}
+      <div className="md:hidden border-t-2 border-mid w-full">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="flex items-center gap-1 overflow-x-auto py-2 whitespace-nowrap">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="inline-block font-inter text-[10px] font-semibold uppercase tracking-[0.6px]
+                           px-[14px] py-[8px] border-2 border-mid text-paper/70
+                           no-underline hover:text-yellow transition-colors flex-shrink-0"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </nav>
