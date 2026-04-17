@@ -26,7 +26,7 @@ export default function Hero({ heroStory, sidebarStories = [] }: { heroStory?: S
   ]
   return (
     <div className="bg-paper border-b-2 border-ink w-full">
-    <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+    <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
       {/* Left column wrapper keeps the vertical rule aligned to column boundary */}
       <div className="md:border-r-2 md:border-ink">
         <div className="p-6 md:p-8">

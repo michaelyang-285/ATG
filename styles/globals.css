@@ -9,7 +9,7 @@
     @apply bg-paper;
   }
   body {
-    @apply bg-paper text-ink font-inter;
+    @apply bg-paper text-ink font-inter overflow-x-hidden;
   }
 }
 
