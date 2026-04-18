@@ -1,5 +1,4 @@
-import Nav from '@/components/Nav'
-import { Footer, PromoBar } from '@/components/Misc'
+import { PromoBar } from '@/components/Misc'
 import ATGPin from '@/components/ATGPin'
 
 export const metadata = {
@@ -10,8 +9,6 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <main className="w-full">
-      <Nav />
-
       {/* Header */}
       <div className="bg-ink border-b-2 border-ink w-full">
         <div className="max-w-[760px] mx-auto px-6 py-12 flex items-center gap-6">
@@ -99,7 +96,6 @@ export default function AboutPage() {
       </div>
 
       <PromoBar />
-      <Footer />
     </main>
   )
 }

@@ -1,8 +1,5 @@
 'use client'
 import { useRef, useState } from 'react'
-import Nav from '@/components/Nav'
-import { Footer } from '@/components/Misc'
-
 export default function SubmitTipPage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const formRef = useRef<HTMLFormElement | null>(null)
@@ -24,8 +21,6 @@ export default function SubmitTipPage() {
 
   return (
     <main className="w-full">
-      <Nav />
-
       <div className="bg-orange border-b-2 border-ink w-full">
         <div className="max-w-[760px] mx-auto px-6 py-8">
           <h1 className="font-archivo text-[42px] text-white tracking-[-1px] leading-none mb-2">
@@ -127,8 +122,6 @@ export default function SubmitTipPage() {
           )}
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

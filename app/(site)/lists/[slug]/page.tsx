@@ -1,7 +1,5 @@
 import { client } from '@/lib/sanity'
 import { PortableText } from '@portabletext/react'
-import Nav from '@/components/Nav'
-import { Footer } from '@/components/Misc'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
@@ -43,8 +41,6 @@ export default async function ListPage({ params }: { params: { slug: string } })
 
   return (
     <main className="w-full">
-      <Nav />
-
       {/* Header */}
       <div className="bg-yellow border-b-2 border-ink w-full">
         <div className="max-w-[760px] mx-auto px-6 py-10">
@@ -106,8 +102,6 @@ export default async function ListPage({ params }: { params: { slug: string } })
           ))}
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

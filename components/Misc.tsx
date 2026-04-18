@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { slugHref } from '@/lib/slugHref'
 
 // ── Business Spotlight ──────────────────────────────────
 
@@ -17,16 +18,20 @@ const FALLBACK: Business[] = [
 ]
 
 export function BusinessSpotlight({ businesses = [] }: { businesses?: Business[] }) {
-  const display = businesses.length > 0 ? businesses : FALLBACK
+  const raw = businesses.length > 0 ? businesses : FALLBACK
+  const ok = raw.filter((b) => slugHref(b.slug))
+  const display = ok.length > 0 ? ok : FALLBACK.filter((b) => slugHref(b.slug))
   return (
     /* Full-bleed paper */
     <div className="bg-paper border-b-2 border-ink w-full">
       {/* Contained — 3 cols with proper gutters */}
       <div className="max-w-[1200px] mx-auto px-6 grid grid-cols-1 md:grid-cols-3">
-        {display.map((b, i) => (
+        {display.map((b, i) => {
+          const bSlug = slugHref(b.slug)
+          return (
           <Link
-            key={b.slug.current}
-            href={`/businesses/${b.slug.current}`}
+            key={bSlug || b.name}
+            href={bSlug ? `/businesses/${bSlug}` : '/businesses'}
             className={[
               'block p-6 no-underline hover:bg-card transition-colors cursor-pointer',
               // Mobile: stack with dividers
@@ -46,7 +51,8 @@ export function BusinessSpotlight({ businesses = [] }: { businesses?: Business[]
             <p className="font-inter text-[11px] text-ink/50 mb-2">{b.businessType}</p>
             <p className="font-georgia text-[13px] text-ink/60 leading-relaxed">{b.description}</p>
           </Link>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
@@ -61,7 +67,7 @@ export function PromoBar() {
       {/* Contained */}
       <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between gap-6">
         <p className="font-space text-[16px] font-bold text-white leading-snug">
-          4,000+ Gwinnett locals in the Facebook group.{' '}
+          6200+ Gwinnett locals in the Facebook group.{' '}
           <span className="underline underline-offset-[3px]">The website just launched.</span>{' '}
           Get in early.
         </p>

@@ -3,7 +3,7 @@
 export default function NewsletterStrip({
   headline = 'Gwinnett in 3 minutes. Every Thursday.',
   sub = 'No fluff. No tourism board energy. Just what actually happened.',
-  subscriberCount = '4,127 locals already subscribed',
+  subscriberCount = '6.2k+ locals already subscribed',
 }: {
   headline?: string
   sub?: string
@@ -25,12 +25,12 @@ export default function NewsletterStrip({
               className="w-full h-10 px-[14px] bg-mid border-2 border-yellow/30 text-paper font-inter text-[13px] outline-none focus:border-yellow transition-colors placeholder:text-paper/40"
             />
             <span
-              className="bg-yellow text-ink font-inter text-[11px] font-bold uppercase tracking-[0.8px]
+              className="bg-yellow text-ink font-inter text-[11px] font-bold tracking-[0.8px]
                          px-7 h-10 leading-10 text-center cursor-pointer whitespace-nowrap w-full
                          border-2 border-ink shadow-brutalist-dk-sm select-none
                          hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
             >
-              I'm in →
+              Stay Updated →
             </span>
           </div>
         </div>

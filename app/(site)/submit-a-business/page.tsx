@@ -1,8 +1,5 @@
 'use client'
 import { useRef, useState } from 'react'
-import Nav from '@/components/Nav'
-import { Footer } from '@/components/Misc'
-
 const CITIES = ['Lawrenceville', 'Duluth', 'Norcross', 'Buford', 'Snellville', 'Suwanee', 'Lilburn', 'Other']
 const CATS   = ['Restaurant', 'Auto', 'Retail', 'Health & Wellness', 'Professional Services', 'Entertainment', 'Other']
 
@@ -28,8 +25,6 @@ export default function SubmitBusinessPage() {
 
   return (
     <main className="w-full">
-      <Nav />
-
       <div className="bg-yellow border-b-2 border-ink w-full">
         <div className="max-w-[760px] mx-auto px-6 py-8">
           <h1 className="font-archivo text-[36px] text-ink tracking-[-1px] leading-none mb-2">Add your business</h1>
@@ -161,8 +156,6 @@ export default function SubmitBusinessPage() {
 
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

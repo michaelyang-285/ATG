@@ -40,7 +40,7 @@ export default {
       name: 'subscriberCount',
       title: 'Subscriber count (social proof)',
       type: 'string',
-      initialValue: '4,127 locals already subscribed',
+      initialValue: '6.2k+ locals already subscribed',
     },
     {
       name: 'communityQuote',

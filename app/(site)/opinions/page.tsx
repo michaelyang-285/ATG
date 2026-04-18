@@ -1,8 +1,7 @@
 import { client } from '@/lib/sanity'
-import Nav from '@/components/Nav'
+import { slugHref } from '@/lib/slugHref'
 import Ticker from '@/components/Ticker'
 import StoryTag from '@/components/StoryTag'
-import { Footer } from '@/components/Misc'
 import Link from 'next/link'
 
 export const revalidate = 60
@@ -25,10 +24,10 @@ async function getOpinions() {
 
 export default async function OpinionsPage() {
   const opinions = await getOpinions()
+  const opinionRows = opinions.filter((s: { slug?: unknown }) => slugHref(s.slug))
 
   return (
     <main className="w-full">
-      <Nav />
       <Ticker items={[]} />
 
       {/* Header */}
@@ -50,8 +49,10 @@ export default async function OpinionsPage() {
       {/* Opinion stories — wider single column, editorial feel */}
       <div className="bg-paper w-full">
         <div className="max-w-[760px] mx-auto px-6">
-          {opinions.length > 0 ? opinions.map((s: any) => (
-            <Link key={s.slug.current} href={`/stories/${s.slug.current}`}
+          {opinionRows.length > 0 ? opinionRows.map((s: any) => {
+            const h = slugHref(s.slug)
+            return (
+            <Link key={h || s.title} href={h ? `/stories/${h}` : '/news'}
               className="block py-8 border-b-2 border-ink last:border-b-0
                          hover:bg-card transition-colors group no-underline -mx-6 px-6">
               <StoryTag color={s.category?.color} name={s.category?.name ?? ''} />
@@ -68,7 +69,8 @@ export default async function OpinionsPage() {
                 <span>{s.readTime} min read</span>
               </div>
             </Link>
-          )) : (
+            )
+          }) : (
             <p className="py-16 font-inter text-[14px] text-[#999] text-center">
               Opinion pieces coming soon.
             </p>
@@ -94,8 +96,6 @@ export default async function OpinionsPage() {
           </Link>
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

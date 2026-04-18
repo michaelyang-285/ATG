@@ -1,7 +1,6 @@
 import { client } from '@/lib/sanity'
-import Nav from '@/components/Nav'
+import { slugHref } from '@/lib/slugHref'
 import Ticker from '@/components/Ticker'
-import { Footer } from '@/components/Misc'
 import Link from 'next/link'
 
 export const revalidate = 60
@@ -32,11 +31,12 @@ const FALLBACK_LISTS = [
 
 export default async function ListsPage() {
   const lists = await getLists()
-  const display = lists.length > 0 ? lists : FALLBACK_LISTS
+  const base = lists.length > 0 ? lists : FALLBACK_LISTS
+  const ok = base.filter((l: { slug?: unknown }) => slugHref(l.slug))
+  const display = ok.length > 0 ? ok : FALLBACK_LISTS.filter((l) => slugHref(l.slug))
 
   return (
     <main className="w-full">
-      <Nav />
       <Ticker items={[]} />
 
       {/* Header */}
@@ -54,8 +54,10 @@ export default async function ListsPage() {
       {/* Lists grid */}
       <div className="bg-paper border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-0">
-          {display.map((l: any, i: number) => (
-            <Link key={l.slug.current} href={`/lists/${l.slug.current}`}
+          {display.map((l: any, i: number) => {
+            const h = slugHref(l.slug)
+            return (
+            <Link key={h || `list-${i}`} href={h ? `/lists/${h}` : '/lists'}
               className="flex items-center gap-0 border-b-2 border-ink last:border-b-0
                          hover:bg-card transition-colors group no-underline cursor-pointer">
               {/* Large number */}
@@ -75,11 +77,10 @@ export default async function ListsPage() {
                 <span className="font-inter text-[20px] text-[#ccc] group-hover:text-orange transition-colors">→</span>
               </div>
             </Link>
-          ))}
+            )
+          })}
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

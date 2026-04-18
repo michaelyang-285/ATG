@@ -1,9 +1,7 @@
 import { client } from '@/lib/sanity'
 import { PortableText } from '@portabletext/react'
-import Nav from '@/components/Nav'
 import Ticker from '@/components/Ticker'
 import StoryTag from '@/components/StoryTag'
-import { Footer } from '@/components/Misc'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
@@ -56,7 +54,6 @@ export default async function StoryPage({ params }: { params: { slug: string } }
 
   return (
     <main className="w-full">
-      <Nav />
       <Ticker items={[]} />
 
       {/* Article header */}
@@ -99,8 +96,6 @@ export default async function StoryPage({ params }: { params: { slug: string } }
           }
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

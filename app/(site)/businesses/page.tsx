@@ -1,7 +1,6 @@
 import { client } from '@/lib/sanity'
-import Nav from '@/components/Nav'
+import { slugHref } from '@/lib/slugHref'
 import Ticker from '@/components/Ticker'
-import { Footer } from '@/components/Misc'
 import Link from 'next/link'
 
 export const revalidate = 60
@@ -25,10 +24,10 @@ async function getBusinesses() {
 
 export default async function BusinessesPage() {
   const businesses = await getBusinesses()
+  const bizRows = businesses.filter((b: { slug?: unknown }) => slugHref(b.slug))
 
   return (
     <main className="w-full">
-      <Nav />
       <Ticker items={[]} />
 
       {/* Header */}
@@ -64,8 +63,10 @@ export default async function BusinessesPage() {
       <div className="bg-paper border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-0
                         grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {businesses.length > 0 ? businesses.map((b: any, i: number) => (
-            <Link key={b.slug.current} href={`/businesses/${b.slug.current}`}
+          {bizRows.length > 0 ? bizRows.map((b: any, i: number) => {
+            const h = slugHref(b.slug)
+            return (
+            <Link key={h || b.name} href={h ? `/businesses/${h}` : '/businesses'}
               className={`block py-6 pr-6 no-underline hover:bg-card transition-colors group
                           border-b-2 border-ink
                           ${i % 3 !== 2 ? 'border-r-2' : ''}
@@ -80,7 +81,8 @@ export default async function BusinessesPage() {
               <p className="font-georgia text-[13px] text-[#555] leading-relaxed">{b.description}</p>
               {b.phone && <p className="font-inter text-[11px] text-orange mt-3">{b.phone}</p>}
             </Link>
-          )) : (
+            )
+          }) : (
             <div className="col-span-3 py-16 text-center">
               <p className="font-inter text-[14px] text-[#999] mb-4">No businesses yet.</p>
               <Link href="/submit-a-business"
@@ -92,8 +94,6 @@ export default async function BusinessesPage() {
           )}
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

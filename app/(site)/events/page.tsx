@@ -1,7 +1,6 @@
 import { client } from '@/lib/sanity'
-import Nav from '@/components/Nav'
+import { slugHref } from '@/lib/slugHref'
 import Ticker from '@/components/Ticker'
-import { Footer } from '@/components/Misc'
 import Link from 'next/link'
 
 export const revalidate = 60
@@ -31,11 +30,11 @@ function groupByMonth(events: any[]) {
 
 export default async function EventsPage() {
   const events = await getEvents()
-  const grouped = groupByMonth(events)
+  const eventRows = events.filter((e: { slug?: unknown }) => slugHref(e.slug))
+  const grouped = groupByMonth(eventRows)
 
   return (
     <main className="w-full">
-      <Nav />
       <Ticker items={[]} />
 
       <div className="bg-ink border-b-2 border-ink w-full">
@@ -55,8 +54,9 @@ export default async function EventsPage() {
               </div>
               {evts.map((e: any) => {
                 const d = new Date(e.date)
+                const h = slugHref(e.slug)
                 return (
-                  <Link key={e.slug.current} href={`/events/${e.slug.current}`}
+                  <Link key={h || e.name} href={h ? `/events/${h}` : '/events'}
                     className="flex items-start gap-4 py-4 border-b border-[#ddd] last:border-b-0
                                hover:bg-card transition-colors group no-underline px-0">
                     {/* Date block */}
@@ -80,8 +80,6 @@ export default async function EventsPage() {
           )}
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

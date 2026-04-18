@@ -1,7 +1,5 @@
 'use client'
 import { useRef, useState } from 'react'
-import Nav from '@/components/Nav'
-import { Footer } from '@/components/Misc'
 import ATGPin from '@/components/ATGPin'
 
 export default function NewsletterPage() {
@@ -26,8 +24,6 @@ export default function NewsletterPage() {
 
   return (
     <main className="w-full">
-      <Nav />
-
       {/* Hero — full bleed ink */}
       <div className="bg-ink border-b-2 border-ink w-full">
         <div className="max-w-[760px] mx-auto px-6 py-16 text-center">
@@ -118,13 +114,11 @@ export default function NewsletterPage() {
       <div className="bg-yellow border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between">
           <p className="font-archivo text-[22px] text-ink tracking-[-0.5px]">
-            4,127 Gwinnett locals already subscribed.
+            6.2k+ Gwinnett locals already subscribed.
           </p>
           <p className="font-inter text-[12px] text-ink/50">Join them.</p>
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

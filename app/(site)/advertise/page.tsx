@@ -1,5 +1,3 @@
-import Nav from '@/components/Nav'
-import { Footer } from '@/components/Misc'
 import Link from 'next/link'
 
 export const metadata = {
@@ -34,8 +32,6 @@ const PACKAGES = [
 export default function AdvertisePage() {
   return (
     <main className="w-full">
-      <Nav />
-
       <div className="bg-yellow border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-8">
           <h1 className="font-archivo text-[42px] text-ink tracking-[-1px] leading-none mb-2">Advertise</h1>
@@ -109,8 +105,6 @@ export default function AdvertisePage() {
           </p>
         </div>
       </div>
-
-      <Footer />
     </main>
   )
 }

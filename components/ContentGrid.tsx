@@ -1,4 +1,5 @@
 import StoryTag from './StoryTag'
+import { slugHref } from '@/lib/slugHref'
 
 type Story = {
   title: string
@@ -19,14 +20,18 @@ const FALLBACK_STORIES: Story[] = [
 ]
 
 export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
-  const display = stories.length > 0 ? stories : FALLBACK_STORIES
+  const raw = stories.length > 0 ? stories : FALLBACK_STORIES
+  const display = raw.filter((s) => slugHref(s.slug))
+  const finalStories = display.length > 0 ? display : FALLBACK_STORIES.filter((s) => slugHref(s.slug))
 
   return (
     <div className="md:border-r-2 md:border-ink border-b-2 border-ink md:border-b-0">
-      {display.map((s) => (
+      {finalStories.map((s) => {
+        const sSlug = slugHref(s.slug)
+        return (
         <a
-          key={s.slug.current}
-          href={`/stories/${s.slug.current}`}
+          key={sSlug || s.title}
+          href={sSlug ? `/stories/${sSlug}` : '/news'}
           className="flex items-stretch border-b-2 border-ink last:border-b-0 hover:bg-card group cursor-pointer min-w-0"
         >
           <div className="p-4 flex-1 min-w-0">
@@ -50,7 +55,8 @@ export function StoryFeed({ stories = [] }: { stories?: Story[] }) {
             </div>
           </div>
         </a>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -74,8 +80,13 @@ const FALLBACK_LISTS: List[] = [
 ]
 
 export function Rail({ events = [], lists = [] }: { events?: Event[]; lists?: List[] }) {
-  const evts = events.length > 0 ? events : FALLBACK_EVENTS
-  const lsts = lists.length  > 0 ? lists  : FALLBACK_LISTS
+  const evRaw = events.length > 0 ? events : FALLBACK_EVENTS
+  const evOk = evRaw.filter((e) => slugHref(e.slug))
+  const evts = evOk.length > 0 ? evOk : FALLBACK_EVENTS.filter((e) => slugHref(e.slug))
+
+  const lsRaw = lists.length > 0 ? lists : FALLBACK_LISTS
+  const lsOk = lsRaw.filter((l) => slugHref(l.slug))
+  const lsts = lsOk.length > 0 ? lsOk : FALLBACK_LISTS.filter((l) => slugHref(l.slug))
 
   return (
     <div className="flex flex-col">
@@ -88,8 +99,9 @@ export function Rail({ events = [], lists = [] }: { events?: Event[]; lists?: Li
         </div>
         {evts.map((e) => {
           const d = new Date(e.date)
+          const eSlug = slugHref(e.slug)
           return (
-            <a key={e.slug.current} href={`/events/${e.slug.current}`} className="flex gap-3 py-[10px] border-b border-ink/15 last:border-b-0 last:pb-0 hover:no-underline group">
+            <a key={eSlug || e.name} href={eSlug ? `/events/${eSlug}` : '/events'} className="flex gap-3 py-[10px] border-b border-ink/15 last:border-b-0 last:pb-0 hover:no-underline group">
               <div className="w-[42px] h-[42px] flex-shrink-0 bg-orange flex flex-col items-center justify-center border-[1.5px] border-ink shadow-brutalist-dk-sm">
                 <span className="font-inter text-[7px] font-bold uppercase text-white/70">{d.toLocaleString('en-US', { month: 'short' })}</span>
                 <span className="font-archivo text-[18px] text-white leading-none">{d.getDate()}</span>
@@ -109,8 +121,10 @@ export function Rail({ events = [], lists = [] }: { events?: Event[]; lists?: Li
           Gwinnett lists
           <a href="/lists" className="font-inter text-[9px] text-orange font-bold uppercase tracking-[0.8px] no-underline">All →</a>
         </div>
-        {lsts.map((l) => (
-          <a key={l.slug.current} href={`/lists/${l.slug.current}`} className="flex border-2 border-ink shadow-brutalist-sm mb-[10px] last:mb-0 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all cursor-pointer group">
+        {lsts.map((l) => {
+          const lSlug = slugHref(l.slug)
+          return (
+          <a key={lSlug || l.title} href={lSlug ? `/lists/${lSlug}` : '/lists'} className="flex border-2 border-ink shadow-brutalist-sm mb-[10px] last:mb-0 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all cursor-pointer group">
             <div className="bg-ink text-yellow font-archivo text-[18px] min-w-[44px] flex items-center justify-center border-r-2 border-ink flex-shrink-0">
               {String(l.order).padStart(2, '0')}
             </div>
@@ -119,7 +133,8 @@ export function Rail({ events = [], lists = [] }: { events?: Event[]; lists?: Li
               <p className="font-inter text-[10px] text-ink/50 mt-[2px]">{l.subtitle}</p>
             </div>
           </a>
-        ))}
+          )
+        })}
       </div>
 
     </div>
