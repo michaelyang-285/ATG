@@ -159,39 +159,41 @@ export default async function StoryPage({ params }: { params: { slug: string } }
         </div>
       </div>
 
-      {story.authorProfile && (
-        <section className="w-full border-t-2 border-ink">
-          <div className="max-w-[760px] mx-auto px-6 py-8">
-            <div className="border-2 border-ink bg-card shadow-brutalist p-5">
-              <div className="flex gap-4 items-start">
-                <AuthorHeadshot name={displayAuthor} imageUrl={story.authorProfile.profileImage} size={72} />
-                <div className="flex-1">
-                  <p className="font-inter text-[9px] font-bold uppercase tracking-[1.2px] text-ink/60">Written by</p>
-                  <p className="font-archivo text-[24px] tracking-[-0.5px] text-ink leading-none mt-1">{displayAuthor}</p>
-                  {story.authorProfile.businessName && (
-                    <p className="font-inter text-[11px] text-ink/60 mt-2">{story.authorProfile.businessName}</p>
-                  )}
-                </div>
-              </div>
-              {story.authorProfile.bio && (
-                <p className="font-georgia text-[15px] leading-relaxed text-[#444] mt-4">{story.authorProfile.bio}</p>
-              )}
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-ink/10">
-                <AuthorSocialLinks profile={story.authorProfile} />
+      <section className="w-full border-t-2 border-ink">
+        <div className="max-w-[760px] mx-auto px-6 py-8">
+          <div className="border-2 border-ink bg-card shadow-brutalist p-5">
+            <div className="flex gap-4 items-start">
+              <AuthorHeadshot
+                name={displayAuthor}
+                imageUrl={story.authorProfile?.profileImage}
+                size={72}
+              />
+              <div className="flex-1">
+                <p className="font-inter text-[9px] font-bold uppercase tracking-[1.2px] text-ink/60">Written by</p>
+                <p className="font-archivo text-[24px] tracking-[-0.5px] text-ink leading-none mt-1">{displayAuthor}</p>
+                {story.authorProfile?.businessName && (
+                  <p className="font-inter text-[11px] text-ink/60 mt-2">{story.authorProfile.businessName}</p>
+                )}
               </div>
             </div>
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
-              <Link
-                href="/stories"
-                className="font-inter text-[10px] font-bold uppercase tracking-[0.8px] text-ink hover:text-orange no-underline"
-              >
-                ← All stories
-              </Link>
-              <ShareRow title={story.title} url={canonicalUrl} />
+            {story.authorProfile?.bio && (
+              <p className="font-georgia text-[15px] leading-relaxed text-[#444] mt-4">{story.authorProfile.bio}</p>
+            )}
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-ink/10">
+              <AuthorSocialLinks profile={story.authorProfile} />
             </div>
           </div>
-        </section>
-      )}
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
+            <Link
+              href="/stories"
+              className="font-inter text-[10px] font-bold uppercase tracking-[0.8px] text-ink hover:text-orange no-underline"
+            >
+              ← All stories
+            </Link>
+            <ShareRow title={story.title} url={canonicalUrl} />
+          </div>
+        </div>
+      </section>
 
       {Array.isArray(story.relatedStories) && story.relatedStories.length > 0 && (
         <div className="w-full border-t-2 border-ink">
