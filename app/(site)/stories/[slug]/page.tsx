@@ -1,6 +1,5 @@
 import { client } from '@/lib/sanity'
 import { PortableText } from '@portabletext/react'
-import Ticker from '@/components/Ticker'
 import StoryTag from '@/components/StoryTag'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -54,8 +53,6 @@ export default async function StoryPage({ params }: { params: { slug: string } }
 
   return (
     <main className="w-full">
-      <Ticker items={[]} />
-
       {/* Article header */}
       <div className="bg-paper border-b-2 border-ink w-full">
         <div className="max-w-[760px] mx-auto px-6 py-10">

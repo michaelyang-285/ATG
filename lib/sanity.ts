@@ -11,13 +11,15 @@ export const client = createClient({
 export const queries = {
 
   homepage: `*[_type == "homepage"][0]{
-    ticker[],
     heroStory->{
-      title, deck, slug, readTime, publishedAt,
+      title, deck, slug, readTime, publishedAt, author,
+      "thumb": thumbnail.asset->url,
+      "photoCredit": photoCredit,
       "category": category->{ name, color }
     },
     sidebarStories[]->{
       title, slug, publishedAt,
+      "thumb": thumbnail.asset->url,
       "category": category->{ name }
     },
     newsletterHeadline,

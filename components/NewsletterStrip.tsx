@@ -3,7 +3,7 @@
 export default function NewsletterStrip({
   headline = 'Gwinnett in 3 minutes. Every Thursday.',
   sub = 'No fluff. No tourism board energy. Just what actually happened.',
-  subscriberCount = '6.2k+ locals already subscribed',
+  subscriberCount = '7.2k+ locals already subscribed',
 }: {
   headline?: string
   sub?: string

@@ -1,6 +1,5 @@
 import { client } from '@/lib/sanity'
 import { slugHref } from '@/lib/slugHref'
-import Ticker from '@/components/Ticker'
 import Link from 'next/link'
 
 export const revalidate = 60
@@ -37,8 +36,6 @@ export default async function ListsPage() {
 
   return (
     <main className="w-full">
-      <Ticker items={[]} />
-
       {/* Header */}
       <div className="bg-ink border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-8">

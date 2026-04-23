@@ -10,8 +10,8 @@ type StatConfig = {
 }
 
 const STATS: StatConfig[] = [
-  { key: 'members', label: 'Members', target: 6.2, format: 'kplus' },
-  { key: 'stories', label: 'Stories today', target: 12, format: 'int' },
+  { key: 'members', label: 'Members', target: 7.2, format: 'kplus' },
+  { key: 'stories', label: 'Stories this week', target: 12, format: 'int' },
   { key: 'events', label: 'Events this week', target: 4, format: 'int' },
 ]
 
@@ -25,12 +25,12 @@ function formatDisplay(raw: number, format: StatConfig['format']) {
   return `${v.toFixed(1)}K+`
 }
 
-export default function HeroStatsStrip() {
+export default function HeroStats() {
   const [values, setValues] = useState(() => STATS.map(() => 0))
 
   useEffect(() => {
     let cancelled = false
-    const duration = 1400
+    const duration = 1200
     const start = performance.now()
 
     const tick = (now: number) => {
@@ -51,11 +51,14 @@ export default function HeroStatsStrip() {
   return (
     <div className="bg-orange border-b-2 border-ink grid grid-cols-3">
       {STATS.map((s, i) => (
-        <div key={s.key} className="text-center py-[14px] px-2 border-r border-white/20 last:border-r-0">
+        <div
+          key={s.key}
+          className="text-center py-[14px] px-2 border-r border-white/20 last:border-r-0"
+        >
           <span className="font-archivo text-[24px] text-white block leading-none tabular-nums">
             {formatDisplay(values[i], s.format)}
           </span>
-          <span className="font-inter text-[8px] font-bold uppercase tracking-[1px] text-white/60 mt-[2px] block">
+          <span className="font-inter text-[8px] font-bold uppercase tracking-[1.2px] text-white/60 mt-[3px] block">
             {s.label}
           </span>
         </div>

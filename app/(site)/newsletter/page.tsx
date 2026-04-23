@@ -114,7 +114,7 @@ export default function NewsletterPage() {
       <div className="bg-yellow border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between">
           <p className="font-archivo text-[22px] text-ink tracking-[-0.5px]">
-            6.2k+ Gwinnett locals already subscribed.
+            7.2k+ Gwinnett locals already subscribed.
           </p>
           <p className="font-inter text-[12px] text-ink/50">Join them.</p>
         </div>

@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 export const metadata = {
   title: 'Advertise — All Things Gwinnett',
-  description: 'Reach 4,000+ Gwinnett County locals. Advertising options for local businesses.',
+  description: 'Reach 7,200+ Gwinnett County locals. Advertising options for local businesses.',
 }
 
 const PACKAGES = [
@@ -16,7 +16,7 @@ const PACKAGES = [
   {
     name: 'Newsletter sponsor',
     price: '$199/issue',
-    desc: 'Single sponsor placement in the ATG Thursday newsletter. Seen by 4,000+ Gwinnett locals.',
+    desc: 'Single sponsor placement in the ATG Thursday newsletter. Seen by 7,200+ Gwinnett locals.',
     includes: ['Logo + 2-line copy in newsletter', 'Link to your site or offer', 'One issue per sponsor'],
     best: true,
   },
@@ -36,7 +36,7 @@ export default function AdvertisePage() {
         <div className="max-w-[1200px] mx-auto px-6 py-8">
           <h1 className="font-archivo text-[42px] text-ink tracking-[-1px] leading-none mb-2">Advertise</h1>
           <p className="font-georgia text-[15px] text-ink/60 italic">
-            Reach 4,000+ Gwinnett County locals who actually live, eat, and spend money here.
+            Reach 7,200+ Gwinnett County locals who actually live, eat, and spend money here.
           </p>
         </div>
       </div>
@@ -45,8 +45,8 @@ export default function AdvertisePage() {
       <div className="bg-ink border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-0 grid grid-cols-4">
           {[
-            { num: '4,000+', lbl: 'Facebook group members' },
-            { num: '4,100+', lbl: 'Newsletter subscribers' },
+            { num: '7,200+', lbl: 'Facebook group members' },
+            { num: '7,200+', lbl: 'Newsletter subscribers' },
             { num: 'Gwinnett', lbl: 'County only — no wasted reach' },
             { num: 'Thursday', lbl: 'Newsletter send day' },
           ].map((s, i) => (

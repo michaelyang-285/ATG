@@ -1,6 +1,5 @@
 import { client } from '@/lib/sanity'
 import { slugHref } from '@/lib/slugHref'
-import Ticker from '@/components/Ticker'
 import StoryTag from '@/components/StoryTag'
 import Link from 'next/link'
 
@@ -28,8 +27,6 @@ export default async function OpinionsPage() {
 
   return (
     <main className="w-full">
-      <Ticker items={[]} />
-
       {/* Header */}
       <div className="bg-paper border-b-2 border-ink w-full">
         <div className="max-w-[1200px] mx-auto px-6 py-8 border-b-4 border-ink">

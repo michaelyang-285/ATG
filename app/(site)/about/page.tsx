@@ -35,7 +35,7 @@ export default function AboutPage() {
           </p>
 
           <p className="mb-6">
-            It grew. 4,000+ members later, the group was doing what local news organizations had
+            It grew. 7,200+ members later, the group was doing what local news organizations had
             stopped doing — covering the actual county. Not the sanitized, press-release version.
             The real one.
           </p>
@@ -89,7 +89,7 @@ export default function AboutPage() {
             <strong className="font-space">Facebook group:</strong>{' '}
             <a href="https://facebook.com/groups/allthingsgwinnett" target="_blank" rel="noopener"
               className="text-orange underline underline-offset-2">
-              Join 4,000+ locals
+              Join 7,200+ locals
             </a>
           </p>
         </div>

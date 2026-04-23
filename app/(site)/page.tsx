@@ -1,5 +1,4 @@
 import { client, queries } from '@/lib/sanity'
-import Ticker from '@/components/Ticker'
 import Hero from '@/components/Hero'
 import NewsletterStrip from '@/components/NewsletterStrip'
 import CategoryBar from '@/components/CategoryBar'
@@ -28,7 +27,6 @@ export default async function HomePage() {
 
   return (
     <main className="w-full">
-      <Ticker items={homepage?.ticker ?? []} />
       <Hero heroStory={homepage?.heroStory} sidebarStories={homepage?.sidebarStories ?? []} />
       <NewsletterStrip headline={homepage?.newsletterHeadline} sub={homepage?.newsletterSub} subscriberCount={homepage?.subscriberCount} />
       <CategoryBar />

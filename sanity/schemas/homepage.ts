@@ -4,13 +4,6 @@ export default {
   type: 'document',
   fields: [
     {
-      name: 'ticker',
-      title: 'Breaking ticker items',
-      type: 'array',
-      of: [{ type: 'string' }],
-      description: 'Short breaking news items shown in the yellow ticker bar',
-    },
-    {
       name: 'heroStory',
       title: 'Hero story',
       type: 'reference',
@@ -40,7 +33,7 @@ export default {
       name: 'subscriberCount',
       title: 'Subscriber count (social proof)',
       type: 'string',
-      initialValue: '6.2k+ locals already subscribed',
+      initialValue: '7.2k+ locals already subscribed',
     },
     {
       name: 'communityQuote',
