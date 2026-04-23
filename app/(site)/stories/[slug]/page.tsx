@@ -59,6 +59,44 @@ async function getStory(slug: string) {
         _type == "image" => {
           ...,
           "imageUrl": asset->url
+        },
+        _type == "gallery" => {
+          ...,
+          "images": images[]{
+            ...,
+            "imageUrl": asset->url
+          }
+        },
+        _type == "relatedStoryRef" => {
+          ...,
+          "story": story->{
+            title,
+            deck,
+            slug,
+            "thumb": thumbnail.asset->url,
+            "category": category->{ name, color }
+          }
+        },
+        _type == "businessRef" => {
+          ...,
+          "business": business->{
+            name,
+            businessType,
+            description,
+            slug,
+            "mainImage": mainImage.asset->url,
+            address1, city, state
+          }
+        },
+        _type == "eventRef" => {
+          ...,
+          "event": event->{
+            name,
+            date,
+            location,
+            price,
+            slug
+          }
         }
       },
       "relatedStories": relatedStories[]->{
@@ -89,56 +127,78 @@ export default async function StoryPage({ params }: { params: { slug: string } }
 
   return (
     <main className="w-full bg-paper">
-      <div className="border-b-2 border-ink">
-        <div className="max-w-[1100px] mx-auto px-6 py-8 md:py-10">
+      <header className="w-full">
+        <div className="max-w-[760px] mx-auto px-6 pt-10 pb-6">
           <StoryTag color={story.category?.color} name={story.category?.name ?? ''} />
-          <h1 className="font-archivo text-[38px] md:text-[52px] leading-[1.02] tracking-[-1px] text-ink mt-3 mb-4 max-w-[900px]">
+          <h1 className="font-archivo text-[40px] leading-[1.05] text-ink tracking-[-1px] mt-3 mb-4">
             {story.title}
           </h1>
-          <p className="font-georgia text-[18px] md:text-[20px] text-[#4a4a4a] leading-relaxed italic border-l-4 border-orange pl-4 max-w-[860px]">
+          <p className="font-georgia text-[18px] text-[#444] leading-relaxed mb-6 pl-4 border-l-4 border-orange">
             {story.deck}
           </p>
-          <div className="mt-5 flex flex-wrap items-center gap-2 md:gap-3 font-inter text-[11px] text-[#888]">
-            <span className="text-ink">{displayAuthor}</span>
-            <span>·</span>
-            <span>{story.location || 'Gwinnett County, GA'}</span>
-            <span>·</span>
-            <span>{story.readTime ?? 5} min read</span>
-            {story.publishedAt && (
-              <>
-                <span>·</span>
-                <span>
-                  {new Date(story.publishedAt).toLocaleDateString('en-US', {
-                    month: 'long',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
 
-      {story.thumb && (
-        <div className="border-b-2 border-ink bg-card">
-          <div className="max-w-[1200px] mx-auto">
-            <img
-              src={story.thumb}
-              alt={story.title}
-              className="w-full h-[280px] sm:h-[360px] md:h-[520px] object-cover"
+          <div className="flex items-start gap-4 pt-5 border-t-2 border-ink/10">
+            <AuthorHeadshot
+              name={displayAuthor}
+              imageUrl={story.authorProfile?.profileImage}
             />
-            {story.photoCredit && (
-              <p className="px-4 py-2 font-inter text-[10px] text-ink/60 border-t-2 border-ink">
-                Photo: {story.photoCredit}
+            <div className="flex-1 min-w-0">
+              <p className="font-inter text-[9px] font-bold uppercase tracking-[1.2px] text-ink/60">
+                By
               </p>
-            )}
+              <p className="font-archivo text-[16px] tracking-[-0.3px] text-ink">
+                {displayAuthor}
+              </p>
+              {story.authorProfile?.businessName ? (
+                <p className="font-inter text-[11px] text-ink/60 leading-tight mt-[1px]">
+                  {story.authorProfile.businessName}
+                </p>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-[2px] mt-2 font-inter text-[11px] text-ink/50">
+                {story.location ? (
+                  <span>Reporting from {story.location}</span>
+                ) : null}
+                {story.location ? <span aria-hidden>·</span> : null}
+                {story.publishedAt ? (
+                  <time dateTime={story.publishedAt}>
+                    {new Date(story.publishedAt).toLocaleDateString('en-US', {
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </time>
+                ) : null}
+                {story.readTime ? (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>{story.readTime} min read</span>
+                  </>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </header>
 
       <div className="w-full">
         <div className="max-w-[760px] mx-auto px-6 pt-10 pb-12 md:pt-14 md:pb-14 text-ink">
+          {story.thumb && (
+            <figure className="mb-10">
+              <div className="relative aspect-[16/10] w-full overflow-hidden border-2 border-ink shadow-brutalist-sm bg-ink">
+                <img
+                  src={story.thumb}
+                  alt={story.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {(story.photoCredit) && (
+                <figcaption className="mt-3 font-inter text-[11px] uppercase tracking-[0.8px] text-ink/60">
+                  {story.photoCredit}
+                </figcaption>
+              )}
+            </figure>
+          )}
+
           {story.body && story.body.length > 0
             ? (
               <>
@@ -159,9 +219,9 @@ export default async function StoryPage({ params }: { params: { slug: string } }
         </div>
       </div>
 
-      <section className="w-full border-t-2 border-ink">
+      <section className="w-full">
         <div className="max-w-[760px] mx-auto px-6 py-8">
-          <div className="border-2 border-ink bg-card shadow-brutalist p-5">
+          <div className="border-2 border-ink bg-card shadow-brutalist p-5 sm:p-6">
             <div className="flex gap-4 items-start">
               <AuthorHeadshot
                 name={displayAuthor}
@@ -177,7 +237,7 @@ export default async function StoryPage({ params }: { params: { slug: string } }
               </div>
             </div>
             {story.authorProfile?.bio && (
-              <p className="font-georgia text-[15px] leading-relaxed text-[#444] mt-4">{story.authorProfile.bio}</p>
+              <p className="font-georgia text-[15px] leading-relaxed text-[#444] mt-5">{story.authorProfile.bio}</p>
             )}
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 pt-4 border-t-2 border-ink/10">
               <AuthorSocialLinks profile={story.authorProfile} />
@@ -196,12 +256,17 @@ export default async function StoryPage({ params }: { params: { slug: string } }
       </section>
 
       {Array.isArray(story.relatedStories) && story.relatedStories.length > 0 && (
-        <div className="w-full border-t-2 border-ink">
-          <div className="max-w-[1100px] mx-auto px-6 py-8">
-            <h2 className="font-archivo text-[24px] tracking-[-0.5px] text-ink mb-4">
-              Related stories
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section aria-labelledby="related-heading" className="w-full border-t-2 border-ink">
+          <div className="max-w-[1200px] mx-auto px-6 py-12">
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <h2 id="related-heading" className="font-archivo text-[26px] sm:text-[32px] leading-[1.05] tracking-[-0.8px] text-ink">
+                Keep reading
+              </h2>
+              <Link href="/stories" className="font-inter text-[10px] font-bold uppercase tracking-[0.8px] text-ink hover:text-orange no-underline">
+                All stories →
+              </Link>
+            </div>
+            <div className="grid gap-8 md:grid-cols-3">
               {story.relatedStories.map((item: any) => {
                 const h = slugHref(item?.slug)
                 if (!h) return null
@@ -209,20 +274,20 @@ export default async function StoryPage({ params }: { params: { slug: string } }
                   <Link
                     key={h}
                     href={`/stories/${h}`}
-                    className="block border-2 border-ink no-underline hover:bg-card transition-colors group overflow-hidden"
+                    className="group block no-underline text-ink"
                   >
-                    <div className="h-[150px] bg-card border-b-2 border-ink flex items-center justify-center">
+                    <div className="relative aspect-[4/3] w-full overflow-hidden border-2 border-ink shadow-brutalist-sm bg-ink">
                       {item?.thumb
-                        ? <img src={item.thumb} alt={item.title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300" />
+                        ? <img src={item.thumb} alt={item.title} className="w-full h-full object-cover transition duration-500 group-hover:scale-[1.03]" />
                         : <span className="font-inter text-[10px] text-ink/35">photo</span>}
                     </div>
-                    <div className="p-4">
+                    <div className="mt-4">
                       <StoryTag color={item?.category?.color ?? ''} name={item?.category?.name ?? ''} />
-                      <p className="mt-2 font-space text-[17px] font-bold text-ink leading-tight group-hover:underline underline-offset-2">
+                      <p className="font-archivo text-[18px] leading-[1.2] tracking-[-0.3px] text-ink group-hover:text-orange transition-colors">
                         {item?.title}
                       </p>
                       {item?.publishedAt && (
-                        <p className="mt-2 font-inter text-[10px] text-ink/50">
+                        <p className="font-inter text-[10px] uppercase tracking-[0.8px] text-ink/50 mt-2">
                           {new Date(item.publishedAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -236,7 +301,7 @@ export default async function StoryPage({ params }: { params: { slug: string } }
               })}
             </div>
           </div>
-        </div>
+        </section>
       )}
     </main>
   )

@@ -1,5 +1,47 @@
 import { CharacterCountInput } from '../../studio/components/CharacterCountInput'
 
+const BUSINESS_TYPE_SEGMENTS: Record<string, string> = {
+  'restaurants-food': 'restaurants',
+  automotive: 'auto',
+  'home-repair-maintenance': 'home-repair',
+  'health-wellness': 'health',
+  'beauty-personal-care': 'beauty',
+  'retail-shopping': 'shopping',
+  'pet-care': 'pets',
+  'real-estate': 'real-estate',
+  'legal-financial': 'legal-finance',
+  'education-tutoring': 'education',
+  'events-entertainment': 'events',
+  'technology-it': 'tech',
+  'community-religious-organizations': 'community',
+  other: 'other',
+}
+
+function toKebab(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s/-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/\/+/g, '/')
+    .replace(/^[-/]+|[-/]+$/g, '')
+}
+
+function businessSlugSource(doc: any) {
+  const typeSegment = BUSINESS_TYPE_SEGMENTS[doc?.businessType || ''] || 'other'
+  const nameSegment = doc?.name || ''
+  return `${typeSegment}/${nameSegment}`
+}
+
+function businessSlugify(input: string) {
+  const raw = String(input || '')
+  const [category = 'other', ...nameParts] = raw.split('/')
+  const categorySegment = toKebab(category) || 'other'
+  const nameSegment = toKebab(nameParts.join('/'))
+  return nameSegment ? `${categorySegment}/${nameSegment}` : categorySegment
+}
+
 export const category = {
   name: 'category',
   title: 'Category',
@@ -180,7 +222,21 @@ export const business = {
       },
     },
     { name: 'openedAt', title: 'Opened / Opening date (optional)', type: 'date' },
-    { name: 'slug', title: 'Slug', type: 'slug', options: { source: 'name' }, validation: (Rule: any) => Rule.required() },
+    {
+      name: 'slug',
+      title: 'Slug',
+      description: 'URL format: /businesses/category/name. Click Generate to recalculate from Type + Business name.',
+      type: 'slug',
+      options: {
+        source: businessSlugSource,
+        slugify: businessSlugify,
+      },
+      validation: (Rule: any) => Rule.required().custom((value: any) => {
+        const current = value?.current || ''
+        if (!current.includes('/')) return 'Slug should include category/name.'
+        return true
+      }),
+    },
   ],
   preview: {
     select: {

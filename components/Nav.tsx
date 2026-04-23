@@ -5,11 +5,10 @@ import ATGPin from './ATGPin'
 import Link from 'next/link'
 
 const NAV_LINKS = [
-  { label: 'Stories',    href: '/stories' },
-  { label: 'News',       href: '/news' },
+  { label: 'Local Stories', href: '/stories' },
+  { label: 'Guides',        href: '/guides' },
   { label: 'Eats',       href: '/eats' },
   { label: 'Events',     href: '/events' },
-  { label: 'Opinions',   href: '/opinions' },
   { label: 'Businesses', href: '/businesses' },
 ]
 

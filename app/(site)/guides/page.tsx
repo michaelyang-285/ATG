@@ -6,27 +6,25 @@ import StoryTag from '@/components/StoryTag'
 export const revalidate = 60
 
 export const metadata = {
-  title: 'Local Stories - All Things Gwinnett',
-  description: 'What is happening around Gwinnett, told like a local.',
+  title: 'Guides - All Things Gwinnett',
+  description: 'Useful local guides, best-of lists, and explainers for Gwinnett.',
 }
 
-type Story = {
+type Guide = {
   title: string
   deck?: string
   slug?: { current?: string }
   publishedAt?: string
   readTime?: number
-  author?: string
-  location?: string
   thumb?: string
   category?: { name?: string; color?: string }
 }
 
-async function getStories(): Promise<Story[]> {
+async function getGuides(): Promise<Guide[]> {
   try {
     return await client.fetch(`
-      *[_type == "story" && (!defined(storyType) || storyType == "localStory")] | order(publishedAt desc)[0...24]{
-        title, deck, slug, publishedAt, readTime, author, location,
+      *[_type == "story" && storyType == "guide"] | order(publishedAt desc)[0...24]{
+        title, deck, slug, publishedAt, readTime,
         "category": category->{ name, color },
         "thumb": thumbnail.asset->url
       }
@@ -45,23 +43,23 @@ function formatDate(date?: string) {
   })
 }
 
-export default async function StoriesPage() {
-  const stories = await getStories()
-  const storyRows = stories.filter((s) => slugHref(s.slug))
-  const [featured, ...rest] = storyRows
+export default async function GuidesPage() {
+  const guides = await getGuides()
+  const guideRows = guides.filter((g) => slugHref(g.slug))
+  const [featured, ...rest] = guideRows
 
   return (
     <main className="w-full bg-paper">
       <div className="border-b-2 border-ink">
         <div className="max-w-[1200px] mx-auto px-6 py-10">
           <p className="font-inter text-[10px] font-bold uppercase tracking-[1.8px] text-orange mb-2">
-            Editorial
+            Utility
           </p>
           <h1 className="font-archivo text-[42px] leading-none tracking-[-1px] text-ink mb-2">
-            Local Stories
+            Guides
           </h1>
           <p className="font-georgia text-[16px] italic text-[#5b5b5b]">
-            The stories locals are actually talking about in Gwinnett.
+            Best-of lists, practical explainers, and local cheat sheets.
           </p>
         </div>
       </div>
@@ -89,10 +87,6 @@ export default async function StoriesPage() {
                   {featured.deck}
                 </p>
                 <div className="font-inter text-[11px] text-[#7a7a7a] flex items-center gap-2 flex-wrap">
-                  <span className="text-ink">{featured.author ?? 'ATG Staff'}</span>
-                  <span>·</span>
-                  <span>{featured.location || 'Gwinnett County, GA'}</span>
-                  <span>·</span>
                   <span>{featured.readTime ?? 5} min read</span>
                   {featured.publishedAt && (
                     <>
@@ -105,7 +99,7 @@ export default async function StoriesPage() {
             </Link>
           ) : (
             <p className="font-inter text-[14px] text-[#888] py-8 text-center">
-              Stories coming soon.
+              Guides coming soon. Mark stories as `Guide` in Studio to populate this page.
             </p>
           )}
         </div>
@@ -113,31 +107,31 @@ export default async function StoriesPage() {
 
       <div>
         <div className="max-w-[1200px] mx-auto px-6 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {rest.map((s) => {
-            const h = slugHref(s.slug)
+          {rest.map((g) => {
+            const h = slugHref(g.slug)
             return (
               <Link
-                key={h || s.title}
-                href={h ? `/stories/${h}` : '/stories'}
+                key={h || g.title}
+                href={h ? `/stories/${h}` : '/guides'}
                 className="border-2 border-ink bg-paper no-underline group hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none shadow-brutalist-sm transition-all"
               >
                 <div className="h-[190px] border-b-2 border-ink bg-card flex items-center justify-center">
-                  {s.thumb ? (
-                    <img src={s.thumb} alt={s.title} className="w-full h-full object-cover" />
+                  {g.thumb ? (
+                    <img src={g.thumb} alt={g.title} className="w-full h-full object-cover" />
                   ) : (
                     <span className="font-inter text-[11px] text-ink/35">photo</span>
                   )}
                 </div>
                 <div className="p-4">
-                  <StoryTag color={s.category?.color ?? ''} name={s.category?.name ?? ''} />
+                  <StoryTag color={g.category?.color ?? ''} name={g.category?.name ?? ''} />
                   <h3 className="font-space text-[18px] font-bold text-ink leading-tight mt-2 mb-2 group-hover:underline underline-offset-2">
-                    {s.title}
+                    {g.title}
                   </h3>
                   <p className="font-georgia text-[14px] text-[#575757] leading-relaxed mb-3">
-                    {s.deck}
+                    {g.deck}
                   </p>
                   <p className="font-inter text-[10px] text-[#888]">
-                    {formatDate(s.publishedAt)}{s.readTime ? ` · ${s.readTime} min read` : ''}
+                    {formatDate(g.publishedAt)}{g.readTime ? ` · ${g.readTime} min read` : ''}
                   </p>
                 </div>
               </Link>

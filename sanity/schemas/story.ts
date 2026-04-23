@@ -8,6 +8,19 @@ export default {
     { name: 'title',       title: 'Headline',     type: 'string' },
     { name: 'deck',        title: 'Deck (subhead)', type: 'text', rows: 2 },
     { name: 'slug',        title: 'Slug',          type: 'slug', options: { source: 'title' } },
+    {
+      name: 'storyType',
+      title: 'Story type',
+      description: 'Use Local Story for coverage/features and Guide for list/explainer utility content.',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Local Story', value: 'localStory' },
+          { title: 'Guide', value: 'guide' },
+        ],
+      },
+      initialValue: 'localStory',
+    },
     { name: 'publishedAt', title: 'Published at',  type: 'datetime' },
     { name: 'readTime',    title: 'Read time (mins)', type: 'number' },
     { name: 'location',    title: 'Location',      type: 'string' },
@@ -157,6 +170,113 @@ export default {
               },
               initialValue: 'rule',
             },
+          ],
+        },
+        {
+          name: 'videoEmbed',
+          title: 'Video embed',
+          type: 'object',
+          fields: [
+            { name: 'url', title: 'Video URL', type: 'url', validation: (Rule: any) => Rule.required() },
+            { name: 'caption', title: 'Caption', type: 'string' },
+          ],
+        },
+        {
+          name: 'socialEmbed',
+          title: 'Social embed',
+          type: 'object',
+          fields: [
+            {
+              name: 'platform',
+              title: 'Platform',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'X', value: 'twitter' },
+                  { title: 'Instagram', value: 'instagram' },
+                  { title: 'Facebook', value: 'facebook' },
+                  { title: 'LinkedIn', value: 'linkedin' },
+                  { title: 'TikTok', value: 'tiktok' },
+                ],
+              },
+            },
+            { name: 'url', title: 'Post URL', type: 'url', validation: (Rule: any) => Rule.required() },
+            { name: 'authorName', title: 'Author name', type: 'string' },
+            { name: 'authorHandle', title: 'Author handle', type: 'string' },
+            { name: 'content', title: 'Quoted content', type: 'text', rows: 4 },
+            { name: 'mediaUrl', title: 'Media image URL (optional)', type: 'url' },
+            { name: 'postedAt', title: 'Posted at', type: 'datetime' },
+          ],
+        },
+        {
+          name: 'mapEmbed',
+          title: 'Map embed',
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'address', title: 'Address', type: 'string' },
+            { name: 'query', title: 'Search query', type: 'string' },
+            { name: 'lat', title: 'Latitude', type: 'number' },
+            { name: 'lng', title: 'Longitude', type: 'number' },
+            { name: 'zoom', title: 'Zoom', type: 'number', initialValue: 15 },
+            { name: 'caption', title: 'Caption', type: 'string' },
+          ],
+        },
+        {
+          name: 'gallery',
+          title: 'Gallery',
+          type: 'object',
+          fields: [
+            {
+              name: 'columns',
+              title: 'Columns',
+              type: 'number',
+              options: { list: [2, 3] },
+              initialValue: 2,
+            },
+            {
+              name: 'images',
+              title: 'Images',
+              type: 'array',
+              of: [
+                {
+                  type: 'image',
+                  options: { hotspot: true },
+                  fields: [
+                    { name: 'alt', title: 'Alt text', type: 'string' },
+                    { name: 'caption', title: 'Caption', type: 'string' },
+                    { name: 'credit', title: 'Credit', type: 'string' },
+                  ],
+                },
+              ],
+              validation: (Rule: any) => Rule.min(2),
+            },
+          ],
+        },
+        {
+          name: 'relatedStoryRef',
+          title: 'Related story card',
+          type: 'object',
+          fields: [
+            { name: 'story', title: 'Story', type: 'reference', to: [{ type: 'story' }], validation: (Rule: any) => Rule.required() },
+          ],
+        },
+        {
+          name: 'businessRef',
+          title: 'Business card',
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'business', title: 'Business', type: 'reference', to: [{ type: 'business' }], validation: (Rule: any) => Rule.required() },
+          ],
+        },
+        {
+          name: 'eventRef',
+          title: 'Event card',
+          type: 'object',
+          fields: [
+            { name: 'label', title: 'Label', type: 'string' },
+            { name: 'event', title: 'Event', type: 'reference', to: [{ type: 'event' }], validation: (Rule: any) => Rule.required() },
           ],
         },
       ],
