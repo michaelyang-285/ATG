@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 async function getStory(slug: string) {
-  return client.fetch(
+  const story = await client.fetch(
     `*[_type == "story" && slug.current == $slug][0]{
       title, deck, publishedAt, readTime, author, location,
       "category": category->{ name, color },
@@ -109,6 +109,31 @@ async function getStory(slug: string) {
     }`,
     { slug }
   )
+
+  if (!story) return null
+
+  // Legacy stories may have only the plain author string. In that case,
+  // look up the profile by first/last name so both byline sections stay in sync.
+  if (!story.authorProfile && typeof story.author === 'string' && story.author.trim()) {
+    const parts = story.author.trim().split(/\s+/).filter(Boolean)
+    if (parts.length >= 2) {
+      const firstName = parts[0]
+      const lastName = parts[parts.length - 1]
+      const fallbackProfile = await client.fetch(
+        `*[_type == "authorProfile" && firstName == $firstName && lastName == $lastName][0]{
+          firstName, lastName, bio, businessName,
+          website, instagram, facebook, linkedin, x,
+          "profileImage": profileImage.asset->url
+        }`,
+        { firstName, lastName }
+      )
+      if (fallbackProfile) {
+        story.authorProfile = fallbackProfile
+      }
+    }
+  }
+
+  return story
 }
 
 function splitBodyAt(value: readonly any[] = [], ratio = 0.6): [readonly any[], readonly any[]] {
@@ -129,7 +154,9 @@ export default async function StoryPage({ params }: { params: { slug: string } }
     <main className="w-full bg-paper">
       <header className="w-full">
         <div className="max-w-[760px] mx-auto px-6 pt-10 pb-6">
-          <StoryTag color={story.category?.color} name={story.category?.name ?? ''} />
+          {story.category?.name ? (
+            <StoryTag color={story.category?.color} name={story.category.name} />
+          ) : null}
           <h1 className="font-archivo text-[40px] leading-[1.05] text-ink tracking-[-1px] mt-3 mb-4">
             {story.title}
           </h1>
@@ -331,11 +358,11 @@ function AuthorHeadshot({ name, imageUrl, size = 56 }: { name: string; imageUrl?
 
 function AuthorSocialLinks({ profile }: { profile: any }) {
   const socials = [
-    profile?.website ? { label: 'Website', href: profile.website } : null,
-    profile?.instagram ? { label: 'Instagram', href: profile.instagram } : null,
-    profile?.facebook ? { label: 'Facebook', href: profile.facebook } : null,
-    profile?.linkedin ? { label: 'LinkedIn', href: profile.linkedin } : null,
-    profile?.x ? { label: 'X', href: profile.x } : null,
+    profile?.website ? { label: 'Website', href: normalizeExternalHref(profile.website) } : null,
+    profile?.instagram ? { label: 'Instagram', href: normalizeExternalHref(profile.instagram) } : null,
+    profile?.facebook ? { label: 'Facebook', href: normalizeExternalHref(profile.facebook) } : null,
+    profile?.linkedin ? { label: 'LinkedIn', href: normalizeExternalHref(profile.linkedin) } : null,
+    profile?.x ? { label: 'X', href: normalizeExternalHref(profile.x) } : null,
   ].filter(Boolean) as Array<{ label: string; href: string }>
 
   if (socials.length === 0) return <span />
@@ -386,4 +413,11 @@ function ShareRow({ title, url }: { title: string; url: string }) {
       </a>
     </div>
   )
+}
+
+function normalizeExternalHref(value: string) {
+  const raw = String(value || '').trim()
+  if (!raw) return '#'
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(raw) || raw.startsWith('//')) return raw
+  return `https://${raw}`
 }

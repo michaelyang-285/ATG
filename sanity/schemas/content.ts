@@ -47,7 +47,23 @@ export const category = {
   title: 'Category',
   type: 'document',
   fields: [
-    { name: 'name',  title: 'Name',  type: 'string' },
+    {
+      name: 'name',
+      title: 'Name',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'News', value: 'News' },
+          { title: 'Food', value: 'Food' },
+          { title: 'Business', value: 'Business' },
+          { title: 'Community', value: 'Community' },
+          { title: 'Events', value: 'Events' },
+          { title: 'Opinion', value: 'Opinion' },
+          { title: 'Guides', value: 'Guides' },
+        ],
+      },
+      validation: (Rule: any) => Rule.required(),
+    },
     {
       name: 'color',
       title: 'Color',
@@ -61,8 +77,22 @@ export const category = {
           { title: 'Outline (Community)',      value: 'outline' },
         ],
       },
+      initialValue: 'outline',
+      validation: (Rule: any) => Rule.required(),
     },
   ],
+  preview: {
+    select: {
+      title: 'name',
+      color: 'color',
+    },
+    prepare({ title, color }: any) {
+      return {
+        title: title || 'Untitled category',
+        subtitle: color ? `Color: ${color}` : 'No color set',
+      }
+    },
+  },
 }
 
 export const event = {
@@ -143,22 +173,14 @@ export const business = {
     {
       name: 'googleMapsUrl',
       title: 'Google Maps link',
-      type: 'url',
-      validation: (Rule: any) =>
-        Rule.uri({ scheme: ['http', 'https'] }).custom((value: string) => {
-          if (!value) return true
-          if (!value.includes('google.com/maps') && !value.includes('maps.app.goo.gl')) {
-            return 'Use a Google Maps URL.'
-          }
-          return true
-        }),
+      type: 'string',
     },
-    { name: 'website', title: 'Website URL', type: 'url', validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }) },
-    { name: 'x', title: 'X URL', type: 'url', validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }) },
-    { name: 'linkedin', title: 'LinkedIn URL', type: 'url', validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }) },
-    { name: 'facebook', title: 'Facebook URL', type: 'url', validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }) },
-    { name: 'instagram', title: 'Instagram URL', type: 'url', validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }) },
-    { name: 'tiktok', title: 'TikTok URL', type: 'url', validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }) },
+    { name: 'website', title: 'Website URL', type: 'string' },
+    { name: 'x', title: 'X URL', type: 'string' },
+    { name: 'linkedin', title: 'LinkedIn URL', type: 'string' },
+    { name: 'facebook', title: 'Facebook URL', type: 'string' },
+    { name: 'instagram', title: 'Instagram URL', type: 'string' },
+    { name: 'tiktok', title: 'TikTok URL', type: 'string' },
     {
       name: 'mainImage',
       title: 'Main image',
@@ -272,11 +294,12 @@ export const authorProfile = {
     { name: 'businessName', title: 'Business name', type: 'string' },
     {
       name: 'profileImage',
-      title: 'Profile photo (1:1, 500x500)',
+      title: 'Profile photo',
       type: 'image',
+      description: 'Recommended: square image at least 500x500 for best results (not required).',
       options: { hotspot: true },
       validation: (Rule: any) =>
-        Rule.required().custom(async (value: any, context: any) => {
+        Rule.custom(async (value: any, context: any) => {
           if (!value?.asset?._ref) return true
           const client = context.getClient({ apiVersion: '2024-01-01' })
           const asset = await client.fetch(
@@ -285,41 +308,36 @@ export const authorProfile = {
           )
           const width = asset?.metadata?.dimensions?.width
           const height = asset?.metadata?.dimensions?.height
-          if (!width || !height) return 'Could not read image dimensions. Please re-upload.'
-          if (width !== height) return 'Profile photo must be square (1:1 aspect ratio).'
-          if (width < 500 || height < 500) return 'Profile photo must be at least 500x500.'
+          if (!width || !height) return 'Could not read image dimensions. Recommended: square and at least 500x500.'
+          if (width !== height) return 'Recommended: use a square image (1:1) for best display.'
+          if (width < 500 || height < 500) return 'Recommended: use at least 500x500 for better quality.'
           return true
-        }),
+        }).warning(),
     },
     {
       name: 'website',
       title: 'Website URL',
-      type: 'url',
-      validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }),
+      type: 'string',
     },
     {
       name: 'instagram',
       title: 'Instagram URL',
-      type: 'url',
-      validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }),
+      type: 'string',
     },
     {
       name: 'facebook',
       title: 'Facebook URL',
-      type: 'url',
-      validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }),
+      type: 'string',
     },
     {
       name: 'linkedin',
       title: 'LinkedIn URL',
-      type: 'url',
-      validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }),
+      type: 'string',
     },
     {
       name: 'x',
       title: 'X URL',
-      type: 'url',
-      validation: (Rule: any) => Rule.uri({ scheme: ['http', 'https'] }),
+      type: 'string',
     },
   ],
   preview: {

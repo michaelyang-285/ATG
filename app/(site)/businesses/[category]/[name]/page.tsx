@@ -55,12 +55,12 @@ export default async function BusinessDetailPage({ params }: { params: Params })
     .join(', ')
 
   const socialLinks = [
-    business.website ? { label: 'Website', href: business.website } : null,
-    business.instagram ? { label: 'Instagram', href: business.instagram } : null,
-    business.facebook ? { label: 'Facebook', href: business.facebook } : null,
-    business.linkedin ? { label: 'LinkedIn', href: business.linkedin } : null,
-    business.x ? { label: 'X', href: business.x } : null,
-    business.tiktok ? { label: 'TikTok', href: business.tiktok } : null,
+    business.website ? { label: 'Website', href: normalizeExternalHref(business.website) } : null,
+    business.instagram ? { label: 'Instagram', href: normalizeExternalHref(business.instagram) } : null,
+    business.facebook ? { label: 'Facebook', href: normalizeExternalHref(business.facebook) } : null,
+    business.linkedin ? { label: 'LinkedIn', href: normalizeExternalHref(business.linkedin) } : null,
+    business.x ? { label: 'X', href: normalizeExternalHref(business.x) } : null,
+    business.tiktok ? { label: 'TikTok', href: normalizeExternalHref(business.tiktok) } : null,
   ].filter(Boolean) as Array<{ label: string; href: string }>
 
   return (
@@ -110,7 +110,7 @@ export default async function BusinessDetailPage({ params }: { params: Params })
           <h3 className="font-archivo text-[18px] tracking-[-0.3px] text-ink mb-3">Visit</h3>
           <p className="font-inter text-[13px] text-ink/80 mb-4">{fullAddress}</p>
           {business.googleMapsUrl && (
-            <a href={business.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-block mb-5 font-inter text-[11px] font-bold uppercase tracking-[0.8px] text-orange no-underline">
+            <a href={normalizeExternalHref(business.googleMapsUrl)} target="_blank" rel="noopener noreferrer" className="inline-block mb-5 font-inter text-[11px] font-bold uppercase tracking-[0.8px] text-orange no-underline">
               Open in Google Maps →
             </a>
           )}
@@ -154,4 +154,11 @@ export default async function BusinessDetailPage({ params }: { params: Params })
       </div>
     </main>
   )
+}
+
+function normalizeExternalHref(value: string) {
+  const raw = String(value || '').trim()
+  if (!raw) return '#'
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(raw) || raw.startsWith('//')) return raw
+  return `https://${raw}`
 }

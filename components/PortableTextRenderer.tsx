@@ -7,11 +7,35 @@ const components: PortableTextComponents = {
     normal: ({ children }) => (
       <p className="font-georgia text-[19px] leading-[1.9] text-ink mb-6">{children}</p>
     ),
+    h1: ({ children }) => (
+      <h2 className="font-archivo text-[38px] sm:text-[44px] leading-[1.05] tracking-[-1px] text-ink mt-14 mb-5 scroll-mt-24">
+        {children}
+      </h2>
+    ),
     h2: ({ children }) => (
-      <h2 className="font-archivo text-[32px] leading-[1.15] tracking-[-0.5px] text-ink mt-10 mb-4">{children}</h2>
+      <h3 className="font-archivo text-[32px] sm:text-[36px] leading-[1.1] tracking-[-0.7px] text-ink mt-12 mb-4 scroll-mt-24">
+        {children}
+      </h3>
     ),
     h3: ({ children }) => (
-      <h3 className="font-archivo text-[25px] leading-[1.2] tracking-[-0.3px] text-ink mt-8 mb-3">{children}</h3>
+      <h4 className="font-archivo text-[26px] sm:text-[29px] leading-[1.15] tracking-[-0.45px] text-ink mt-10 mb-3 scroll-mt-24">
+        {children}
+      </h4>
+    ),
+    h4: ({ children }) => (
+      <h5 className="font-archivo text-[22px] sm:text-[24px] leading-[1.2] tracking-[-0.25px] text-ink mt-8 mb-3 scroll-mt-24">
+        {children}
+      </h5>
+    ),
+    h5: ({ children }) => (
+      <h6 className="font-inter text-[15px] font-bold uppercase tracking-[1px] leading-[1.35] text-ink/85 mt-7 mb-2 scroll-mt-24">
+        {children}
+      </h6>
+    ),
+    h6: ({ children }) => (
+      <p className="font-inter text-[12px] font-semibold uppercase tracking-[1.1px] leading-[1.35] text-ink/60 mt-6 mb-2 scroll-mt-24">
+        {children}
+      </p>
     ),
     blockquote: ({ children }) => (
       <blockquote className="font-georgia italic text-[24px] leading-[1.5] text-ink border-l-4 border-orange pl-5 my-8">
