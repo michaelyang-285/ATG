@@ -395,7 +395,7 @@ const components: PortableTextComponents = {
   },
 }
 
-export default function PortableTextRenderer({ value }: { value: any[] }) {
+export default function PortableTextRenderer({ value }: { value: readonly any[] }) {
   return <PortableText value={value} components={components} />
 }
 

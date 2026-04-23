@@ -1,4 +1,3 @@
-import { Stack, Text } from '@sanity/ui'
 import type { StringInputProps, TextInputProps } from 'sanity'
 
 type CharacterCountOptions = {
@@ -21,14 +20,24 @@ export function CharacterCountInput(props: CharacterCountProps) {
   const overLimit = typeof maxLength === 'number' && count > maxLength
   const tone = overLimit ? 'critical' : 'default'
 
+  const color = tone === 'critical' ? '#d14343' : '#6b7280'
+
   return (
-    <Stack space={2}>
+    <div>
       {props.renderDefault(props)}
-      <Text size={1} align="right" tone={tone}>
+      <div
+        style={{
+          marginTop: 6,
+          textAlign: 'right',
+          fontSize: 12,
+          color,
+          lineHeight: 1.4,
+        }}
+      >
         {count}
         {typeof maxLength === 'number' ? `/${maxLength}` : ''} characters
         {recommendedRange ? ` · recommended ${recommendedRange}` : ''}
-      </Text>
-    </Stack>
+      </div>
+    </div>
   )
 }

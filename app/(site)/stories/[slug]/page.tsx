@@ -111,10 +111,10 @@ async function getStory(slug: string) {
   )
 }
 
-function splitBodyAt(value: any[] = [], ratio = 0.6) {
-  if (!Array.isArray(value) || value.length === 0) return [[], []] as const
+function splitBodyAt(value: readonly any[] = [], ratio = 0.6): [readonly any[], readonly any[]] {
+  if (!Array.isArray(value) || value.length === 0) return [[], []]
   const midpoint = Math.max(1, Math.floor(value.length * ratio))
-  return [value.slice(0, midpoint), value.slice(midpoint)] as const
+  return [value.slice(0, midpoint), value.slice(midpoint)]
 }
 
 export default async function StoryPage({ params }: { params: { slug: string } }) {
