@@ -30,3 +30,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+.vercel/
+.impeccable/review/
+.env*.save

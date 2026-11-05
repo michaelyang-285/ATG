@@ -1,12 +1,23 @@
-import Nav from '@/components/Nav'
-import { Footer } from '@/components/Misc'
-
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+import SiteHeader from "@/components/SiteHeader";
+import { Footer } from "@/components/Publication";
+import { getPublication } from "@/lib/publication";
+import { navigation } from "@/lib/navigation";
+export default async function SiteLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  let data;
+  try {
+    data = await getPublication();
+  } catch {
+    data = { stories: [], businesses: [] };
+  }
   return (
     <>
-      <Nav />
+      <SiteHeader items={navigation(data.stories, data.businesses)} />
       {children}
       <Footer />
     </>
-  )
+  );
 }

@@ -1,152 +1,36 @@
 # All Things Gwinnett
 
-Local news, food, events, and community for Gwinnett County, GA.
+The approved “Guide desk” homepage and navigation, built with Next.js 14.2.35, React 18, TypeScript and Sanity. Brand specifications are in DESIGN.md; product decisions are in PRODUCT.md.
 
-**Stack:** Next.js 14 (App Router) · Tailwind CSS · Sanity CMS · Vercel
+## Existing services
 
----
+- Repository: https://github.com/michaelyang-285/ATG
+- Production: https://allthingsgwinnett.com — Vercel project `atg-site`, team `285-marketing`.
+- Sanity: project `xnm5c645`, public `production` dataset.
+- Studio: https://www.sanity.io/@oUcV9EK10/studio/tg2pib63zu890y3tcluji8jy
 
-## Site structure
+## Local development
 
-```
-allthingsgwinnett.com/
-├── /                          Homepage
-├── /news                      All news stories
-├── /eats                      Food & drink stories + restaurant picks
-├── /events                    Upcoming events, grouped by month
-├── /opinions                  Community voices + editorials
-├── /businesses                Business directory
-├── /businesses/[slug]         Individual business page
-├── /stories/[slug]            Individual story/article page
-├── /events/[slug]             Individual event page
-├── /lists/[slug]              Individual listicle (8 best tacos, etc.)
-├── /newsletter                Newsletter signup page
-├── /submit-a-business         Public business submission form
-├── /about                     About ATG
-├── /advertise                 Advertising info
-└── /submit-a-tip              Story tip submission
-```
+Use Node.js 24. Run `npm ci`, copy `.env.local.example` to `.env.local`, then run `npm run dev`. Run `npm run build` for type checking and production compilation.
 
----
+The website reads public published content; no Sanity write token is needed. Never commit authentication credentials or local environment backups.
 
-## Taxonomy system
+For Studio, run `npm ci` and `npm run dev` in `studio/`. The source schema is `sanity/schemas/index.ts`. Studio deploys to the existing application ID in `studio/sanity.cli.ts`; do not create another project.
 
-ATG uses a **two-level taxonomy**: Sections (nav) → Categories (tags).
+## Publishing
 
-### Sections (top-level nav)
-| Section | URL | Purpose |
-|---|---|---|
-| News | /news | Local news — crime, schools, development, roads |
-| Eats | /eats | Food & drink stories, restaurant reviews, best-of lists |
-| Events | /events | What's happening in Gwinnett |
-| Opinions | /opinions | Community voices, letters, editorials |
-| Businesses | /businesses | Business directory + new openings |
+Create an author, then a story with a headline, slug, section, format, publication date and body. Use the optional topic for Arts & culture or Schools & development. Add genuine photography with alternative text and credit. Publish when ready. Hidden posts, drafts and future-dated posts do not appear publicly. The old test article is preserved but hidden.
 
-### Categories (fine-grained, live under a section)
+In **Homepage & site settings**, select a featured story, up to three supporting stories and up to two guides. With no selection, the homepage uses recent published content. Updates appear within about a minute. Topic and area navigation appears as content becomes available.
 
-**News**
-- Crime & safety
-- Schools
-- Development
-- Roads & traffic
-- Local government
-- Health
-- Community
+Businesses and events are manually created and published in Studio. Only upcoming events appear. The website includes topic hubs, guides, search, area browsing, business pages and article pages; legacy URLs redirect to their replacements.
 
-**Eats**
-- Restaurant review
-- New opening
-- Food news
-- Bar & drinks
-- Best-of list
+## Launch state
 
-**Events**
-- Free events
-- Family
-- Music
-- Food & drink events
-- Sports
-- Festivals
+No finished reporting or directory listings were provided. Empty sections explicitly say they are coming soon. Newsletter signup opens when a real hosted signup URL is supplied in site settings. Public submission APIs return 503 until their workflows are configured. The proposed $5 listing charge has no active checkout or invented billing schedule.
 
-**Opinions**
-- Community voice
-- Editorial
-- Hot take
+## Deployment
 
-**Businesses**
-- Just opened
-- Coming soon
-- Closed
-- Business news
+Build and test before releasing. For a staged production build in the existing Vercel project, run `vercel deploy --prod --skip-domain --scope 285-marketing`, verify it, then promote the tested deployment. The production project ID is `prj_48R16IDTQ5798CZrJoi1pfDtFwFc`. Keep public Sanity variables set to the IDs above.
 
-### How to set up in Sanity Studio
-1. Create each Section document first (News, Eats, Events, Opinions, Businesses)
-2. Create Category documents — link each to its parent Section
-3. When writing a Story, pick its Category (Section is inferred automatically)
-
----
-
-## Content types (Sanity documents)
-
-| Type | Controls | Who creates it |
-|---|---|---|
-| **Homepage** | Ticker, hero story, newsletter copy, community quote | ATG editor |
-| **Story** | All articles and reviews | ATG editor |
-| **Section** | Top-level nav sections | Set up once, rarely changed |
-| **Category** | Story tags/filters | Set up once, add as needed |
-| **Event** | Upcoming events | ATG editor or scraped |
-| **List** | Listicles (8 best tacos…) | ATG editor |
-| **Business** | Business directory entries | Scraped, user-submitted, or ATG staff |
-
----
-
-## Business submissions
-
-Users submit via `/submit-a-business` → hits `/api/submit-business` → creates a **draft** in Sanity with `status: pending`. You review and publish in Sanity Studio. Nothing goes live without your approval.
-
-For bulk imports (scraping), run:
-```bash
-npx ts-node scripts/import-businesses.ts
-```
-
----
-
-## Layout pattern
-
-Every section uses **full-bleed background + contained content**:
-
-```tsx
-// Full-bleed color bar
-<div className="bg-ink border-b-2 border-ink w-full">
-  // Contained content — max 1200px, centered, with gutters
-  <div className="max-w-[1200px] mx-auto px-6">
-    {/* content */}
-  </div>
-</div>
-```
-
-Change `max-w-[1200px]` in one place to adjust site width everywhere.
-
----
-
-## Quick start
-
-```bash
-git clone https://github.com/YOUR_ORG/all-things-gwinnett
-cd all-things-gwinnett
-npm install
-cp .env.local.example .env.local
-# Add your Sanity project ID
-npm run dev
-```
-
-## Deploy to Vercel
-
-```bash
-vercel --prod
-```
-
-Set env vars in Vercel dashboard:
-- `NEXT_PUBLIC_SANITY_PROJECT_ID`
-- `NEXT_PUBLIC_SANITY_DATASET` → `production`
-- `SANITY_API_TOKEN`
+To update the existing Studio, run `sanity deploy --yes --schema-required` from `studio/` with an authorized Sanity login. The application ID in the CLI configuration pins the target.

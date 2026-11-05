@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation'
-
-export default function NewsPage() {
-  redirect('/stories')
+import { permanentRedirect } from "next/navigation";
+export default function Page() {
+  permanentRedirect("/local-life?format=news");
 }

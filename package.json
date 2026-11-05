@@ -10,10 +10,11 @@
     "studio": "npm run dev --prefix studio",
     "studio:build": "npm run build --prefix studio",
     "studio:deploy": "npm run deploy --prefix studio",
-    "seed:sanity": "node scripts/seed-sanity-smoke.mjs"
+    "seed:sanity": "node scripts/seed-sanity-smoke.mjs",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "14.2.3",
+    "next": "14.2.35",
     "react": "^18",
     "react-dom": "^18",
     "next-sanity": "^9.0.0",
@@ -31,6 +32,6 @@
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
     "eslint": "^8",
-    "eslint-config-next": "14.2.3"
+    "eslint-config-next": "14.2.35"
   }
 }
