@@ -1,0 +1,319 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T00:41:57.557002+00:00",
+  "title": "Design System: All Things Gwinnett",
+  "extensions": {
+    "colorMeta": {
+      "orange": {
+        "role": "primary",
+        "displayName": "Orange",
+        "tonalRamp": [
+          "oklch(15% 0.22069 34.20)",
+          "oklch(26% 0.22069 34.20)",
+          "oklch(38% 0.22069 34.20)",
+          "oklch(49% 0.22069 34.20)",
+          "oklch(61% 0.22069 34.20)",
+          "oklch(72% 0.22069 34.20)",
+          "oklch(84% 0.22069 34.20)",
+          "oklch(95% 0.22069 34.20)"
+        ]
+      },
+      "text-orange": {
+        "role": "primary",
+        "displayName": "Text Orange",
+        "tonalRamp": [
+          "oklch(15% 0.17909 33.42)",
+          "oklch(26% 0.17909 33.42)",
+          "oklch(38% 0.17909 33.42)",
+          "oklch(49% 0.17909 33.42)",
+          "oklch(61% 0.17909 33.42)",
+          "oklch(72% 0.17909 33.42)",
+          "oklch(84% 0.17909 33.42)",
+          "oklch(95% 0.17909 33.42)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.00000 0.00)",
+          "oklch(26% 0.00000 0.00)",
+          "oklch(38% 0.00000 0.00)",
+          "oklch(49% 0.00000 0.00)",
+          "oklch(61% 0.00000 0.00)",
+          "oklch(72% 0.00000 0.00)",
+          "oklch(84% 0.00000 0.00)",
+          "oklch(95% 0.00000 0.00)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15% 0.00000 0.00)",
+          "oklch(26% 0.00000 0.00)",
+          "oklch(38% 0.00000 0.00)",
+          "oklch(49% 0.00000 0.00)",
+          "oklch(61% 0.00000 0.00)",
+          "oklch(72% 0.00000 0.00)",
+          "oklch(84% 0.00000 0.00)",
+          "oklch(95% 0.00000 0.00)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Quiet Surface",
+        "tonalRamp": [
+          "oklch(15% 0.00397 106.47)",
+          "oklch(26% 0.00397 106.47)",
+          "oklch(38% 0.00397 106.47)",
+          "oklch(49% 0.00397 106.47)",
+          "oklch(61% 0.00397 106.47)",
+          "oklch(72% 0.00397 106.47)",
+          "oklch(84% 0.00397 106.47)",
+          "oklch(95% 0.00397 106.47)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Editorial Rule",
+        "tonalRamp": [
+          "oklch(15% 0.00680 106.54)",
+          "oklch(26% 0.00680 106.54)",
+          "oklch(38% 0.00680 106.54)",
+          "oklch(49% 0.00680 106.54)",
+          "oklch(61% 0.00680 106.54)",
+          "oklch(72% 0.00680 106.54)",
+          "oklch(84% 0.00680 106.54)",
+          "oklch(95% 0.00680 106.54)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "tonalRamp": [
+          "oklch(15% 0.00625 106.63)",
+          "oklch(26% 0.00625 106.63)",
+          "oklch(38% 0.00625 106.63)",
+          "oklch(49% 0.00625 106.63)",
+          "oklch(61% 0.00625 106.63)",
+          "oklch(72% 0.00625 106.63)",
+          "oklch(84% 0.00625 106.63)",
+          "oklch(95% 0.00625 106.63)"
+        ]
+      },
+      "field-stroke": {
+        "role": "neutral",
+        "displayName": "Field Stroke",
+        "tonalRamp": [
+          "oklch(15% 0.00864 106.63)",
+          "oklch(26% 0.00864 106.63)",
+          "oklch(38% 0.00864 106.63)",
+          "oklch(49% 0.00864 106.63)",
+          "oklch(61% 0.00864 106.63)",
+          "oklch(72% 0.00864 106.63)",
+          "oklch(84% 0.00864 106.63)",
+          "oklch(95% 0.00864 106.63)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Responsive page headings; mobile lead and article titles have source-specific overrides."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings and results headings."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Story titles and topic previews."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "General reading copy."
+      },
+      "body-compact": {
+        "displayName": "Body Compact",
+        "purpose": "Preview and introductory copy."
+      },
+      "action": {
+        "displayName": "Action",
+        "purpose": "Filled action labels."
+      },
+      "utility-link": {
+        "displayName": "Utility Link",
+        "purpose": "Medium-weight utility-row destinations."
+      },
+      "story-metadata": {
+        "displayName": "Story Metadata",
+        "purpose": "Actual category and format metadata after a headline."
+      },
+      "quiet": {
+        "displayName": "Quiet",
+        "purpose": "Short availability annotations."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "document-scroll",
+        "value": "smooth",
+        "purpose": "HTML scroll behavior; auto when prefers-reduced-motion is reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tablet",
+        "value": "950px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "narrow-mobile",
+        "value": "359px"
+      }
+    ],
+    "focus": {
+      "selector": "a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible",
+      "value": "outline: 3px solid var(--text-orange); outline-offset: 4px;"
+    },
+    "layering": [
+      {
+        "name": "desktop-submenu",
+        "value": "z-index: 20",
+        "purpose": "Parent navigation layer; white submenu with a one-pixel border."
+      },
+      {
+        "name": "mobile-dialog",
+        "value": "native dialog top layer; backdrop: #17171780",
+        "purpose": "Fullscreen mobile navigation."
+      }
+    ],
+    "tonalRampNote": "Eight-step OKLCH ramps are derived preview metadata only. They are not shipped palette tokens or authorization to add new surface colors."
+  },
+  "components": [
+    {
+      "name": "Orange Button",
+      "kind": "button",
+      "refersTo": "button-orange",
+      "description": "Filled orange action with bold text, a subtle radius, and underline hover.",
+      "html": "<button class=\"ds-button-orange\" type=\"button\">Get the newsletter</button>",
+      "css": ".ds-button-orange{font-family:\"DM Sans\",sans-serif;display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 20px;border:0;border-radius:4px;font-size:16px;font-weight:700;line-height:1.4;background:var(--orange,#ff4d22);color:var(--ink,#171717);cursor:pointer;text-underline-offset:5px;}.ds-button-orange:hover{text-decoration:underline;}.ds-button-orange:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}"
+    },
+    {
+      "name": "Ink Button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Filled ink action with bold text, a subtle radius, and underline hover.",
+      "html": "<button class=\"ds-button-ink\" type=\"button\">Sign me up</button>",
+      "css": ".ds-button-ink{font-family:\"DM Sans\",sans-serif;display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 20px;border:0;border-radius:4px;font-size:16px;font-weight:700;line-height:1.4;background:var(--ink,#171717);color:#fff;cursor:pointer;text-underline-offset:5px;}.ds-button-ink:hover{text-decoration:underline;}.ds-button-ink:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}"
+    },
+    {
+      "name": "Search",
+      "kind": "input",
+      "refersTo": "search",
+      "description": "Search input and SVG submit control share one outlined shell.",
+      "html": "<form class=\"ds-search\" action=\"/search\" role=\"search\"><input name=\"q\" type=\"search\" aria-label=\"Search All Things Gwinnett\" placeholder=\"Search the site\" maxlength=\"100\"/><button type=\"submit\" aria-label=\"Search\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><circle cx=\"10.5\" cy=\"10.5\" r=\"6.5\"/><path d=\"m16 16 5 5\"/></svg></button></form>",
+      "css": ".ds-search{display:flex;align-items:center;border:1px solid #9a9a94;border-radius:4px;min-width:0;background:#fff;}.ds-search input{font-family:\"DM Sans\",sans-serif;font-size:16px;line-height:1.6;width:210px;min-width:0;padding:10px 12px;border:0;background:transparent;color:var(--ink,#171717);caret-color:var(--text-orange,#b92f10);}.ds-search input::placeholder{color:#62625e;}.ds-search button{height:44px;width:44px;border:0;background:none;display:grid;place-items:center;flex-shrink:0;color:var(--ink,#171717);cursor:pointer;}.ds-search input:focus-visible,.ds-search button:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}@media(max-width:950px){.ds-search input{width:180px;}}@media(max-width:760px){.ds-search input{width:100%;}}"
+    },
+    {
+      "name": "Page Text Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "The standalone search-page field shares the shell stroke and small radius.",
+      "html": "<input class=\"ds-field\" type=\"search\" aria-label=\"Search stories\" placeholder=\"Search stories\"/>",
+      "css": ".ds-field{font-family:\"DM Sans\",sans-serif;font-size:18px;line-height:1.6;color:var(--ink,#171717);background:#fff;border:1px solid #9a9a94;padding:10px 14px;border-radius:4px;width:min(550px,100%);min-width:0;caret-color:var(--text-orange,#b92f10);}.ds-field:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}"
+    },
+    {
+      "name": "Desktop Navigation",
+      "kind": "nav",
+      "refersTo": "desktop-nav",
+      "description": "Direct topic link, active underline, and the flat expanded submenu state. Application code controls the disclosure button.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main navigation\"><div class=\"ds-nav-group\"><a href=\"/food-drink\" aria-current=\"page\">Food &amp; drink</a><button type=\"button\" aria-label=\"Show Food & drink links\" aria-expanded=\"true\" aria-controls=\"ds-submenu\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><path d=\"m3 6 5 5 5-5\"/></svg></button><ul id=\"ds-submenu\" class=\"ds-submenu\"><li><a href=\"/food-drink\">All food &amp; drink</a></li></ul></div></nav>",
+      "css": ".ds-nav{font-family:\"DM Sans\",sans-serif;display:flex;gap:32px;border-block:1px solid var(--rule,#d3d3ce);position:relative;z-index:20;color:var(--ink,#171717);line-height:1.6;}.ds-nav-group{display:flex;align-items:center;position:relative;}.ds-nav a{color:inherit;text-decoration:none;text-underline-offset:5px;}.ds-nav-group>a{padding-block:12px;font-weight:700;font-size:16px;}.ds-nav-group>a[aria-current]{text-decoration:underline;text-decoration-color:var(--orange,#ff4d22);text-decoration-thickness:3px;}.ds-nav-group>button{width:32px;height:44px;background:none;border:0;display:grid;place-items:center;color:inherit;cursor:pointer;}.ds-submenu{position:absolute;top:100%;left:-12px;min-width:240px;background:#fff;border:1px solid var(--rule,#d3d3ce);padding:8px;margin:0;list-style:none;}.ds-submenu a{display:block;padding:10px 12px;font-size:16px;}.ds-nav a:hover{text-decoration:underline;}.ds-submenu a:hover{background:var(--surface,#f5f5f2);}.ds-nav a:focus-visible,.ds-nav button:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}"
+    },
+    {
+      "name": "Mobile Navigation Disclosure",
+      "kind": "nav",
+      "refersTo": "mobile-disclosure",
+      "description": "Native expandable group with a thin rule, quiet fill, and SVG plus/minus.",
+      "html": "<details class=\"ds-disclosure\" open><summary>Food &amp; drink<svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><path d=\"M4 12h16\"/><path class=\"ds-disclosure-vertical\" d=\"M12 4v16\"/></svg></summary><ul><li><a href=\"/food-drink\">All food &amp; drink</a></li></ul></details>",
+      "css": ".ds-disclosure{font-family:\"DM Sans\",sans-serif;color:var(--ink,#171717);line-height:1.6;border-block-end:1px solid var(--rule,#d3d3ce);}.ds-disclosure summary{display:flex;align-items:center;justify-content:space-between;list-style:none;cursor:pointer;padding:18px 0;font-weight:700;font-size:23px;}.ds-disclosure summary::-webkit-details-marker{display:none;}.ds-disclosure[open] .ds-disclosure-vertical{display:none;}.ds-disclosure ul{list-style:none;padding:0 16px 16px;margin:0;background:var(--surface,#f5f5f2);}.ds-disclosure a{display:block;padding:10px 0;font-size:18px;color:inherit;text-decoration:none;text-underline-offset:5px;}.ds-disclosure a:hover{text-decoration:underline;}.ds-disclosure a:focus-visible,.ds-disclosure summary:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}"
+    },
+    {
+      "name": "Story Preview",
+      "kind": "card",
+      "refersTo": "story-preview",
+      "description": "Open editorial row; headline precedes real taxonomy and optional summary. Example uses existing launch copy.",
+      "html": "<article class=\"ds-story\"><h3><a href=\"/food-drink\">Food &amp; drink</a></h3><p>Places worth a closer look.</p><span class=\"ds-quiet\">Stories coming soon</span></article>",
+      "css": ".ds-story{font-family:\"DM Sans\",sans-serif;padding-block:18px;border-bottom:1px solid var(--rule,#d3d3ce);color:var(--ink,#171717);line-height:1.6;}.ds-story:last-child{border-bottom:0;}.ds-story h3{margin:0;font-size:23px;font-weight:700;line-height:1.12;letter-spacing:-0.025em;text-wrap:balance;}.ds-story a{color:inherit;text-decoration:none;text-underline-offset:5px;}.ds-story a:hover{text-decoration:underline;}.ds-story a:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}.ds-story p{font-size:16px;line-height:1.5;margin:8px 0 0;}.ds-story .ds-metadata{color:var(--text-orange,#b92f10);font-weight:700;font-size:13px;line-height:1.6;letter-spacing:0.035em;text-transform:uppercase;margin:8px 0;}.ds-quiet{display:block;font-size:13px;color:#62625e;margin-top:8px;}"
+    },
+    {
+      "name": "Newsletter Band",
+      "kind": "custom",
+      "refersTo": "newsletter",
+      "description": "Orange editorial invitation with the current truthful signup-pending state.",
+      "html": "<section class=\"ds-newsletter\"><div><h2>Get Gwinnett in your inbox.</h2><p>Good food. Local plans. Changes worth paying attention to.</p></div><div class=\"ds-pending\"><p>Signup is opening soon.</p><a href=\"https://www.facebook.com/groups/allthingsgwinnett\">Join the conversation on Facebook <svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" aria-hidden=\"true\"><path d=\"M4 12h16m-6-6 6 6-6 6\"/></svg></a></div></section>",
+      "css": ".ds-newsletter{font-family:\"DM Sans\",sans-serif;display:flex;justify-content:space-between;align-items:center;gap:32px;background:var(--orange,#ff4d22);color:var(--ink,#171717);padding:26px 28px;margin-block:28px 10px;border-radius:4px;line-height:1.6;}.ds-newsletter h2{margin:0;font-size:29px;font-weight:700;line-height:1.12;letter-spacing:-0.025em;text-wrap:balance;}.ds-newsletter p{font-size:16px;margin:6px 0 0;}.ds-pending{max-width:270px;}.ds-pending p{font-weight:700;margin-top:0;}.ds-pending a{font-size:14px;color:inherit;text-decoration:underline;text-underline-offset:5px;}.ds-pending svg{display:inline-block;vertical-align:-3px;margin-left:3px;}.ds-pending a:focus-visible{outline:3px solid var(--text-orange,#b92f10);outline-offset:4px;}@media(max-width:760px){.ds-newsletter{align-items:flex-start;flex-direction:column;padding:24px;gap:24px;margin-top:24px;}.ds-newsletter h2{font-size:28px;}}"
+    },
+    {
+      "name": "Empty Content Panel",
+      "kind": "custom",
+      "refersTo": "empty-state",
+      "description": "A quiet surface with a plain heading and honest availability message.",
+      "html": "<div class=\"ds-empty\"><h2>Stories coming soon</h2><p>We’re getting our first local stories and guides ready.</p></div>",
+      "css": ".ds-empty{font-family:\"DM Sans\",sans-serif;padding:36px;background:var(--surface,#f5f5f2);max-width:850px;color:var(--ink,#171717);font-size:18px;line-height:1.6;}.ds-empty h2{margin:0;font-size:25px;font-weight:700;line-height:1.12;letter-spacing:-0.025em;text-wrap:balance;}.ds-empty p{max-width:60ch;margin:12px 0 0;}@media(max-width:760px){.ds-empty{padding:24px;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The guide desk",
+    "overview": "All Things Gwinnett is an independent local publication with a warm, recognizable Soft Serif logo and direct, compact reading surfaces. White space, ink typography, fine dividers, and a concentrated orange accent carry the approved lighter neo-brutalist character. The supplied logo owns the outlined lettering and shallow offset; the interface itself remains flat.\n\nThe built system favors a clear headline, a useful short summary, and a visible destination. DM Sans supplies the complete live-text hierarchy. Density comes from editorial rows and aligned columns, with a single reading sequence on small screens. The launch tagline remains separate from the permanent logo artwork.",
+    "keyCharacteristics": [
+      "Supplied Soft Serif artwork paired with locally hosted DM Sans.",
+      "White reading surfaces, ink text, and orange identity and action areas.",
+      "Thin dividers and open editorial rows instead of elevated card shells.",
+      "Readable summaries, restrained controls, and explicit empty states."
+    ],
+    "rules": [
+      {
+        "name": "The Two Oranges Rule",
+        "body": "Use orange for filled action areas and brand emphasis; use text-orange for small links, metadata, caret, and keyboard focus. Filled orange controls carry ink text.",
+        "section": "colors"
+      },
+      {
+        "name": "The Artwork Boundary Rule",
+        "body": "Render the supplied Soft Serif logo as artwork. Keep live headings and interface text in DM Sans; preserve the launch tagline as separate text.",
+        "section": "typography"
+      },
+      {
+        "name": "The Headline First Rule",
+        "body": "Place story taxonomy after its headline. Category and format metadata describe real content; they are not decorative eyebrows.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Reading Surface Rule",
+        "body": "Separate content with white space, thin rules, and surface fills. UI components do not inherit the logo artwork’s offset or gain drop shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use the supplied logo artwork and the locally hosted DM Sans weights already shipped.",
+      "Do use text-orange for small actionable text and ink on filled orange controls.",
+      "Do preserve headline-first story previews, short summaries, and visible link destinations.",
+      "Do carry the same content order into the single-column mobile layout.",
+      "Do retain the visible keyboard outline, real SVG icons, and keyboard-operable disclosures.",
+      "Do distinguish unpublished content and unavailable signup with explicit empty-state copy."
+    ],
+    "donts": [
+      "Don’t recreate the Soft Serif logo with a system display font or attach the launch tagline to its artwork.",
+      "Don’t extend the logo’s outline and offset into shadows on reading surfaces or controls.",
+      "Don’t place invented kickers or decorative eyebrows above story headings.",
+      "Don’t replace the repeated editorial rows with elevated, heavily rounded card shells.",
+      "Don’t present wireframe sample stories or an unconfigured newsletter form as available content."
+    ]
+  }
+}
