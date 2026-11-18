@@ -44,7 +44,7 @@ export default function SchoolCalendar() {
     { title: "This Week", dates: upcoming.filter(event => event.day <= saturday) },
     { title: "Later This Month", dates: afterWeek.filter(event => event.day.startsWith(month)) },
     { title: "Looking Ahead", dates: afterWeek.filter(event => !event.day.startsWith(month)) },
-    { title: "Past school dates", dates: dates.filter(event => event.end < today).reverse() },
+    { title: "Past school dates", dates: dates.filter(event => event.end < today).sort((a, b) => a.day.localeCompare(b.day)) },
   ].filter(group => group.title === "This Week" || group.dates.length);
   return (
     <main id="main" className="site-width page-content atg-desk">
