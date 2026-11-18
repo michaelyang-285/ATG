@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { calendarNotices, gcpsSource } from "@/lib/gcps-calendar";
+import { calendarNotices } from "@/lib/gcps-calendar";
 import "@/components/community.css";
 
 export const metadata = {
@@ -20,7 +20,6 @@ export default function SchoolCalendar() {
         <Link className="text-link" href="/events">← All Gwinnett events</Link>
         <h1>GCPS school calendar</h1>
         <p>Plan for the 2026–27 Gwinnett County Public Schools year. Find days off, days students learn from home, and early dismissal dates for your child’s grade.</p>
-        <a className="text-link" href={gcpsSource}>Official GCPS student calendar (PDF)</a>
       </header>
       {dates.map(event => (
         <article className="event-day" key={event.day + event.title}>
