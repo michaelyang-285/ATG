@@ -21,3 +21,8 @@
 .profile-links{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
 .profile-links a{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #c9c1b5;border-radius:.55rem;padding:.5rem .75rem;background:white;color:#171717;text-decoration:none;min-height:44px}
 .profile-links a:hover,.profile-links a:focus-visible{border-color:#171717;text-decoration:underline}
+
+.directory-coverage{margin-block:1.5rem;border-top:2px solid #171717;padding-top:1.25rem}
+.directory-coverage ul{list-style:none;padding:0}.directory-coverage li{margin:.75rem 0}
+.directory-coverage a{display:grid;justify-items:start;gap:.4rem;color:inherit}
+.directory-coverage span{font-size:.8rem;font-weight:700;padding:.25rem .65rem;background:#fff0d7;border-radius:1rem}
