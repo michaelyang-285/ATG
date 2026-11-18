@@ -169,27 +169,21 @@ export default async function Page({
             day: h.day,
             element: (
               <article className="event-day" key={h.day + h.title}>
-                <p>
-                  {label(h.day, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                  })}{" "}
-                  {h.end !== h.day && (
-                    <>– {label(h.end, { month: "short", day: "numeric" })} </>
-                  )}
-                  · {h.kind}
-                </p>
                 <h3>{h.title}</h3>
+                <p>
+                  {h.kind === "GCPS schools closed for students"
+                    ? "GCPS students have no school"
+                    : h.kind}
+                  {h.end === h.day ? " on " : " from "}
+                  {label(h.day, { weekday: "long", month: "short", day: "numeric" })}
+                  {h.end !== h.day && (
+                    <> through {label(h.end, { weekday: "long", month: "short", day: "numeric" })}</>
+                  )}.
+                </p>
                 {h.overlaps?.map((o) => (
-                  <p key={o.day}>
-                    {o.title === h.title
-                      ? o.kind
-                      : label(o.day, { month: "short", day: "numeric" }) +
-                        " · " +
-                        o.title +
-                        " · " +
-                        o.kind}
+                  <p key={o.day + o.title}>
+                    {o.title} is {o.kind === "U.S. federal holiday" ? "a U.S. federal holiday " : ""}
+                    on {label(o.day, { weekday: "long", month: "short", day: "numeric" })}.
                   </p>
                 ))}
               </article>
