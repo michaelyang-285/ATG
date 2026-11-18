@@ -3,6 +3,28 @@ import { owner, human, respond, Failure, db } from "@/lib/directory/server";
 import { publication, safeUrl } from "@/lib/publication";
 import { easternInstant, validDay, shift } from "@/lib/event-time";
 import { cities } from "@/lib/gwinnett";
+function eventStore() {
+  if (!process.env.SANITY_WRITE_TOKEN) throw new Error("Event storage unavailable");
+  return publication.withConfig({ token: process.env.SANITY_WRITE_TOKEN, useCdn: false, perspective: "raw" });
+}
+
+export const dynamic = "force-dynamic";
+
+export function GET(req: Request) {
+  return respond(async () => {
+    const user = await owner(req);
+    const events = await eventStore().fetch(
+      `*[_type == "communityEventOwner" && ownerId == $ownerId]{
+        "published": *[_id == ^.eventId][0]{title, "slug": slug.current},
+        "draft": *[_id == "drafts." + ^.eventId][0]{title},
+        eventId
+      }[defined(published) || defined(draft)]`,
+      { ownerId: user.id }, { cache: "no-store" }
+    );
+    return { events };
+  });
+}
+
 export function POST(req: Request) {
   return respond(async () => {
     await human();
@@ -74,16 +96,15 @@ export function POST(req: Request) {
         .slice(0, 65) +
       "-" +
       id.slice(0, 8);
-    const writer = publication.withConfig({
-      token: process.env.SANITY_WRITE_TOKEN,
-      useCdn: false,
-    });
-    await writer.createIfNotExists({
-      _id:
-        "drafts.community-event-" +
-        createHash("sha256")
-          .update(user.id + ":" + id)
-          .digest("hex"),
+    const digest = createHash("sha256").update(user.id + ":" + id).digest("hex");
+    const eventId = "community-event-" + digest;
+    await eventStore().transaction().createIfNotExists({
+      _id: "ownership." + digest,
+      _type: "communityEventOwner",
+      ownerId: user.id,
+      eventId,
+    }).createIfNotExists({
+      _id: "drafts." + eventId,
       _type: "event",
       title,
       slug: { _type: "slug", current: slug },
@@ -101,7 +122,7 @@ export function POST(req: Request) {
       priceLabel:
         cost === "free" ? "Free" : price === undefined ? "Paid" : "$" + price,
       ...(url ? { url } : {}),
-    });
+    }).commit();
     return { ok: true };
   });
 }
