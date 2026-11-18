@@ -1,0 +1,17 @@
+.atg-directory .page-deck,.listing-summary{max-width:65ch}
+.atg-directory h1,.listing-heading h1{letter-spacing:-.055em;text-wrap:balance}
+.atg-directory h1{border-top:8px solid #ff4d22;padding-top:.35em}
+.atg-directory .directory-tools,.listing-columns aside{background:#faf6ef;border:1px solid #ded6ca;border-radius:18px;padding:clamp(1rem,3vw,2rem)}
+.atg-directory .directory-find :is(input,select){border-radius:8px}
+.atg-directory .business-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:1rem}
+.atg-directory .business-list article{border:1px solid #ddd6cb;border-top:4px solid #ff4d22;border-radius:12px;padding:1.3rem;overflow-wrap:anywhere}
+.atg-directory .business-list article:focus-within,.atg-directory .business-list article:hover{border-color:#171717}
+.listing-heading{display:flex;align-items:center;gap:1.5rem;padding:2rem 0;margin:1rem 0 2rem;border-block:1px solid #c9c1b5;border-top:6px solid #ff4d22}
+.listing-heading img{object-fit:contain;background:white;border-radius:12px}
+.listing-heading h1{margin:.1em 0;font-size:clamp(2.3rem,6vw,5rem)}
+.listing-columns{display:grid;grid-template-columns:2fr 1fr;gap:clamp(1rem,4vw,4rem);align-items:start}
+.atg-profile{overflow-wrap:anywhere}.listing-columns aside p{margin:1rem 0}
+.listing-summary{white-space:pre-line;font-size:1.15rem;line-height:1.65}
+.listing-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}.listing-tags span{background:#faf6ef;padding:.3rem .75rem;border-radius:2rem}
+.listing-photo{max-width:100%;height:auto;margin:1rem 0}
+@media(max-width:660px){.listing-columns{grid-template-columns:1fr}.listing-heading{align-items:start;flex-direction:column}}
