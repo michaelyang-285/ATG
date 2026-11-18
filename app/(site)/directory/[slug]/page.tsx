@@ -5,7 +5,18 @@ import {getListing, listingPhoto, listingPath, listingSchema} from "@/lib/direct
 import "../directory.css";
 export const revalidate = 60;
 type Props = {params:{slug:string}};
+const sample = {
+  _id:"sample", slug:"sample-coffee-profile", name:"Lantern & Oak Coffee",
+  category:"Coffee", categories:["Cafés"], services:["Storefront","Pickup"],
+  neighborhood:"Duluth", hours:"Monday–Saturday, 7 am–4 pm",
+  summary:"Espresso, cold brew, and rotating pastries in downtown Duluth. Stop in for a morning pour-over or pick up a latte on your way to work.",
+  publicPhone:"(770) 555-0142"
+};
+function isSample(slug:string) {
+  return process.env.VERCEL_ENV === "preview" && slug === sample.slug;
+}
 export async function generateMetadata({params}:Props) {
+  if (isSample(params.slug)) return {title:"Sample coffee shop profile",robots:{index:false,follow:false}};
   const b = await getListing(params.slug);
   if (!b) notFound();
   const title = [b.name,b.category,b.neighborhood || "Gwinnett County"].filter(Boolean).join(" · ");
@@ -14,12 +25,13 @@ export async function generateMetadata({params}:Props) {
   return {title,description,alternates:{canonical:path},openGraph:{title,description,url:path,images:[listingPhoto(b)||"/brand/og.png"]}};
 }
 export default async function Page({params}:Props) {
-  const b = await getListing(params.slug);
+  const demo = isSample(params.slug);
+  const b: Awaited<ReturnType<typeof getListing>> = demo ? sample : await getListing(params.slug);
   if (!b) notFound();
   const photo = listingPhoto(b);
   const tags = Array.from(new Set([b.category,...(b.categories||[]),...(b.services||[])].filter(Boolean)));
   return <main id="main" className="site-width page-content atg-profile">
-    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(listingSchema(b)).replace(/</g,"\\u003c")}}/>
+    {demo ? <p className="story-label">Sample profile · Fictional business</p> : <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(listingSchema(b)).replace(/</g,"\\u003c")}}/>}
     <Link className="text-link" href="/directory">← Gwinnett directory</Link>
     <header className="listing-heading">
       {photo && <img src={photo} width="112" height="112" alt=""/>}
