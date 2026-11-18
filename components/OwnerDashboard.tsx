@@ -63,6 +63,7 @@ export default function OwnerDashboard() {
     [progress,setProgress]=useState<Progress[]>([]),
     [signin,setSignin]=useState(false),
     [sent,setSent]=useState(false),
+    [googleEnabled,setGoogleEnabled]=useState(false),
     [loaded,setLoaded]=useState(false),
     [account,setAccount]=useState({firstName:"",lastName:"",phone:"",name:""}),
     [msg, setMsg] = useState(""),
@@ -71,8 +72,15 @@ export default function OwnerDashboard() {
   useEffect(() => {
     setSignin(new URLSearchParams(location.search).get("mode")==="signin");
     if (!client) return;
+    const controller = new AbortController();
+    fetch(process.env.NEXT_PUBLIC_SUPABASE_URL + "/auth/v1/settings", {
+      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
+      signal: controller.signal,
+    }).then(response => response.ok ? response.json() : null)
+      .then(settings => setGoogleEnabled(settings?.external?.google === true))
+      .catch(() => {});
     const { data } = client.auth.onAuthStateChange((_, s) => setSession(s));
-    return () => data.subscription.unsubscribe();
+    return () => { controller.abort(); data.subscription.unsubscribe(); };
   }, [client]);
   async function api(path: string, body?: unknown) {
     const file = body instanceof FormData;
@@ -149,7 +157,7 @@ export default function OwnerDashboard() {
             revision: row.revision,
             status: row.status,
           }
-        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||"",lastName:m.lastName||"",phone:m.phone||"",name:m.name||"" },
+        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||"",lastName:m.lastName||"",phone:m.phone||"",name:m.businessName||m.name||"" },
     );
     setStep(0);
     setMsg("");
@@ -215,12 +223,38 @@ export default function OwnerDashboard() {
       <h1>{signin?"Welcome back.":"Get listed in Gwinnett."}</h1><p>{signin?"Pick up where you left off or manage a published listing.":"Help neighbors find your business, services, or organization."}</p>
       <p className="fee-note">Free to create an account. The one-time $3 listing fee comes at the end.</p></aside>
       <div className="signup-card">{sent?<><h2>Check your inbox</h2><p>Open the link sent to <strong>{email}</strong> to continue.</p><button onClick={()=>setSent(false)}>Change email or resend</button></>:<>
-      <h2>{signin?"Sign in":"Create your account"}</h2><form onSubmit={e=>{e.preventDefault();run(async()=>{await api("login",{email,...(signin?{}:{account})});setSent(true)})}}>
+      <h2>{signin?"Sign in":"Create your account"}</h2>
+      {googleEnabled && <><button type="button" disabled={busy} onClick={()=>run(async()=>{
+        const {error}=await client.auth.signInWithOAuth({provider:"google",options:{
+          redirectTo:new URL("/directory/manage",window.location.origin).href,
+          scopes:"openid email profile"
+        }});
+        if(error)throw error;
+      })}>Continue with Google</button><p>Or continue with email</p></>}<form onSubmit={e=>{e.preventDefault();run(async()=>{await api("login",{email,...(signin?{}:{account})});setSent(true)})}}>
       <div className="account-grid">{([["firstName","First name","given-name","text"],["lastName","Last name","family-name","text"],["email","Email address","email","email"],["phone","Phone number","tel","tel"],["name","Business or organization name","organization","text"]] as const).filter(([k])=>!signin||k==="email").map(([k,label,auto,type])=><label key={k} className={k==="firstName"||k==="lastName"?"":"wide"}>{label}<input required autoComplete={auto} type={type} maxLength={k==="email"?254:240} value={k==="email"?email:account[k]} onChange={e=>k==="email"?setEmail(e.target.value):setAccount({...account,[k]:e.target.value})}/></label>)}</div>
       {!signin&&<p className="quiet">Your name, phone, and email stay private. You’ll choose public contact details later.</p>}
       <button className="primary-action" disabled={busy}>{busy?"Sending…":signin?"Email me a sign-in link":"Create account"}</button></form>
       <button className="text-action" onClick={()=>{setSignin(!signin);setMsg("")}}>{signin?"New here? Create an account":"Already have an account? Sign in"}</button></>}{status}</div></section>
     );
+  const googleUser=session.user.identities?.some(identity=>identity.provider==="google");
+  const meta=session.user.user_metadata || {};
+  if(googleUser && loaded && !rows.length && !progress.length && !(meta.firstName && meta.lastName && meta.phone && meta.businessName)){
+    return <section className="signup-card"><h1>Finish your account</h1>
+      <p>Signed in with Google as {session.user.email}. Confirm your details to start your listing.</p>
+      <form onSubmit={e=>{e.preventDefault();const fields=new FormData(e.currentTarget);run(async()=>{
+        const data=Object.fromEntries(["firstName","lastName","phone","businessName"].map(key=>[key,String(fields.get(key)||"").trim()]));
+        if(Object.values(data).some(value=>!value)||data.phone.replace(/\D/g,"").length<7)throw Error("Enter your name, business name, and a valid phone number.");
+        const result=await client.auth.updateUser({data});if(result.error)throw result.error;
+        setSession({...session,user:result.data.user});
+        setForm({...blank,listingId:crypto.randomUUID(),firstName:data.firstName,lastName:data.lastName,phone:data.phone,name:data.businessName});
+      })}}>
+        <label>First name<input name="firstName" autoComplete="given-name" maxLength={240} required defaultValue={meta.firstName||meta.given_name||""}/></label>
+        <label>Last name<input name="lastName" autoComplete="family-name" maxLength={240} required defaultValue={meta.lastName||meta.family_name||""}/></label>
+        <label>Phone number<input name="phone" type="tel" autoComplete="tel" maxLength={240} required defaultValue={meta.phone||""}/></label>
+        <label>Business or organization name<input name="businessName" autoComplete="organization" maxLength={240} required defaultValue={meta.businessName||""}/></label>
+        <button className="primary-action" disabled={busy}>Next</button>{status}
+      </form></section>
+  }
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
