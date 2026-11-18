@@ -245,6 +245,7 @@ export default function OwnerDashboard() {
       `}</style><button className="google-auth" type="button" disabled={busy} onClick={()=>run(async()=>{
         const {error}=await client.auth.signInWithOAuth({provider:"google",options:{
           redirectTo:new URL("/directory/manage",window.location.origin).href,
+          queryParams:{prompt:"select_account"},
           scopes:"openid email profile"
         }});
         if(error)throw error;
@@ -264,7 +265,17 @@ export default function OwnerDashboard() {
   const meta=session.user.user_metadata || {};
   if(googleUser && loaded && !rows.length && !progress.length && !(meta.firstName && meta.lastName && meta.phone && meta.businessName)){
     return <section className="signup-card"><Completion completed={0}/><h1>Finish your account</h1>
-      <p>Signed in with Google as {session.user.email}. Confirm your details to start your listing.</p>
+      <p>Signed in with Google as <strong>{session.user.email}</strong>.{" "}
+        <button type="button" className="text-action" disabled={busy} onClick={()=>run(async()=>{
+          const {error}=await client.auth.signOut({scope:"local"});
+          if(error) throw error;
+          setSent(false);
+          setSignin(true);
+          setEmail("");
+          setAccount({firstName:"",lastName:"",phone:"",name:""});
+          setMsg("Signed out. Choose Continue with Google to use another account.");
+        })}>Sign out</button>
+      </p>
       <form onSubmit={e=>{e.preventDefault();const fields=new FormData(e.currentTarget);run(async()=>{
         const data=Object.fromEntries(["firstName","lastName","phone","businessName"].map(key=>[key,String(fields.get(key)||"").trim()]));
         if(Object.values(data).some(value=>!value)||data.phone.replace(/\D/g,"").length<7)throw Error("Enter your name, business name, and a valid phone number.");
