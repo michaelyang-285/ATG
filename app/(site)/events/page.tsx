@@ -1,4 +1,4 @@
-import { calendarNotices, gcpsSource } from "@/lib/gcps-calendar";
+import { calendarNotices } from "@/lib/gcps-calendar";
 import Link from "next/link";
 import { calendar, occurrencePath } from "@/lib/events";
 import { localClock, shift, validDay, zone } from "@/lib/event-time";
@@ -196,11 +196,6 @@ export default async function Page({
       ) : (
         <p>No published events for this {view} yet.</p>
       )}
-      <p>
-        <a className="text-link" href={gcpsSource}>
-          Official 2026–27 GCPS student calendar (PDF)
-        </a>
-      </p>
       <p className="event-day">
         <a className="text-link" href={facebookGroup}>
           Ask neighbors about upcoming events in the ATG Facebook group ↗
