@@ -48,11 +48,37 @@ export async function calendar(from: string, to: string) {
     },
     { next: { revalidate: 60 } },
   );
+  const seen = new Set<string>();
   return events
     .flatMap(eventDates)
     .filter(
       (e) =>
         e.day <= to && localClock(e.endsAt || e.startsAt).slice(0, 10) >= from,
     )
-    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+    .sort(
+      (a, b) =>
+        Date.parse(a.startsAt) - Date.parse(b.startsAt) ||
+        a._id.localeCompare(b._id),
+    )
+    .filter((e) => {
+      if (!e.title || !(e.venue || e.street || e.url)) return true;
+      const key = JSON.stringify(
+        [
+          e.title,
+          e.venue,
+          e.street,
+          e.city || e.neighborhood,
+          e.organizer,
+          e.url,
+        ]
+          .map((v) => v?.trim().replace(/\s+/g, " ").toLowerCase() || "")
+          .concat(
+            String(Date.parse(e.startsAt)),
+            e.endsAt ? String(Date.parse(e.endsAt)) : "",
+          ),
+      );
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }

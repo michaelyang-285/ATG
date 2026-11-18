@@ -1,4 +1,4 @@
-import { holidays } from "@/lib/holidays";
+import { calendarNotices, gcpsSource } from "@/lib/gcps-calendar";
 import Link from "next/link";
 import { calendar, occurrencePath } from "@/lib/events";
 import { localClock, shift, validDay, zone } from "@/lib/event-time";
@@ -50,7 +50,7 @@ export default async function Page({
     next = shift(to, 1);
   }
   const items = await calendar(from, to);
-  const observances = holidays(from, to);
+  const observances = calendarNotices(from, to);
   const period =
     view === "year"
       ? from.slice(0, 4)
@@ -112,13 +112,19 @@ export default async function Page({
                 <div key={date}>
                   <time dateTime={date}>{Number(date.slice(8))}</time>
                   {observances
-                    .filter((h) => h.day === date)
+                    .filter((h) => h.day <= date && h.end >= date)
                     .map((h) => (
                       <small
                         key={h.title}
                         style={{ display: "block", overflowWrap: "anywhere" }}
                       >
                         {h.title}
+                        {h.school && <> · {h.kind}</>}
+                        {h.overlaps
+                          ?.filter((o) => o.day === date && o.title !== h.title)
+                          .map((o) => (
+                            <span key={o.title}> · {o.title}</span>
+                          ))}
                       </small>
                     ))}
                   {matches.map((e) => (
@@ -169,9 +175,23 @@ export default async function Page({
                     month: "short",
                     day: "numeric",
                   })}{" "}
+                  {h.end !== h.day && (
+                    <>– {label(h.end, { month: "short", day: "numeric" })} </>
+                  )}
                   · {h.kind}
                 </p>
                 <h3>{h.title}</h3>
+                {h.overlaps?.map((o) => (
+                  <p key={o.day}>
+                    {o.title === h.title
+                      ? o.kind
+                      : label(o.day, { month: "short", day: "numeric" }) +
+                        " · " +
+                        o.title +
+                        " · " +
+                        o.kind}
+                  </p>
+                ))}
               </article>
             ),
           })),
@@ -181,6 +201,11 @@ export default async function Page({
       ) : (
         <p>No published events for this {view} yet.</p>
       )}
+      <p>
+        <a className="text-link" href={gcpsSource}>
+          Official 2026–27 GCPS student calendar (PDF)
+        </a>
+      </p>
       <p className="event-day">
         <a className="text-link" href={facebookGroup}>
           Ask neighbors about upcoming events in the ATG Facebook group ↗
