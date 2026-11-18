@@ -1,3 +1,4 @@
+import {networks} from "./social";
 import { categories, services } from "./categories";
 import { Failure } from "./server";
 export function listing(input: any, email: string, uid: string) {
@@ -69,6 +70,15 @@ export function listing(input: any, email: string, uid: string) {
       url: url("url"),
       booking: url("booking"),
       social: url("social"),
+      ...Object.fromEntries(networks.map(({key,label,hosts})=>{
+        const value = url(key);
+        if (value) {
+          let host = "";
+          try { host = new URL(value).hostname; } catch { invalid(label); }
+          if (!hosts.some(domain=>host===domain || host.endsWith("."+domain))) invalid(label);
+        }
+        return [key,value];
+      })),
       hours: field("hours"),
       logo,
       gallery,
