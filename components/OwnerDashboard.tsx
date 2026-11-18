@@ -212,6 +212,7 @@ export default function OwnerDashboard() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     await run(async()=>{
+      if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
       const result=await api("owner",form);
       setForm(null);await refresh();
