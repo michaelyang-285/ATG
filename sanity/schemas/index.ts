@@ -1,3 +1,4 @@
+import {DirectoryCoverageInput} from "../../studio/components/DirectoryCoverageInput";
 import { defineField, defineType } from "sanity";
 const image = (name: string, title: string) =>
   defineField({
@@ -127,6 +128,15 @@ export const schemaTypes = [
             },
           ],
         },
+      }),
+      defineField({
+        name:"relatedDirectoryListings",
+        title:"Related directory listings",
+        description:"Select the businesses or organizations mentioned in this piece. Publishing adds a coverage link to each profile.",
+        type:"array",
+        of:[{type:"string"}],
+        components:{input:DirectoryCoverageInput},
+        validation:R=>R.unique()
       }),
       image("mainImage", "Main image"),
       reference("author", "author", "Author"),
