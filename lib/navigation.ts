@@ -40,7 +40,6 @@ export function navigation(
         ...(has("things-to-do", "guide")
           ? [{ label: "Weekend guides", href: "/things-to-do?format=guide" }]
           : []),
-        { label: "Events", href: "/events" },
         ...(stories.some(
           (s) => sectionOf(s) === "things-to-do" && s.topic === "arts-culture",
         )
@@ -51,6 +50,14 @@ export function navigation(
               },
             ]
           : []),
+      ],
+    },
+    {
+      label: "Events",
+      href: "/events",
+      children: [
+        { label: "Events calendar", href: "/events" },
+        { label: "Submit an event", href: "/events/submit" },
       ],
     },
     {
