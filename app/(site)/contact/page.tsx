@@ -1,5 +1,3 @@
-import InfoPage, { info } from "@/components/InfoPage";
-export const metadata = { title: info["contact"].title };
-export default function Page() {
-  return <InfoPage kind="contact" />;
-}
+import CommunityDesk, {deskMetadata} from "@/components/CommunityDesk";
+export const metadata=deskMetadata("contact");
+export default function Page(){return <CommunityDesk kind="contact"/>}

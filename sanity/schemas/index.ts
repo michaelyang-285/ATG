@@ -242,6 +242,12 @@ export const schemaTypes = [
       defineField({ name: "endsAt", type: "datetime" }),
       text("venue", "Venue"),
       text("neighborhood", "Area"),
+      text("street", "Street address"),
+      text("city", "City"),
+      text("organizer", "Public organizer name"),
+      defineField({name:"weeklyUntil",title:"Repeat weekly through",type:"date"}),
+      defineField({name:"cost",title:"Admission",type:"string",options:{list:["free","paid"]}}),
+      defineField({name:"price",title:"Ticket price (USD)",type:"number"}),
       text("priceLabel", "Price"),
       defineField({
         name: "url",

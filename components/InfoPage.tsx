@@ -45,7 +45,9 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
     paragraphs: [
       "You can browse this site without creating an account. Search terms are used to display matching public content.",
       "This website is hosted by Vercel, and published content is served through Sanity. Those services receive normal technical request information needed to deliver the website, such as your IP address and browser details.",
-      "Links to Facebook and other external websites take you to services with their own privacy practices. Newsletter signup is not open on this website yet.",
+      "Directory and event accounts use Supabase authentication. Your account email and private contact details are used to manage submissions. Published listings display the contact fields, service areas, links, and photos you choose to share. Event organizers supply public venue and event details.",
+      "Stripe processes directory checkout. ATG uses the payment confirmation to send your listing for review. To request a correction, removal, or help with a charge, contact a group admin privately.",
+      "Links to Facebook and other external websites take you to services with their own privacy practices.",
       "To ask about privacy, contact the All Things Gwinnett group admins through Facebook.",
     ],
   },

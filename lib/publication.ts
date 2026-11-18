@@ -21,7 +21,7 @@ export type Story = {
   publishedAt?: string;
   image?: any;
   categories?: { title: string; slug: string }[];
-  author?: { name: string };
+  author?: { name: string; slug?: string };
   body?: any[];
 };
 export type Business = {
@@ -56,7 +56,7 @@ export type Settings = {
   featuredGuides?: Story[];
   newsletterUrl?: string;
 };
-export const STORY_FIELDS = `_id,title,"slug":slug.current,excerpt,section,format,topic,location,publishedAt,"image":mainImage,"categories":categories[]->{title,"slug":slug.current},"author":author->{name}`;
+export const STORY_FIELDS = `_id,title,"slug":slug.current,excerpt,section,format,topic,location,publishedAt,"image":mainImage,"categories":categories[]->{title,"slug":slug.current},"author":author->{name,"slug":slug.current}`;
 export const PUBLISHED = `_type == "post" && defined(slug.current) && !(_id in path("drafts.**")) && hideFromSearch != true && defined(publishedAt) && publishedAt <= now()`;
 export const getPublication = cache(async () => {
   const result = await publication.fetch<{

@@ -1,4 +1,5 @@
 "use client";
+import {ServiceAreas} from "./ServiceAreas";
 import { useEffect, useState, FormEvent } from "react";
 import { createClient, Session } from "@supabase/supabase-js";
 import { categories, services } from "@/lib/directory/categories";
@@ -457,7 +458,7 @@ export default function OwnerDashboard() {
                     </label>
                   ))}
                 </fieldset>
-                {field("neighborhood", "Cities or areas served", true)}
+                <ServiceAreas value={form.neighborhood} onChange={v=>change("neighborhood",v)}/>
                 {field("address", "Public street address (optional)")}
                 {field("hours", "Hours or appointment availability")}
                 </>}{step===2&&<>
@@ -541,6 +542,7 @@ export default function OwnerDashboard() {
               </>
             )}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>setStep(step-1)}>Back</button>}
+              {step===4 && (!form.status || form.status==="unpaid") && <p>The one-time $3 listing fee helps prevent spam. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
               <button className="primary-action">{busy?"Saving…":step<4?"Next":form.status&&form.status!=="unpaid"?"Submit edits for review":"Continue to payment · $3"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>

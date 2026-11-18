@@ -51,7 +51,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <h1>{story.title}</h1>
           {story.excerpt && <p className="lead-deck">{story.excerpt}</p>}
           <p className="byline">
-            {story.author?.name ? `By ${story.author.name} · ` : ""}
+            {story.author?.name && <>By {story.author.slug ? <a href={"/authors/"+encodeURIComponent(story.author.slug)}>{story.author.name}</a> : story.author.name} · </>}
             {story.publishedAt && (
               <time dateTime={story.publishedAt}>
                 {formatDate(story.publishedAt)}
@@ -128,6 +128,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
             }}
           />
         </div>
+      <p><a className="text-link" href="https://www.facebook.com/groups/allthingsgwinnett">Discuss this story in the ATG Facebook group ↗</a></p>
       </article>
     </main>
   );
