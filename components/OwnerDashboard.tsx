@@ -158,7 +158,7 @@ export default function OwnerDashboard() {
             revision: row.revision,
             status: row.status,
           }
-        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||"",lastName:m.lastName||"",phone:m.phone||"",name:m.businessName||m.name||"" },
+        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||m.given_name||"",lastName:m.lastName||m.family_name||"",phone:m.phone||"",name:m.businessName||"" },
     );
     setStep(0);
     setMsg("");
@@ -224,35 +224,6 @@ export default function OwnerDashboard() {
       <SignupCard {...{client,signin,setSignin,sent,setSent,email,setEmail,googleEnabled,busy,account,setAccount,status,setMsg,run}}
         sendEmail={()=>api("login",{email,...(signin?{}:{account})})}/>
     );
-  const googleUser=session.user.identities?.some(identity=>identity.provider==="google");
-  const meta=session.user.user_metadata || {};
-  if(form && googleUser && loaded && !rows.length && !progress.length && !(meta.firstName && meta.lastName && meta.phone && meta.businessName)){
-    return <><button type="button" onClick={()=>setForm(null)}>Back to my submissions</button><section className="signup-card"><Completion completed={0}/><h1>Finish your account</h1>
-      <p>Signed in with Google as <strong>{session.user.email}</strong>.{" "}
-        <button type="button" className="text-action" disabled={busy} onClick={()=>run(async()=>{
-          const {error}=await client.auth.signOut({scope:"local"});
-          if(error) throw error;
-          setSent(false);
-          setSignin(true);
-          setEmail("");
-          setAccount({firstName:"",lastName:"",phone:"",name:""});
-          setMsg("Signed out. Choose Continue with Google to use another account.");
-        })}>Sign out</button>
-      </p>
-      <form onSubmit={e=>{e.preventDefault();const fields=new FormData(e.currentTarget);run(async()=>{
-        const data=Object.fromEntries(["firstName","lastName","phone","businessName"].map(key=>[key,String(fields.get(key)||"").trim()]));
-        if(Object.values(data).some(value=>!value)||data.phone.replace(/\D/g,"").length<7)throw Error("Enter your name, business name, and a valid phone number.");
-        const result=await client.auth.updateUser({data});if(result.error)throw result.error;
-        setSession({...session,user:result.data.user});
-        setForm({...blank,listingId:crypto.randomUUID(),firstName:data.firstName,lastName:data.lastName,phone:data.phone,name:data.businessName});
-      })}}>
-        <label>First name<input name="firstName" autoComplete="given-name" maxLength={240} required defaultValue={meta.firstName||meta.given_name||""}/></label>
-        <label>Last name<input name="lastName" autoComplete="family-name" maxLength={240} required defaultValue={meta.lastName||meta.family_name||""}/></label>
-        <label>Phone number<input name="phone" type="tel" autoComplete="tel" maxLength={240} required defaultValue={meta.phone||""}/></label>
-        <label>Business or organization name<input name="businessName" autoComplete="organization" maxLength={240} required defaultValue={meta.businessName||""}/></label>
-        <button className="primary-action" disabled={busy}>Next</button>{status}
-      </form></section></>
-  }
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
@@ -355,7 +326,7 @@ export default function OwnerDashboard() {
               </>
             ) : (
               <>
-                {step===0&&<><details open={!form.firstName||!form.lastName||!form.phone}><summary>Private account details</summary>
+                {step===0&&<><details open={!form.firstName||!form.lastName||!form.phone}><summary>Private listing contact</summary>
                 {field("firstName", "First name", true)}
                 {field("lastName", "Last name", true)}
                 {field("phone", "Phone number", true, "tel")}
