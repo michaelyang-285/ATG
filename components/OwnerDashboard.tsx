@@ -1,4 +1,5 @@
 "use client";
+import MySubmissions from "./MySubmissions";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
 import { useEffect, useState, FormEvent } from "react";
@@ -230,7 +231,7 @@ export default function OwnerDashboard() {
   const googleUser=session.user.identities?.some(identity=>identity.provider==="google");
   const meta=session.user.user_metadata || {};
   if(googleUser && loaded && !rows.length && !progress.length && !(meta.firstName && meta.lastName && meta.phone && meta.businessName)){
-    return <section className="signup-card"><Completion completed={0}/><h1>Finish your account</h1>
+    return <><MySubmissions key={session.user.id} session={session} /><section className="signup-card"><Completion completed={0}/><h1>Finish your account</h1>
       <p>Signed in with Google as <strong>{session.user.email}</strong>.{" "}
         <button type="button" className="text-action" disabled={busy} onClick={()=>run(async()=>{
           const {error}=await client.auth.signOut({scope:"local"});
@@ -254,11 +255,12 @@ export default function OwnerDashboard() {
         <label>Phone number<input name="phone" type="tel" autoComplete="tel" maxLength={240} required defaultValue={meta.phone||""}/></label>
         <label>Business or organization name<input name="businessName" autoComplete="organization" maxLength={240} required defaultValue={meta.businessName||""}/></label>
         <button className="primary-action" disabled={busy}>Next</button>{status}
-      </form></section>
+      </form></section></>
   }
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
+      <MySubmissions key={session.user.id} session={session} />
       {status}
       <h1>{form?"Build your listing":"Your listings"}</h1>
       <p>
