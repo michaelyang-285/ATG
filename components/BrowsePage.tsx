@@ -1,3 +1,5 @@
+import DirectoryLocation from "./DirectoryLocation";
+import { resolveArea } from "@/lib/directory/locations";
 import {categories as directoryCategories, services} from "@/lib/directory/categories";
 import {directoryPublic} from "@/lib/directory/public";
 import { DirectionIcon } from "@/components/DirectionIcon";
@@ -62,10 +64,20 @@ export default async function BrowsePage({
   if (filters.area)
     stories = stories.filter((s) => s.location === filters.area);
   const directoryBusinesses = ["directory","search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
+  const rawArea = typeof filters.area === "string" ? filters.area : "";
+  const matches = kind === "directory" ? resolveArea(rawArea) : null;
+  const countyLink = {pathname: "/directory", query: {category: filters.category, service: filters.service}};
   let businesses = directoryBusinesses
     .filter((b) => !filters.category || b.category === filters.category || b.categories?.includes(filters.category))
     .filter(b => !filters.service || b.services?.includes(filters.service))
-    .filter((b) => !filters.area || b.neighborhood?.split(",").some(city=>city.trim().toLowerCase()===filters.area.toLowerCase()));
+    .filter((b) => {
+      if (kind !== "directory") return !rawArea || b.neighborhood?.split(",").some(city => city.trim().toLowerCase() === rawArea.toLowerCase());
+      if (!matches) return true;
+      if (!matches.length) return false;
+      const areas = String(b.neighborhood || "").split(",").map(city => city.trim().toLowerCase());
+      return areas.some(city => ["gwinnett county", "all of gwinnett", "gwinnett"].includes(city)) ||
+        matches.some(city => areas.includes(city.toLowerCase()));
+    });
   let events = data.events;
   if (kind === "search") {
     const term = query.toLocaleLowerCase();
@@ -154,13 +166,18 @@ export default async function BrowsePage({
         <>
           <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" action="/directory">
             <label>Category<select name="category" defaultValue={filters.category||""}><option value="">All categories</option>{Object.entries(directoryCategories).map(([group,items])=><optgroup label={group} key={group}>{items.map(v=><option key={v}>{v}</option>)}</optgroup>)}{Array.from(new Set(directoryBusinesses.map(b=>b.category).filter(c=>c&&!Object.values(directoryCategories).flat().includes(c)))).map(c=><option key={c}>{c}</option>)}</select></label>
-            <label>City or area<input name="area" defaultValue={filters.area||""} placeholder="e.g. Lawrenceville"/></label>
+            <DirectoryLocation key={rawArea} initial={rawArea}/>
             <label>Service<select name="service" defaultValue={filters.service||""}><option value="">Any service option</option>{services.map(v=><option key={v}>{v}</option>)}</select></label>
             <button className="button button-orange">Find listings</button></form>
             <nav className="filter-links" aria-label="Mobile services">{["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={"/directory?category="+encodeURIComponent(c)+"&service=Mobile"}>Mobile {c}</Link>)}</nav>
             <div className="directory-join"><Link className="button" href="/directory/submit">Add your listing</Link><Link href="/directory/manage?mode=signin">Manage my listings</Link></div>
           </section>
-          {!businesses.length && (
+          {matches && matches.length > 1 && <nav className="filter-links" aria-label="Cities in this ZIP">Narrow by city {matches.map(city => <Link key={city} href={{pathname: "/directory", query: {...countyLink.query, area: city}}}>{city}</Link>)}</nav>}
+          {matches?.length === 0 ? (
+            <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{rawArea}” to a local city or ZIP. <Link href={countyLink}>Search all of Gwinnett</Link></EmptyState>
+          ) : matches && !businesses.length ? (
+            <EmptyState title="No listings match this search yet."><Link href={countyLink}>Search all of Gwinnett</Link></EmptyState>
+          ) : !businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
               Independent restaurants, beauty professionals, and local services
               will be listed here.{" "}
