@@ -1,0 +1,36 @@
+import {cache} from "react";
+import {publication, type Business, imageUrl, safeUrl} from "@/lib/publication";
+import {directoryPublic} from "./public";
+import {categories} from "./categories";
+
+type Listing = Business & {
+  hours?: string; publicPhone?: string; publicEmail?: string;
+  booking?: string; social?: string; gallery?: string[];
+};
+export const getListing = cache(async (slug: string): Promise<Listing | null> => {
+  const local = /^local-([a-f0-9-]{36})$/.exec(slug);
+  if (local) return (await directoryPublic(local[1]))[0] ?? null;
+  return publication.fetch('*[_type=="business" && slug.current==$slug][0]{_id,name,"slug":slug.current,category,neighborhood,summary,address,url,image}', {slug}, {next:{revalidate:60}});
+});
+const types: Record<string,string> = {
+  Coffee:"CafeOrCoffeeShop", "Cafés":"CafeOrCoffeeShop", Restaurants:"Restaurant", Bakers:"Bakery",
+  "Hair Salons":"HairSalon", Barbers:"HairSalon", Nails:"NailSalon", Mechanics:"AutoRepair",
+  Churches:"Church", Mosques:"Mosque", Synagogues:"Synagogue", Temples:"PlaceOfWorship",
+  "Other Faith Communities":"ReligiousOrganization", Nonprofits:"Organization", Libraries:"Library",
+  Plumbing:"Plumber", Electrical:"Electrician", Dentists:"Dentist", Veterinarians:"VeterinaryCare"
+};
+export const listingPath = (slug:string) => "/directory/" + encodeURIComponent(slug);
+export const listingPhoto = (b:Listing) => safeUrl(b.logo) || imageUrl(b.image) || safeUrl(b.gallery?.[0]);
+export function listingSchema(b:Listing) {
+  const url = "https://allthingsgwinnett.com" + listingPath(b.slug);
+  const category = b.category || "";
+  const type = types[category] || (categories.Community.includes(category) ? "Organization" :
+    categories["Beauty & Personal Care"].includes(category) ? "HealthAndBeautyBusiness" : "LocalBusiness");
+  const areas = b.neighborhood?.split(",").map(v=>v.trim()).filter(Boolean);
+  return {"@context":"https://schema.org","@type":"WebPage","@id":url,url,name:b.name,
+    mainEntity:{"@type":type,"@id":url+"#listing",name:b.name,description:b.summary||undefined,
+      url:safeUrl(b.url)||url,image:listingPhoto(b)||undefined,logo:safeUrl(b.logo)||undefined,
+      telephone:b.publicPhone||undefined,email:b.publicEmail||undefined,address:b.address||undefined,
+      areaServed:["Church","Mosque","Synagogue","PlaceOfWorship"].includes(type)?undefined:areas,
+      sameAs:safeUrl(b.social)||undefined}};
+}
