@@ -36,6 +36,14 @@ type Row = {
   draft: Partial<Draft>;
 };
 const sections=["Business basics","Service area","Contact & links","Photos","Review"];
+function Completion({completed}:{completed:number}) {
+  const total=sections.length+1;
+  const percent=Math.round(100*completed/total);
+  return <div className="listing-completion">
+    <div><span>{completed===total?"Listing details complete":`Step ${completed+1} of ${total}`}</span><strong>{percent}% complete</strong></div>
+    <progress aria-label="Listing setup completion" max={100} value={percent}>{percent}%</progress>
+  </div>;
+}
 type Progress={listing_id:string,step:number,fields:Draft};
 const labels: Record<string, string> = {
   unpaid: "Awaiting $3 payment",
@@ -222,7 +230,7 @@ export default function OwnerDashboard() {
       <section className="signup-layout"><aside className="signup-intro"><a href="/directory">← Directory</a>
       <h1>{signin?"Welcome back.":"Get listed in Gwinnett."}</h1><p>{signin?"Pick up where you left off or manage a published listing.":"Help neighbors find your business, services, or organization."}</p>
       <p className="fee-note">Free to create an account. The one-time $3 listing fee comes at the end.</p></aside>
-      <div className="signup-card">{sent?<><h2>Check your inbox</h2><p>Open the link sent to <strong>{email}</strong> to continue.</p><button onClick={()=>setSent(false)}>Change email or resend</button></>:<>
+      <div className="signup-card">{!signin&&<Completion completed={0}/>}{sent?<><h2>Check your inbox</h2><p>Open the link sent to <strong>{email}</strong> to continue.</p><button onClick={()=>setSent(false)}>Change email or resend</button></>:<>
       <h2>{signin?"Sign in":"Create your account"}</h2>
       {googleEnabled && <><style jsx>{`
         :global(.directory-owner) button.google-auth {
@@ -246,7 +254,7 @@ export default function OwnerDashboard() {
           <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
           <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"/>
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        </svg><span>Continue with Google</span></button><p>Or continue with email</p></>}<form onSubmit={e=>{e.preventDefault();run(async()=>{await api("login",{email,...(signin?{}:{account})});setSent(true)})}}>
+        </svg><span>Continue with Google</span></button><p className="auth-divider">or use email</p></>}<form onSubmit={e=>{e.preventDefault();run(async()=>{await api("login",{email,...(signin?{}:{account})});setSent(true)})}}>
       <div className="account-grid">{([["firstName","First name","given-name","text"],["lastName","Last name","family-name","text"],["email","Email address","email","email"],["phone","Phone number","tel","tel"],["name","Business or organization name","organization","text"]] as const).filter(([k])=>!signin||k==="email").map(([k,label,auto,type])=><label key={k} className={k==="firstName"||k==="lastName"?"":"wide"}>{label}<input required autoComplete={auto} type={type} maxLength={k==="email"?254:240} value={k==="email"?email:account[k]} onChange={e=>k==="email"?setEmail(e.target.value):setAccount({...account,[k]:e.target.value})}/></label>)}</div>
       {!signin&&<p className="quiet">Your name, phone, and email stay private. You’ll choose public contact details later.</p>}
       <button className="primary-action" disabled={busy}>{busy?"Sending…":signin?"Email me a sign-in link":"Create account"}</button></form>
@@ -255,7 +263,7 @@ export default function OwnerDashboard() {
   const googleUser=session.user.identities?.some(identity=>identity.provider==="google");
   const meta=session.user.user_metadata || {};
   if(googleUser && loaded && !rows.length && !progress.length && !(meta.firstName && meta.lastName && meta.phone && meta.businessName)){
-    return <section className="signup-card"><h1>Finish your account</h1>
+    return <section className="signup-card"><Completion completed={0}/><h1>Finish your account</h1>
       <p>Signed in with Google as {session.user.email}. Confirm your details to start your listing.</p>
       <form onSubmit={e=>{e.preventDefault();const fields=new FormData(e.currentTarget);run(async()=>{
         const data=Object.fromEntries(["firstName","lastName","phone","businessName"].map(key=>[key,String(fields.get(key)||"").trim()]));
@@ -296,11 +304,11 @@ export default function OwnerDashboard() {
           <button disabled={busy} onClick={() => run(refresh)}>
             Refresh status
           </button>
-          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}><h2>{p.fields.name||"New listing"}</h2><p>Draft · {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button></article>)}
+          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}><h2>{p.fields.name||"New listing"}</h2><Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button></article>)}
           {rows.map((r) => (
             <article key={r.id}>
               <h2>{r.draft.name}</h2>
-              <p>{labels[r.status]}</p>
+              <p>{labels[r.status]}</p>{r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
               {r.review_note && <p>{r.review_note}</p>}
               <button onClick={() => edit(r)}>Edit listing</button>{" "}
               {r.status === "unpaid" && (
@@ -358,11 +366,11 @@ export default function OwnerDashboard() {
           )}
         </>
       ) : (
-        <form className="listing-wizard" onSubmit={submit}><p>Step {step+1} of {sections.length}</p><progress max={sections.length} value={step+1} aria-label="Listing progress"/><h2>{sections[step]}</h2>
+        <form className="listing-wizard" onSubmit={submit}><Completion completed={step+1}/><h2>{sections[step]}</h2>
           <fieldset disabled={busy}>
             {step===4 ? (
               <>
-                <h2>Public listing preview</h2>
+                <p className="quiet">Here’s what neighbors will see in the directory.</p>
                 <ListingPreview data={form} />
 
               </>
@@ -391,7 +399,7 @@ export default function OwnerDashboard() {
                     value={form.category}
                     onChange={(e) => change("category", e.target.value)}
                   >
-                    <option value="">Choose a category</option>
+                    <option value="">Select your primary category</option>
                     {Object.entries(categories).map(([group, items]) => (
                       <optgroup key={group} label={group}>
                         {items.map((v) => (
@@ -468,9 +476,9 @@ export default function OwnerDashboard() {
                 {field("url", "Website", false, "url")}
                 {field("booking", "Booking or ordering link", false, "url")}
                 {field("social", "Social profile", false, "url")}
-                </>}{step===3&&<><p>Add a logo and photos, or continue without them.</p>
+                </>}{step===3&&<><p>Logo and photos are optional. Choose a JPG, PNG, or WebP up to 2 MB.</p>
                 {(["logo", "gallery"] as const).map((k) => (
-                  <section key={k}>
+                  <section key={k} className="upload-panel">
                     <label>
                       {k === "logo"
                         ? "Logo or profile photo"
