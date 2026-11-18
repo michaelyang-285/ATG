@@ -96,6 +96,7 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
             height="86"
           />
         </Link>
+        <Link style={{marginInlineStart:"auto",whiteSpace:"nowrap"}} className="text-link" href="/directory/manage?mode=signin">Sign in</Link>
         <div className="desktop-tools">
           <Search id="desktop-search" />
           <Link className="button button-orange" href="/newsletter">

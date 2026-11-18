@@ -1,3 +1,4 @@
+import NewsletterSignup from "./NewsletterSignup";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import Link from "next/link";
 import Image from "next/image";
@@ -43,8 +44,7 @@ export function StoryPreview({ story }: { story: Story }) {
     </article>
   );
 }
-export function Newsletter({ url }: { url?: string }) {
-  const href = safeUrl(url);
+export function Newsletter(_props: { url?: string }) {
   return (
     <section
       className="newsletter"
@@ -55,18 +55,7 @@ export function Newsletter({ url }: { url?: string }) {
         <h2 id="newsletter-heading">Get Gwinnett in your inbox.</h2>
         <p>Good food. Local plans. Changes worth paying attention to.</p>
       </div>
-      {href ? (
-        <a href={href} className="button button-ink">
-          Sign me up
-        </a>
-      ) : (
-        <div className="newsletter-pending">
-          <p>Signup is opening soon.</p>
-          <a href="https://www.facebook.com/groups/allthingsgwinnett">
-            Join the conversation on Facebook <DirectionIcon />
-          </a>
-        </div>
-      )}
+      <NewsletterSignup />
     </section>
   );
 }

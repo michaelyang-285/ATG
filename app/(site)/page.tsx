@@ -1,9 +1,10 @@
 import { DirectionIcon } from "@/components/DirectionIcon";
+import "./home.css";
+import { facebookGroup } from "@/lib/gwinnett";
 import Link from "next/link";
 import {
   getPublication,
   isGuide,
-  sectionOf,
   storyHref,
   storyLabel,
 } from "@/lib/publication";
@@ -26,18 +27,16 @@ export default async function HomePage() {
     .slice(0, 2);
   return (
     <main id="main" className="site-width homepage">
-      <section
-        className="publication-intro"
-        aria-label="About All Things Gwinnett"
-      >
-        <p className="tagline">Migos. Food. Traffic.</p>
-        <p>
-          An independent guide to Gwinnett’s food, culture, and everyday life.
-        </p>
-        <Link className="mobile-newsletter-link" href="/newsletter">
-          Get the newsletter
-        </Link>
+      <section className="home-welcome">
+        <div><h1>What’s happening in Gwinnett?</h1>
+        <p>Find a weekend plan, a new place to eat, or a local business your neighbors recommend.</p>
+        <div className="home-actions"><Link className="button button-orange" href="/events">Explore events</Link>
+        <Link className="text-link" href="/directory">Find a local business <DirectionIcon /></Link></div></div>
+        <aside className="home-community"><h2>Ask your Gwinnett neighbors</h2>
+        <p>Join <strong>39k+ members</strong> in the All Things Gwinnett Facebook group. Ask who cuts great locs, where to grab lunch in Duluth, or what’s open nearby.</p>
+        <a className="text-link" href={facebookGroup}>Join the Facebook group <DirectionIcon /></a></aside>
       </section>
+      <Newsletter url={settings.newsletterUrl} />
       <div className="lead-layout">
         <section className="lead-story" aria-label="Featured story">
           {featured ? (
@@ -45,9 +44,7 @@ export default async function HomePage() {
               <Link href={storyHref(featured)} tabIndex={-1} aria-hidden="true">
                 <StoryImage story={featured} priority />
               </Link>
-              <h1>
-                <Link href={storyHref(featured)}>{featured.title}</Link>
-              </h1>
+              <h2><Link href={storyHref(featured)}>{featured.title}</Link></h2>
               <p className="story-label">
                 {storyLabel(featured)}
                 {isGuide(featured) ? " · Guide" : ""}
@@ -65,7 +62,7 @@ export default async function HomePage() {
               <div className="launch-art" aria-hidden="true">
                 <img src="/brand/logo.svg" alt="" width="360" height="120" />
               </div>
-              <h1>Good stories start close to home.</h1>
+              <h2>Good stories start close to home.</h2>
               <p className="lead-deck">
                 We’re getting our first local stories and guides ready. Until
                 then, the conversation is happening in our Facebook group.
@@ -134,27 +131,11 @@ export default async function HomePage() {
           )}
         </div>
       </section>
-      <section className="utility-row">
-        <h2>Make a local plan</h2>
-        <div>
-          {stories.some(
-            (s) => sectionOf(s) === "things-to-do" && isGuide(s),
-          ) && <Link href="/things-to-do?format=guide">Weekend guides</Link>}
-          <Link href="/events">
-            Browse events <DirectionIcon />
-          </Link>
-        </div>
+      <section className="home-business"><div><h2>Reach Gwinnett locals</h2>
+        <p>Put your business in the directory or introduce it to the ATG community through a sponsorship.</p></div>
+        <div className="home-actions"><Link className="button button-ink" href="/advertise">Advertise with ATG</Link>
+        <Link className="text-link" href="/directory/submit">List your business <DirectionIcon /></Link></div>
       </section>
-      <section className="utility-row">
-        <h2>Find an independent business</h2>
-        <div>
-          <Link href="/directory">
-            Browse the directory <DirectionIcon />
-          </Link>
-          <Link href="/directory/submit">List your business</Link>
-        </div>
-      </section>
-      <Newsletter url={settings.newsletterUrl} />
     </main>
   );
 }

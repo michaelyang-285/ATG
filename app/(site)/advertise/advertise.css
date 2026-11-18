@@ -1,0 +1,22 @@
+.ad-page { padding-bottom: 3rem }
+.ad-page h1 { max-width: 19ch; line-height: 1.03; letter-spacing: -.045em }
+.ad-page p { max-width: 66ch; line-height: 1.6; margin: .7rem 0 1.1rem }
+.ad-hero { background: #faf6ef; border-top: 6px solid #ff4d22; padding: clamp(1.5rem,5vw,4rem) }
+.ad-hero p { font-size: 1.17rem }
+.ad-page section { margin: clamp(2rem,5vw,4rem) 0 }
+.ad-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin: 1rem 0 }
+.ad-stats div { display: flex; flex-direction: column-reverse; border-top: 2px solid currentColor; padding-top: .5rem }
+.ad-stats dd { font-size: clamp(2rem,4vw,4rem); font-weight: 800; letter-spacing: -.05em; margin: 0; line-height: 1.2 }
+.ad-invite { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; padding:clamp(1rem,3vw,2rem); background:#faf6ef }
+.ad-invite p { margin-bottom:0 }
+.ad-page figure { margin: 1.5rem 0 }
+.ad-page figcaption,.ad-page h3 { font-weight: 700 }
+.ad-cities { list-style:none; padding:0; max-width:52rem; margin:1rem 0 }
+.ad-cities li { display:grid; grid-template-columns:minmax(7.5rem,10rem) 1fr 3.2rem; align-items:center; gap:.7rem; padding:.32rem 0 }
+.ad-cities strong { text-align:right; font-variant-numeric:tabular-nums }
+.ad-track { height:.65rem; background:#efeae2 }
+.ad-track i { display:block; height:100%; background:#ce411e }
+.ad-page small { display:block; max-width:85ch; color:#56514b }
+.ad-page #advertising { scroll-margin-top:6rem; border-top:2px solid; padding-top:1.5rem }
+.ad-page h3 { margin-top:2rem }
+@media(max-width:640px) { .ad-stats { grid-template-columns:repeat(2,1fr) } .ad-cities li { grid-template-columns:7.4rem 1fr 3rem; gap:.4rem } }

@@ -76,6 +76,7 @@ export default function OwnerDashboard() {
     [notes, setNotes] = useState<Record<string, string>>({});
   useEffect(() => {
     setSignin(new URLSearchParams(location.search).get("mode")==="signin");
+    if (new URLSearchParams(window.location.search).get("mode") === "signin") setSignin(true);
     if (!client) return;
     const controller = new AbortController();
     fetch(process.env.NEXT_PUBLIC_SUPABASE_URL + "/auth/v1/settings", {
