@@ -2,7 +2,7 @@ import DirectorySocialIcon from "@/components/DirectorySocialIcon";
 import {networks} from "@/lib/directory/social";
 import {notFound} from "next/navigation";
 import Link from "next/link";
-import {safeUrl} from "@/lib/publication";
+import {publication,PUBLISHED,isGuide,storyHref,type Story,safeUrl} from "@/lib/publication";
 import {getListing, listingPhoto, listingPath, listingSchema} from "@/lib/directory/profile";
 import "../directory.css";
 export const revalidate = 60;
@@ -38,6 +38,11 @@ export default async function Page({params}:Props) {
   const b: Awaited<ReturnType<typeof getListing>> = demo ? sample : await getListing(params.slug);
   if (!b) notFound();
   const photo = demo ? sample.logo : listingPhoto(b);
+  const listingKey = (b.slug === "local-"+b._id ? "local:" : "sanity:") + b._id;
+  const coverage = demo ? [] : await publication.fetch<Story[]>(
+    `*[${PUBLISHED} && $listingKey in relatedDirectoryListings] | order(publishedAt desc){_id,title,"slug":slug.current,format,"categories":categories[]->{title}}`,
+    {listingKey}, {next:{revalidate:60}}
+  );
   const website = safeUrl(b.url);
   const destination = b.address?.trim() ? encodeURIComponent(b.address.trim()) : "";
   const socials = networks.flatMap(n=>{
@@ -55,6 +60,12 @@ export default async function Page({params}:Props) {
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>
       <div className="listing-tags">{tags.map(tag=><span key={tag}>{tag}</span>)}</div>
+      {coverage.length>0 && <section className="directory-coverage"><h2>On All Things Gwinnett</h2>
+        <ul>{coverage.map(piece=><li key={piece._id}><Link href={storyHref(piece)}>
+          <span>{isGuide(piece) ? "Featured in an ATG Guide" : "Mentioned on ATG"}</span>
+          <strong>{piece.title}</strong>
+        </Link></li>)}</ul>
+      </section>}
       {b.gallery?.map((src,index)=><img className="listing-photo" key={src} src={src} alt={demo ? ["Café interior","Freshly poured latte"][index] : b.name+" work photo"} loading="lazy"/>)}
     </section><aside><h2>Listing details</h2>
       {[[ "City or service area",b.neighborhood],["Address",b.address],["Hours",b.hours]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
