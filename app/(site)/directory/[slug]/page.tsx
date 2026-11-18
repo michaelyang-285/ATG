@@ -44,6 +44,7 @@ export default async function Page({params}:Props) {
     {listingKey}, {next:{revalidate:60}}
   );
   const website = safeUrl(b.url);
+  const instagramWebsite = website && /^(?:[a-z0-9-]+\.)*(?:instagram\.com|instagr\.am)$/i.test(new URL(website).hostname.replace(/\.$/, ""));
   const destination = b.address?.trim() ? encodeURIComponent(b.address.trim()) : "";
   const socials = networks.flatMap(n=>{
     const href = safeUrl(b[n.key]);
@@ -56,7 +57,7 @@ export default async function Page({params}:Props) {
     <header className="listing-heading">
       {photo && <img src={photo} width="112" height="112" alt=""/>}
       <div><p className="story-label">{b.category || "Community directory"}</p><h1>{b.name}</h1>
-      {b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>Visit website ↗</a>}</div>
+      {b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>{instagramWebsite ? "Go to Instagram" : "Visit website"} <span aria-hidden="true">↗</span></a>}</div>
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>
       <div className="listing-tags">{tags.map(tag=><span key={tag}>{tag}</span>)}</div>
