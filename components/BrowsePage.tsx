@@ -1,6 +1,6 @@
 import DirectoryLocation from "./DirectoryLocation";
 import { resolveArea } from "@/lib/directory/locations";
-import {categories as directoryCategories, services} from "@/lib/directory/categories";
+import {categories as directoryCategories} from "@/lib/directory/categories";
 import {directoryPublic} from "@/lib/directory/public";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import Link from "next/link";
@@ -52,7 +52,7 @@ export default async function BrowsePage({
   filters?: Filters;
 }) {
   const data = await getPublication(),
-    query = (filters.q || "").trim().slice(0, 100);
+    query = (typeof filters.q === "string" ? filters.q : "").trim().slice(0, 100);
   let stories = data.stories;
   if (sections.some((x) => x.slug === kind))
     stories = stories.filter((s) => sectionOf(s) === kind);
@@ -66,7 +66,7 @@ export default async function BrowsePage({
   const directoryBusinesses = ["directory","search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
   const rawArea = typeof filters.area === "string" ? filters.area : "";
   const matches = kind === "directory" ? resolveArea(rawArea) : null;
-  const countyLink = {pathname: "/directory", query: {category: filters.category, service: filters.service}};
+  const countyLink = {pathname: "/directory", query: {q: query || undefined, category: filters.category, service: filters.service}};
   let businesses = directoryBusinesses
     .filter((b) => !filters.category || b.category === filters.category || b.categories?.includes(filters.category))
     .filter(b => !filters.service || b.services?.includes(filters.service))
@@ -78,6 +78,13 @@ export default async function BrowsePage({
       return areas.some(city => ["gwinnett county", "all of gwinnett", "gwinnett"].includes(city)) ||
         matches.some(city => areas.includes(city.toLowerCase()));
     });
+  if (kind === "directory" && query) {
+    const words = query.toLowerCase().split(/\s+/);
+    businesses = businesses.filter(b => {
+      const searchable = [b.name, b.summary, b.category, b.neighborhood, ...(b.categories || []), ...(b.services || [])].join(" ").toLowerCase();
+      return words.every(word => searchable.includes(word));
+    });
+  }
   let events = data.events;
   if (kind === "search") {
     const term = query.toLocaleLowerCase();
@@ -165,9 +172,9 @@ export default async function BrowsePage({
       {kind === "directory" && (
         <>
           <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" action="/directory">
+            <label>Keyword<input type="search" name="q" defaultValue={query} maxLength={100} placeholder="Business name, product or service"/></label>
             <label>Category<select name="category" defaultValue={filters.category||""}><option value="">All categories</option>{Object.entries(directoryCategories).map(([group,items])=><optgroup label={group} key={group}>{items.map(v=><option key={v}>{v}</option>)}</optgroup>)}{Array.from(new Set(directoryBusinesses.map(b=>b.category).filter(c=>c&&!Object.values(directoryCategories).flat().includes(c)))).map(c=><option key={c}>{c}</option>)}</select></label>
             <DirectoryLocation key={rawArea} initial={rawArea}/>
-            <label>Service<select name="service" defaultValue={filters.service||""}><option value="">Any service option</option>{services.map(v=><option key={v}>{v}</option>)}</select></label>
             <button className="button button-orange">Find listings</button></form>
             <nav className="filter-links" aria-label="Mobile services">{["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={"/directory?category="+encodeURIComponent(c)+"&service=Mobile"}>Mobile {c}</Link>)}</nav>
             <div className="directory-join"><Link className="button" href="/directory/submit">Add your listing</Link><Link href="/directory/manage?mode=signin">Manage my listings</Link></div>
@@ -175,8 +182,8 @@ export default async function BrowsePage({
           {matches && matches.length > 1 && <nav className="filter-links" aria-label="Cities in this ZIP">Narrow by city {matches.map(city => <Link key={city} href={{pathname: "/directory", query: {...countyLink.query, area: city}}}>{city}</Link>)}</nav>}
           {matches?.length === 0 ? (
             <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{rawArea}” to a local city or ZIP. <Link href={countyLink}>Search all of Gwinnett</Link></EmptyState>
-          ) : matches && !businesses.length ? (
-            <EmptyState title="No listings match this search yet."><Link href={countyLink}>Search all of Gwinnett</Link></EmptyState>
+          ) : (matches || query || filters.category || filters.service) && !businesses.length ? (
+            <EmptyState title="No listings match this search yet."><Link href="/directory">Clear filters</Link></EmptyState>
           ) : !businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
               Independent restaurants, beauty professionals, and local services
