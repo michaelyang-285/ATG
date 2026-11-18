@@ -8,12 +8,11 @@ export default function Manage() {
   return (
     <main id="main" className="site-width page-content directory-owner">
       <BotIdClient
-        protect={["login", "owner", "upload", "checkout"].map((path) => ({
+        protect={["login", "owner", "progress", "upload", "checkout"].map((path) => ({
           path: "/api/directory/" + path,
           method: "POST" as const,
         }))}
       />
-      <h1>Manage your listings</h1>
       <OwnerDashboard />
     </main>
   );

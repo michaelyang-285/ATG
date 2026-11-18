@@ -10,7 +10,9 @@ export function GET(req: Request) {
       .eq("owner_id", user.id)
       .order("id");
     if (error) throw error;
-    return {
+    const progress=await db().from("directory_progress").select("listing_id,fields,step").eq("owner_id",user.id).order("updated_at",{ascending:false});
+    if(progress.error)throw progress.error;
+    return {progress:progress.data,
       rows: data,
       moderator: user.app_metadata.directory_admin === true,
     };
@@ -38,12 +40,13 @@ export function POST(req: Request) {
           .select("id")
           .maybeSingle()
       : await table
-          .insert({ ...values, owner_id: user.id })
+          .insert({ ...values, ...(body.listingId?{id:body.listingId}:{}),owner_id: user.id })
           .select("id")
           .single();
     if (result.error) throw result.error;
     if (!result.data)
       throw new Failure(409, "This listing changed. Reload before editing.");
+    if(body.listingId)await db().from("directory_progress").delete().eq("owner_id",user.id).eq("listing_id",body.listingId);
     return result.data;
   });
 }

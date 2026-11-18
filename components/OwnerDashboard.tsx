@@ -3,6 +3,7 @@ import { useEffect, useState, FormEvent } from "react";
 import { createClient, Session } from "@supabase/supabase-js";
 import { categories, services } from "@/lib/directory/categories";
 const blank = {
+  listingId: "",
   id: "",
   revision: 0,
   status: "",
@@ -34,6 +35,8 @@ type Row = {
   contact: Partial<Draft>;
   draft: Partial<Draft>;
 };
+const sections=["Business basics","Service area","Contact & links","Photos","Review"];
+type Progress={listing_id:string,step:number,fields:Draft};
 const labels: Record<string, string> = {
   unpaid: "Awaiting $3 payment",
   review: "In review",
@@ -56,11 +59,17 @@ export default function OwnerDashboard() {
     [rows, setRows] = useState<Row[]>([]),
     [queue, setQueue] = useState<Row[]>([]);
   const [form, setForm] = useState<Draft | null>(null),
-    [preview, setPreview] = useState(false),
+    [step,setStep]=useState(0),
+    [progress,setProgress]=useState<Progress[]>([]),
+    [signin,setSignin]=useState(false),
+    [sent,setSent]=useState(false),
+    [loaded,setLoaded]=useState(false),
+    [account,setAccount]=useState({firstName:"",lastName:"",phone:"",name:""}),
     [msg, setMsg] = useState(""),
     [busy, setBusy] = useState(false),
     [notes, setNotes] = useState<Record<string, string>>({});
   useEffect(() => {
+    setSignin(new URLSearchParams(location.search).get("mode")==="signin");
     if (!client) return;
     const { data } = client.auth.onAuthStateChange((_, s) => setSession(s));
     return () => data.subscription.unsubscribe();
@@ -83,12 +92,13 @@ export default function OwnerDashboard() {
   async function refresh() {
     const data = await api("owner");
     setRows(data.rows);
+    setProgress(data.progress);
     setQueue(data.moderator ? await api("review") : []);
   }
   useEffect(() => {
     let active = true;
     if (!session) {
-      setRows([]);
+      setLoaded(false);setProgress([]);setRows([]);
       setQueue([]);
       setForm(null);
       return;
@@ -96,7 +106,11 @@ export default function OwnerDashboard() {
     api("owner")
       .then(async (data) => {
         if (!active) return;
-        setRows(data.rows);
+        setRows(data.rows);setProgress(data.progress);setLoaded(true);
+        if(!data.rows.length){
+          if(data.progress.length===1)resume(data.progress[0]);
+          else if(!data.progress.length && session.user.user_metadata?.firstName)edit();
+        }
         if (data.moderator) {
           const q = await api("review");
           if (active) setQueue(q);
@@ -108,7 +122,7 @@ export default function OwnerDashboard() {
     return () => {
       active = false;
     };
-  }, [session?.access_token]);
+  }, [session?.user.id]);
   async function run(fn: () => Promise<void>) {
     setBusy(true);
     setMsg("");
@@ -120,20 +134,24 @@ export default function OwnerDashboard() {
       setBusy(false);
     }
   }
+  function resume(saved:Progress){setForm(saved.fields);setStep(saved.step);setMsg("")}
   function edit(row?: Row) {
+    const existing=row&&progress.find(p=>p.listing_id===row.id&&p.fields.revision===row.revision);
+    if(existing){resume(existing);return}
+    const m=session?.user.user_metadata||{};
     setForm(
       row
         ? {
             ...blank,
             ...row.contact,
             ...row.draft,
-            id: row.id,
+            id: row.id,listingId:row.id,
             revision: row.revision,
             status: row.status,
           }
-        : { ...blank },
+        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||"",lastName:m.lastName||"",phone:m.phone||"",name:m.name||"" },
     );
-    setPreview(false);
+    setStep(0);
     setMsg("");
   }
   function change(k: keyof Draft, v: unknown) {
@@ -174,57 +192,40 @@ export default function OwnerDashboard() {
   }
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!preview) {
-      setPreview(true);
-      return;
-    }
-    await run(async () => {
-      await api("owner", form);
-      setForm(null);
-      await refresh();
-      setMsg(
-        form.status && form.status !== "unpaid"
-          ? "Edits submitted for review."
-          : "Listing saved. Complete the $3 payment below.",
-      );
+    await run(async()=>{
+      if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
+      const result=await api("owner",form);
+      setForm(null);await refresh();
+      if(!form.status || form.status==="unpaid"){
+        const checkout=await api("checkout",{id:result.id});
+        window.location.assign(checkout.url);
+      }else setMsg("Edits submitted for review.");
     });
+  }
+  async function checkpoint(next:number){
+    await api("progress",{listingId:form.listingId,step:next,fields:form});
+    setProgress(old=>[{listing_id:form.listingId,step:next,fields:form},...old.filter(p=>p.listing_id!==form.listingId)]);
   }
   const status = <p aria-live="polite">{msg}</p>;
   if (!client)
     return <p>Directory signup is being set up. Please check back soon.</p>;
   if (!session)
     return (
-      <>
-        <p>
-          Sign in by email to add or update a Gwinnett listing. New listings
-          cost $3 once. Edits are free.
-        </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            run(async () => {
-              await api("login", { email });
-              setMsg("Check your email for a sign-in link.");
-            });
-          }}
-        >
-          <label>
-            Email address
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </label>
-          <button disabled={busy}>Email me a sign-in link</button>
-        </form>
-        {status}
-      </>
+      <section className="signup-layout"><aside className="signup-intro"><a href="/directory">← Directory</a>
+      <h1>{signin?"Welcome back.":"Get listed in Gwinnett."}</h1><p>{signin?"Pick up where you left off or manage a published listing.":"Help neighbors find your business, services, or organization."}</p>
+      <p className="fee-note">Free to create an account. The one-time $3 listing fee comes at the end.</p></aside>
+      <div className="signup-card">{sent?<><h2>Check your inbox</h2><p>Open the link sent to <strong>{email}</strong> to continue.</p><button onClick={()=>setSent(false)}>Change email or resend</button></>:<>
+      <h2>{signin?"Sign in":"Create your account"}</h2><form onSubmit={e=>{e.preventDefault();run(async()=>{await api("login",{email,...(signin?{}:{account})});setSent(true)})}}>
+      <div className="account-grid">{([["firstName","First name","given-name","text"],["lastName","Last name","family-name","text"],["email","Email address","email","email"],["phone","Phone number","tel","tel"],["name","Business or organization name","organization","text"]] as const).filter(([k])=>!signin||k==="email").map(([k,label,auto,type])=><label key={k} className={k==="firstName"||k==="lastName"?"":"wide"}>{label}<input required autoComplete={auto} type={type} maxLength={k==="email"?254:240} value={k==="email"?email:account[k]} onChange={e=>k==="email"?setEmail(e.target.value):setAccount({...account,[k]:e.target.value})}/></label>)}</div>
+      {!signin&&<p className="quiet">Your name, phone, and email stay private. You’ll choose public contact details later.</p>}
+      <button className="primary-action" disabled={busy}>{busy?"Sending…":signin?"Email me a sign-in link":"Create account"}</button></form>
+      <button className="text-action" onClick={()=>{setSignin(!signin);setMsg("")}}>{signin?"New here? Create an account":"Already have an account? Sign in"}</button></>}{status}</div></section>
     );
+  if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
       {status}
+      <h1>{form?"Build your listing":"Your listings"}</h1>
       <p>
         Signed in as {session.user.email} ·{" "}
         <button
@@ -245,6 +246,7 @@ export default function OwnerDashboard() {
           <button disabled={busy} onClick={() => run(refresh)}>
             Refresh status
           </button>
+          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}><h2>{p.fields.name||"New listing"}</h2><p>Draft · {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button></article>)}
           {rows.map((r) => (
             <article key={r.id}>
               <h2>{r.draft.name}</h2>
@@ -306,24 +308,22 @@ export default function OwnerDashboard() {
           )}
         </>
       ) : (
-        <form onSubmit={submit}>
+        <form className="listing-wizard" onSubmit={submit}><p>Step {step+1} of {sections.length}</p><progress max={sections.length} value={step+1} aria-label="Listing progress"/><h2>{sections[step]}</h2>
           <fieldset disabled={busy}>
-            {preview ? (
+            {step===4 ? (
               <>
                 <h2>Public listing preview</h2>
                 <ListingPreview data={form} />
-                <button type="button" onClick={() => setPreview(false)}>
-                  Back to editing
-                </button>
+
               </>
             ) : (
               <>
-                <h2>Your private contact information</h2>
+                {step===0&&<><details open={!form.firstName||!form.lastName||!form.phone}><summary>Private account details</summary>
                 {field("firstName", "First name", true)}
                 {field("lastName", "Last name", true)}
                 {field("phone", "Phone number", true, "tel")}
                 <p>Email · {session.user.email}</p>
-                <h2>Public listing</h2>
+                </details>
                 {field("name", "Business, organization, or working name", true)}
                 <label>
                   Description
@@ -373,7 +373,7 @@ export default function OwnerDashboard() {
                     </fieldset>
                   ))}
                 </details>
-                <fieldset>
+                </>}{step===1&&<><fieldset>
                   <legend>Service options</legend>
                   {services.map((v) => (
                     <label key={v}>
@@ -389,6 +389,7 @@ export default function OwnerDashboard() {
                 {field("neighborhood", "Cities or areas served", true)}
                 {field("address", "Public street address (optional)")}
                 {field("hours", "Hours or appointment availability")}
+                </>}{step===2&&<>
                 {field("publicPhone", "Public phone", false, "tel")}
                 <label>
                   <input
@@ -417,6 +418,7 @@ export default function OwnerDashboard() {
                 {field("url", "Website", false, "url")}
                 {field("booking", "Booking or ordering link", false, "url")}
                 {field("social", "Social profile", false, "url")}
+                </>}{step===3&&<><p>Add a logo and photos, or continue without them.</p>
                 {(["logo", "gallery"] as const).map((k) => (
                   <section key={k}>
                     <label>
@@ -461,19 +463,12 @@ export default function OwnerDashboard() {
                       </span>
                     ))}
                   </section>
-                ))}
+                ))}</>}
               </>
             )}
-            <button>
-              {preview
-                ? form.status && form.status !== "unpaid"
-                  ? "Submit edits for review"
-                  : "Save listing and continue"
-                : "Preview listing"}
-            </button>{" "}
-            <button type="button" onClick={() => setForm(null)}>
-              Cancel
-            </button>
+            <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>setStep(step-1)}>Back</button>}
+              <button className="primary-action">{busy?"Saving…":step<4?"Next":form.status&&form.status!=="unpaid"?"Submit edits for review":"Continue to payment · $3"}</button>
+              <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
         </form>
       )}

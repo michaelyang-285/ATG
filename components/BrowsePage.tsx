@@ -1,3 +1,4 @@
+import {categories as directoryCategories, services} from "@/lib/directory/categories";
 import {directoryPublic} from "@/lib/directory/public";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import Link from "next/link";
@@ -151,28 +152,14 @@ export default async function BrowsePage({
       )}
       {kind === "directory" && (
         <>
-          <nav className="filter-links" aria-label="Business categories">
-            <Link
-              href="/directory"
-              aria-current={!filters.category ? "page" : undefined}
-            >
-              All businesses
-            </Link>
-            {Array.from(
-              new Set(directoryBusinesses.flatMap((b) => [b.category,...(b.categories||[])]).filter(Boolean)),
-            ).map((c) => (
-              <Link
-                key={c}
-                href={`/directory?category=${encodeURIComponent(c!)}`}
-                aria-current={filters.category === c ? "page" : undefined}
-              >
-                {c}
-              </Link>
-            ))}
-            {["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={`/directory?category=${encodeURIComponent(c)}&service=Mobile`}>Mobile {c}</Link>)}
-            <Link href="/directory/submit">Add a listing</Link>
-            <Link href="/directory/manage">Manage my listings</Link>
-          </nav>
+          <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" action="/directory">
+            <label>Category<select name="category" defaultValue={filters.category||""}><option value="">All categories</option>{Object.entries(directoryCategories).map(([group,items])=><optgroup label={group} key={group}>{items.map(v=><option key={v}>{v}</option>)}</optgroup>)}{Array.from(new Set(directoryBusinesses.map(b=>b.category).filter(c=>c&&!Object.values(directoryCategories).flat().includes(c)))).map(c=><option key={c}>{c}</option>)}</select></label>
+            <label>City or area<input name="area" defaultValue={filters.area||""} placeholder="e.g. Lawrenceville"/></label>
+            <label>Service<select name="service" defaultValue={filters.service||""}><option value="">Any service option</option>{services.map(v=><option key={v}>{v}</option>)}</select></label>
+            <button className="button button-orange">Find listings</button></form>
+            <nav className="filter-links" aria-label="Mobile services">{["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={"/directory?category="+encodeURIComponent(c)+"&service=Mobile"}>Mobile {c}</Link>)}</nav>
+            <div className="directory-join"><Link className="button" href="/directory/submit">Add your listing</Link><Link href="/directory/manage?mode=signin">Manage my listings</Link></div>
+          </section>
           {!businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
               Independent restaurants, beauty professionals, and local services
