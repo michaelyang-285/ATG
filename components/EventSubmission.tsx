@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useMemo, type FormEvent } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
+import SignupCard, { Completion } from "./SignupCard";
 import { cities } from "@/lib/gwinnett";
 export default function EventSubmission() {
   const client = useMemo(() => {
@@ -17,8 +18,26 @@ export default function EventSubmission() {
     [cost, setCost] = useState("free"),
     [done, setDone] = useState(false),
     [requestId] = useState(() => globalThis.crypto.randomUUID());
+  const [signin, setSignin] = useState(false),
+    [sent, setSent] = useState(false),
+    [email, setEmail] = useState(""),
+    [account, setAccount] = useState({
+      firstName: "",
+      lastName: "",
+      phone: "",
+      name: "",
+    }),
+    [googleEnabled, setGoogleEnabled] = useState(false);
   useEffect(() => {
     if (!client) return;
+    const controller = new AbortController();
+    fetch(process.env.NEXT_PUBLIC_SUPABASE_URL + "/auth/v1/settings", {
+      headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
+      signal: controller.signal,
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((settings) => setGoogleEnabled(settings?.external?.google === true))
+      .catch(() => {});
     const { data } = client.auth.onAuthStateChange((_, s) => {
       setSession(s);
       setReady(true);
@@ -28,7 +47,10 @@ export default function EventSubmission() {
         ),
       );
     });
-    return () => data.subscription.unsubscribe();
+    return () => {
+      controller.abort();
+      data.subscription.unsubscribe();
+    };
   }, [client]);
   async function run(fn: () => Promise<void>) {
     setMessage("");
@@ -45,19 +67,7 @@ export default function EventSubmission() {
     ev.preventDefault();
     const data = Object.fromEntries(new FormData(ev.currentTarget));
     await run(async () => {
-      if (!session) {
-        const res = await fetch("/api/directory/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: data.email, eventSignup: true }),
-        });
-        const out = await res.json();
-        if (!res.ok) throw new Error(out.error);
-        setMessage(
-          "Check your email for a sign-in link to continue to your event.",
-        );
-        return;
-      }
+      if (!session) return;
       const res = await fetch("/api/events", {
         method: "POST",
         headers: {
@@ -86,6 +96,50 @@ export default function EventSubmission() {
       <p>Organizer accounts are unavailable here. Please try again later.</p>
     );
   if (!ready) return <p>Loading your account…</p>;
+  if (!session)
+    return (
+      <SignupCard
+        event
+        {...{
+          client,
+          signin,
+          setSignin,
+          sent,
+          setSent,
+          email,
+          setEmail,
+          googleEnabled,
+          busy,
+          account,
+          setAccount,
+          run,
+        }}
+        setMsg={setMessage}
+        status={<p role="status">{message}</p>}
+        sendEmail={async () => {
+          const res = await fetch("/api/directory/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email,
+              eventSignup: true,
+              ...(signin
+                ? {}
+                : {
+                    account: {
+                      firstName: account.firstName,
+                      lastName: account.lastName,
+                    },
+                  }),
+            }),
+          });
+          if (!res.ok)
+            throw Error(
+              (await res.json()).error || "Unable to send the sign-in link.",
+            );
+        }}
+      />
+    );
   if (done)
     return (
       <>
@@ -111,129 +165,97 @@ export default function EventSubmission() {
   }
   return (
     <form
-      className="event-form"
+      className={complete ? "event-form" : "signup-card"}
       key={session ? (complete ? "event" : "profile") : "signin"}
       onSubmit={submit}
     >
+      {!complete && <Completion completed={0} total={2} />}
+      <h1>{complete ? "Submit a Gwinnett event" : "Finish your account"}</h1>
       <fieldset disabled={busy}>
-        {!session ? (
+        <p>
+          Signed in as {session.user.email} ·{" "}
+          <button
+            type="button"
+            onClick={() =>
+              run(async () => {
+                const { error } = await client.auth.signOut({
+                  scope: "local",
+                });
+                if (error) throw error;
+                setSent(false);
+                setSignin(true);
+                setEmail("");
+                setAccount({
+                  firstName: "",
+                  lastName: "",
+                  phone: "",
+                  name: "",
+                });
+              })
+            }
+          >
+            Sign out
+          </button>
+        </p>
+        {!complete ? (
           <>
-            <h2>Sign in or create an account</h2>
-            <button
-              className="button"
-              type="button"
-              onClick={() =>
-                run(async () => {
-                  const { error } = await client.auth.signInWithOAuth({
-                    provider: "google",
-                    options: {
-                      redirectTo: location.origin + "/events/submit",
-                      queryParams: { prompt: "select_account" },
-                    },
-                  });
-                  if (error) throw error;
-                })
-              }
-            >
-              Continue with Google
-            </button>
-            {input("email", "Email address", "email")}
-            <button className="button button-orange">
-              Email me a sign-in link
-            </button>
+            {input("firstName", "First name")}
+            {input("lastName", "Last name")}
+            <button className="primary-action">Continue to event</button>
           </>
         ) : (
           <>
-            <p>
-              Signed in as {session.user.email} ·{" "}
-              <button
-                type="button"
-                onClick={() =>
-                  run(async () => {
-                    const { error } = await client.auth.signOut({
-                      scope: "local",
-                    });
-                    if (error) throw error;
-                  })
-                }
-              >
-                Sign out
-              </button>
-            </p>
-            {!complete ? (
-              <>
-                <h2>Create your organizer profile</h2>
-                {input("firstName", "First name")}
-                {input("lastName", "Last name")}
-                <button className="button button-orange">
-                  Continue to event
-                </button>
-              </>
-            ) : (
-              <>
-                <h2>Event details</h2>
-                {input("title", "Event name")}
-                {input("organizer", "Public organizer name")}
-                <label>
-                  Description
-                  <textarea name="summary" required maxLength={3000} />
-                </label>
-                {input("venue", "Venue")}
-                {input("street", "Street address")}
-                <label>
-                  City
-                  <select name="city" required defaultValue="">
-                    <option value="">Choose a city</option>
-                    {cities.map((c) => (
-                      <option key={c}>{c}</option>
-                    ))}
-                  </select>
-                </label>
-                {input("start", "Starts (Eastern time)", "datetime-local")}
-                {input(
-                  "end",
-                  "Ends (optional, Eastern time)",
-                  "datetime-local",
-                  false,
-                )}
-                <label>
-                  Repeats
-                  <select
-                    value={weekly ? "weekly" : "once"}
-                    onChange={(e) => setWeekly(e.target.value === "weekly")}
-                  >
-                    <option value="once">Once</option>
-                    <option value="weekly">Weekly</option>
-                  </select>
-                </label>
-                {weekly && input("until", "Repeat through", "date")}
-                <label>
-                  Admission
-                  <select
-                    value={cost}
-                    onChange={(e) => setCost(e.target.value)}
-                  >
-                    <option value="free">Free</option>
-                    <option value="paid">Paid</option>
-                  </select>
-                </label>
-                {cost === "paid" && (
-                  <label>
-                    Ticket price in USD (optional)
-                    <input name="price" type="number" min=".01" step=".01" />
-                  </label>
-                )}
-                {input(
-                  "url",
-                  "Event or ticket website (optional)",
-                  "url",
-                  false,
-                )}
-                <button className="button button-orange">
-                  Submit for review
-                </button>
-              </>
+            <h2>Event details</h2>
+            {input("title", "Event name")}
+            {input("organizer", "Public organizer name")}
+            <label>
+              Description
+              <textarea name="summary" required maxLength={3000} />
+            </label>
+            {input("venue", "Venue")}
+            {input("street", "Street address")}
+            <label>
+              City
+              <select name="city" required defaultValue="">
+                <option value="">Choose a city</option>
+                {cities.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+            {input("start", "Starts (Eastern time)", "datetime-local")}
+            {input(
+              "end",
+              "Ends (optional, Eastern time)",
+              "datetime-local",
+              false,
             )}
+            <label>
+              Repeats
+              <select
+                value={weekly ? "weekly" : "once"}
+                onChange={(e) => setWeekly(e.target.value === "weekly")}
+              >
+                <option value="once">Once</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </label>
+            {weekly && input("until", "Repeat through", "date")}
+            <label>
+              Admission
+              <select value={cost} onChange={(e) => setCost(e.target.value)}>
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </select>
+            </label>
+            {cost === "paid" && (
+              <label>
+                Ticket price in USD (optional)
+                <input name="price" type="number" min=".01" step=".01" />
+              </label>
+            )}
+            {input("url", "Event or ticket website (optional)", "url", false)}
+            <button className="button button-orange">Submit for review</button>
           </>
         )}
       </fieldset>
