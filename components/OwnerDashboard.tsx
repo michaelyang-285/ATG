@@ -2,7 +2,9 @@
 import { useEffect, useState, FormEvent } from "react";
 import { createClient, Session } from "@supabase/supabase-js";
 import { categories, services } from "@/lib/directory/categories";
+import {blankSocial, networks} from "@/lib/directory/social";
 const blank = {
+  ...blankSocial,
   listingId: "",
   id: "",
   revision: 0,
@@ -486,7 +488,10 @@ export default function OwnerDashboard() {
                 </label>
                 {field("url", "Website", false, "url")}
                 {field("booking", "Booking or ordering link", false, "url")}
-                {field("social", "Social profile", false, "url")}
+                <details><summary>Social profiles (optional)</summary>
+                  {networks.map(({key,label})=><div key={key}>{field(key,label+" URL",false,"url")}</div>)}
+                  {field("social","Other social profile",false,"url")}
+                </details>
                 </>}{step===3&&<><p>Logo and photos are optional. Choose a JPG, PNG, or WebP up to 2 MB.</p>
                 {(["logo", "gallery"] as const).map((k) => (
                   <section key={k} className="upload-panel">
@@ -573,6 +578,7 @@ function ListingPreview({ data: d }: { data: Partial<Draft> }) {
         d.publicEmail,
         d.url,
         d.booking,
+        ...networks.map(n=>d[n.key]),
         d.social,
       ]
         .filter(Boolean)
