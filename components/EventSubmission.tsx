@@ -1,4 +1,5 @@
 "use client";
+import MySubmissions from "./MySubmissions";
 import { useState, useEffect, useMemo, type FormEvent } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
 import SignupCard, { Completion } from "./SignupCard";
@@ -143,6 +144,7 @@ export default function EventSubmission() {
   if (done)
     return (
       <>
+        <MySubmissions key={session.user.id} session={session} />
         <h2>Event sent for review</h2>
         <p>
           ATG will review your details before the event appears on the calendar.
@@ -164,6 +166,8 @@ export default function EventSubmission() {
     );
   }
   return (
+    <>
+    <MySubmissions key={session.user.id} session={session} />
     <form
       className={complete ? "event-form" : "signup-card"}
       key={session ? (complete ? "event" : "profile") : "signin"}
@@ -261,5 +265,6 @@ export default function EventSubmission() {
       </fieldset>
       <p role="status">{message}</p>
     </form>
+    </>
   );
 }
