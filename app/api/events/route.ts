@@ -45,8 +45,6 @@ export function POST(req: Request) {
       if (error) throw error;
       return { ok: true };
     }
-    if (!user.user_metadata.firstName || !user.user_metadata.lastName)
-      throw new Failure(400, "Complete your organizer profile first.");
     const title = field("title"),
       summary = field("summary", 3000),
       venue = field("venue"),
