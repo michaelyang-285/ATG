@@ -120,10 +120,6 @@ export default function OwnerDashboard() {
       .then(async (data) => {
         if (!active) return;
         setRows(data.rows);setProgress(data.progress);setLoaded(true);
-        if(!data.rows.length){
-          if(data.progress.length===1)resume(data.progress[0]);
-          else if(!data.progress.length && session.user.user_metadata?.firstName)edit();
-        }
         if (data.moderator) {
           const q = await api("review");
           if (active) setQueue(q);
@@ -230,8 +226,8 @@ export default function OwnerDashboard() {
     );
   const googleUser=session.user.identities?.some(identity=>identity.provider==="google");
   const meta=session.user.user_metadata || {};
-  if(googleUser && loaded && !rows.length && !progress.length && !(meta.firstName && meta.lastName && meta.phone && meta.businessName)){
-    return <><MySubmissions key={session.user.id} session={session} /><section className="signup-card"><Completion completed={0}/><h1>Finish your account</h1>
+  if(form && googleUser && loaded && !rows.length && !progress.length && !(meta.firstName && meta.lastName && meta.phone && meta.businessName)){
+    return <><button type="button" onClick={()=>setForm(null)}>Back to my submissions</button><section className="signup-card"><Completion completed={0}/><h1>Finish your account</h1>
       <p>Signed in with Google as <strong>{session.user.email}</strong>.{" "}
         <button type="button" className="text-action" disabled={busy} onClick={()=>run(async()=>{
           const {error}=await client.auth.signOut({scope:"local"});
@@ -260,9 +256,8 @@ export default function OwnerDashboard() {
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
-      <MySubmissions key={session.user.id} session={session} />
       {status}
-      <h1>{form?"Build your listing":"Your listings"}</h1>
+      <h1>{form?"Build your listing":"My submissions"}</h1>
       <p>
         Signed in as {session.user.email} ·{" "}
         <button
@@ -279,14 +274,17 @@ export default function OwnerDashboard() {
       </p>
       {!form ? (
         <>
+          <section aria-labelledby="directory-submissions" style={{marginBlock:"2rem"}}>
+          <h2 id="directory-submissions">Directory listings</h2>
+          {!rows.length && !progress.length && <p>No directory listings yet.</p>}
           <button onClick={() => edit()}>Add a listing</button>{" "}
           <button disabled={busy} onClick={() => run(refresh)}>
             Refresh status
           </button>
-          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}><h2>{p.fields.name||"New listing"}</h2><Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button></article>)}
+          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}><h3>{p.fields.name||"New listing"}</h3><Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button></article>)}
           {rows.map((r) => (
             <article key={r.id}>
-              <h2>{r.draft.name}</h2>
+              <h3>{r.draft.name}</h3>
               <p>{labels[r.status]}</p>{r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
               {r.review_note && <p>{r.review_note}</p>}
               <button onClick={() => edit(r)}>Edit listing</button>{" "}
@@ -305,6 +303,8 @@ export default function OwnerDashboard() {
               )}
             </article>
           ))}
+          </section>
+          <MySubmissions key={session.user.id} session={session} />
           {queue.length > 0 && (
             <section>
               <h2>Review submissions</h2>
