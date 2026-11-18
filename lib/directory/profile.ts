@@ -1,9 +1,10 @@
+import {networks,type SocialFields} from "./social";
 import {cache} from "react";
 import {publication, type Business, imageUrl, safeUrl} from "@/lib/publication";
 import {directoryPublic} from "./public";
 import {categories} from "./categories";
 
-type Listing = Business & {
+type Listing = Business & SocialFields & {
   hours?: string; publicPhone?: string; publicEmail?: string;
   booking?: string; social?: string; gallery?: string[];
 };
@@ -32,5 +33,5 @@ export function listingSchema(b:Listing) {
       url:safeUrl(b.url)||url,image:listingPhoto(b)||undefined,logo:safeUrl(b.logo)||undefined,
       telephone:b.publicPhone||undefined,email:b.publicEmail||undefined,address:b.address||undefined,
       areaServed:["Church","Mosque","Synagogue","PlaceOfWorship"].includes(type)?undefined:areas,
-      sameAs:safeUrl(b.social)||undefined}};
+      sameAs:Array.from(new Set([...networks.map(n=>safeUrl(b[n.key])),safeUrl(b.social)].filter(Boolean)))}};
 }
