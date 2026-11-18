@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, type FormEvent } from "react";
 import { createClient, type Session } from "@supabase/supabase-js";
-import SignupCard, { Completion } from "./SignupCard";
+import SignupCard from "./SignupCard";
 import { cities } from "@/lib/gwinnett";
 export default function EventSubmission() {
   const client = useMemo(() => {
@@ -14,7 +14,6 @@ export default function EventSubmission() {
     [ready, setReady] = useState(false),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
-    [complete, setComplete] = useState(false),
     [weekly, setWeekly] = useState(false),
     [cost, setCost] = useState("free"),
     [done, setDone] = useState(false),
@@ -42,11 +41,6 @@ export default function EventSubmission() {
     const { data } = client.auth.onAuthStateChange((_, s) => {
       setSession(s);
       setReady(true);
-      setComplete(
-        Boolean(
-          s?.user.user_metadata.firstName && s?.user.user_metadata.lastName,
-        ),
-      );
     });
     return () => {
       controller.abort();
@@ -78,18 +72,14 @@ export default function EventSubmission() {
         body: JSON.stringify({
           ...data,
           requestId,
-          action: complete ? "event" : "profile",
+          action: "event",
           cost,
           until: weekly ? data.until : "",
         }),
       });
       const out = await res.json();
       if (!res.ok) throw new Error(out.error);
-      if (complete) setDone(true);
-      else {
-        await client!.auth.refreshSession();
-        setComplete(true);
-      }
+      setDone(true);
     });
   }
   if (!client)
@@ -169,12 +159,11 @@ export default function EventSubmission() {
     <>
     <a className="text-link" href="/directory/manage">View my submissions</a>
     <form
-      className={complete ? "event-form" : "signup-card"}
-      key={session ? (complete ? "event" : "profile") : "signin"}
+      className="event-form"
+      key={session.user.id}
       onSubmit={submit}
     >
-      {!complete && <Completion completed={0} total={2} />}
-      <h1>{complete ? "Submit a Gwinnett event" : "Finish your account"}</h1>
+      <h1>Submit a Gwinnett event</h1>
       <fieldset disabled={busy}>
         <p>
           Signed in as {session.user.email} ·{" "}
@@ -201,15 +190,7 @@ export default function EventSubmission() {
             Sign out
           </button>
         </p>
-        {!complete ? (
-          <>
-            {input("firstName", "First name")}
-            {input("lastName", "Last name")}
-            <button className="primary-action">Continue to event</button>
-          </>
-        ) : (
-          <>
-            <h2>Event details</h2>
+        <h2>Event details</h2>
             {input("title", "Event name")}
             {input("organizer", "Public organizer name")}
             <label>
@@ -260,8 +241,6 @@ export default function EventSubmission() {
             )}
             {input("url", "Event or ticket website (optional)", "url", false)}
             <button className="button button-orange">Submit for review</button>
-          </>
-        )}
       </fieldset>
       <p role="status">{message}</p>
     </form>
