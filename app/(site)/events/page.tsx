@@ -1,3 +1,4 @@
+import { holidays } from "@/lib/holidays";
 import Link from "next/link";
 import { calendar, occurrencePath } from "@/lib/events";
 import { localClock, shift, validDay, zone } from "@/lib/event-time";
@@ -49,6 +50,7 @@ export default async function Page({
     next = shift(to, 1);
   }
   const items = await calendar(from, to);
+  const observances = holidays(from, to);
   const period =
     view === "year"
       ? from.slice(0, 4)
@@ -109,6 +111,16 @@ export default async function Page({
               return (
                 <div key={date}>
                   <time dateTime={date}>{Number(date.slice(8))}</time>
+                  {observances
+                    .filter((h) => h.day === date)
+                    .map((h) => (
+                      <small
+                        key={h.title}
+                        style={{ display: "block", overflowWrap: "anywhere" }}
+                      >
+                        {h.title}
+                      </small>
+                    ))}
                   {matches.map((e) => (
                     <Link key={e._id + e.day} href={occurrencePath(e)}>
                       {e.title}
@@ -120,29 +132,52 @@ export default async function Page({
           )}
         </div>
       )}
-      {items.length ? (
-        items.map((e) => (
-          <article className="event-day" key={e._id + e.day}>
-            <p>
-              {new Date(e.startsAt).toLocaleString("en-US", {
-                timeZone: zone,
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </p>
-            <h3>
-              <Link href={occurrencePath(e)}>{e.title}</Link>
-            </h3>
-            <p>
-              {[e.venue, e.city || e.neighborhood, e.priceLabel]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-          </article>
-        ))
+      {items.length || observances.length ? (
+        [
+          ...items.map((e) => ({
+            day: e.day,
+            element: (
+              <article className="event-day" key={e._id + e.day}>
+                <p>
+                  {new Date(e.startsAt).toLocaleString("en-US", {
+                    timeZone: zone,
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </p>
+                <h3>
+                  <Link href={occurrencePath(e)}>{e.title}</Link>
+                </h3>
+                <p>
+                  {[e.venue, e.city || e.neighborhood, e.priceLabel]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+              </article>
+            ),
+          })),
+          ...observances.map((h) => ({
+            day: h.day,
+            element: (
+              <article className="event-day" key={h.day + h.title}>
+                <p>
+                  {label(h.day, {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}{" "}
+                  · {h.kind}
+                </p>
+                <h3>{h.title}</h3>
+              </article>
+            ),
+          })),
+        ]
+          .sort((a, b) => a.day.localeCompare(b.day))
+          .map((row) => row.element)
       ) : (
         <p>No published events for this {view} yet.</p>
       )}
