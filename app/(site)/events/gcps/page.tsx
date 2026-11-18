@@ -1,4 +1,4 @@
-import { localClock } from "@/lib/event-time";
+import { localClock, shift } from "@/lib/event-time";
 import Link from "next/link";
 import { calendarNotices } from "@/lib/gcps-calendar";
 import "@/components/community.css";
@@ -36,8 +36,16 @@ function details(event: SchoolDate) {
 export default function SchoolCalendar() {
   const dates = calendarNotices("2026-07-01", "2027-06-30").filter(event => event.school);
   const today = localClock(Date.now()).slice(0, 10);
+  const saturday = shift(today, 6 - new Date(today).getUTCDay());
   const upcoming = dates.filter(event => event.end >= today);
-  const past = dates.filter(event => event.end < today).reverse();
+  const afterWeek = upcoming.filter(event => event.day > saturday);
+  const month = today.slice(0, 7);
+  const groups = [
+    { title: "This Week", dates: upcoming.filter(event => event.day <= saturday) },
+    { title: "Later This Month", dates: afterWeek.filter(event => event.day.startsWith(month)) },
+    { title: "Looking Ahead", dates: afterWeek.filter(event => !event.day.startsWith(month)) },
+    { title: "Past school dates", dates: dates.filter(event => event.end < today).reverse() },
+  ].filter(group => group.dates.length);
   return (
     <main id="main" className="site-width page-content atg-desk">
       <header>
@@ -45,13 +53,9 @@ export default function SchoolCalendar() {
         <h1>GCPS school calendar</h1>
         <p>Plan for the 2026–27 Gwinnett County Public Schools year. Find days off, Digital Learning Days, and early dismissal dates for your child’s grade.</p>
       </header>
-      {[
-        { title: "Upcoming school dates", dates: upcoming },
-        { title: "Past school dates", dates: past },
-      ].map(group => (
+      {groups.map(group => (
         <section key={group.title} style={{ display: "block" }}>
           <h2>{group.title}</h2>
-          {group.dates.length ? (
             <ul style={{ marginTop: "0.5rem", paddingInlineStart: "1.25rem", listStyle: "disc" }}>
               {group.dates.map(event => (
                 <li key={event.day + event.title}>
@@ -59,7 +63,6 @@ export default function SchoolCalendar() {
                 </li>
               ))}
             </ul>
-          ) : <p>No {group.title.toLowerCase()} for this school year.</p>}
         </section>
       ))}
     </main>
