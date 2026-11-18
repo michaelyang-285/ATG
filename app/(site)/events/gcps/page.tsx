@@ -45,7 +45,7 @@ export default function SchoolCalendar() {
     { title: "Later This Month", dates: afterWeek.filter(event => event.day.startsWith(month)) },
     { title: "Looking Ahead", dates: afterWeek.filter(event => !event.day.startsWith(month)) },
     { title: "Past school dates", dates: dates.filter(event => event.end < today).reverse() },
-  ].filter(group => group.dates.length);
+  ].filter(group => group.title === "This Week" || group.dates.length);
   return (
     <main id="main" className="site-width page-content atg-desk">
       <header>
@@ -56,6 +56,7 @@ export default function SchoolCalendar() {
       {groups.map(group => (
         <section key={group.title} style={{ display: "block" }}>
           <h2>{group.title}</h2>
+            {group.dates.length === 0 ? <p>Nothing this week.</p> : (
             <ul style={{ marginTop: "0.5rem", paddingInlineStart: "1.25rem", listStyle: "disc" }}>
               {group.dates.map(event => (
                 <li key={event.day + event.title}>
@@ -63,6 +64,7 @@ export default function SchoolCalendar() {
                 </li>
               ))}
             </ul>
+          )}
         </section>
       ))}
     </main>
