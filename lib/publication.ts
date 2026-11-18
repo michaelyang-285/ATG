@@ -29,6 +29,9 @@ export type Business = {
   name: string;
   slug: string;
   category?: string;
+  categories?: string[];
+  services?: string[];
+  logo?: string;
   neighborhood?: string;
   summary?: string;
   address?: string;

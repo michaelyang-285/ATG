@@ -10,4 +10,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+module.exports = require("botid/next/config").withBotId(nextConfig)

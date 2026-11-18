@@ -1,3 +1,4 @@
+import {directoryPublic} from "@/lib/directory/public";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import Link from "next/link";
 import {
@@ -14,7 +15,7 @@ export const TITLES: Record<string, string> = {
   "things-to-do": "Things to do",
   "local-life": "Local life",
   guides: "Guides to Gwinnett",
-  directory: "Independent businesses",
+  directory: "Gwinnett directory",
   events: "Upcoming events",
   areas: "Explore by area",
   search: "Search Gwinnett",
@@ -26,7 +27,7 @@ const DESCRIPTIONS: Record<string, string> = {
   "local-life": "The people, decisions, and everyday changes shaping Gwinnett.",
   guides: "Useful local knowledge, all in one place.",
   directory:
-    "Discover independent businesses around Gwinnett. Owner-submitted listings are not editorial endorsements.",
+    "Find local businesses, independent workers, and community organizations around Gwinnett. Owner-submitted listings are not editorial endorsements.",
   events: "Local plans, with the practical details up front.",
   areas: "Find stories and businesses close to you.",
   search:
@@ -37,6 +38,7 @@ export type Filters = {
   format?: string;
   topic?: string;
   category?: string;
+  service?: string;
   area?: string;
 };
 export default async function BrowsePage({
@@ -58,9 +60,11 @@ export default async function BrowsePage({
   if (filters.topic) stories = stories.filter((s) => s.topic === filters.topic);
   if (filters.area)
     stories = stories.filter((s) => s.location === filters.area);
-  let businesses = data.businesses
-    .filter((b) => !filters.category || b.category === filters.category)
-    .filter((b) => !filters.area || b.neighborhood === filters.area);
+  const directoryBusinesses = ["directory","search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
+  let businesses = directoryBusinesses
+    .filter((b) => !filters.category || b.category === filters.category || b.categories?.includes(filters.category))
+    .filter(b => !filters.service || b.services?.includes(filters.service))
+    .filter((b) => !filters.area || b.neighborhood?.split(",").some(city=>city.trim().toLowerCase()===filters.area.toLowerCase()));
   let events = data.events;
   if (kind === "search") {
     const term = query.toLocaleLowerCase();
@@ -79,7 +83,7 @@ export default async function BrowsePage({
       : [];
     businesses = query
       ? businesses.filter((b) =>
-          [b.name, b.summary, b.neighborhood, b.category]
+          [b.name, b.summary, b.neighborhood, b.category,...(b.categories||[]),...(b.services||[])]
             .join(" ")
             .toLowerCase()
             .includes(term),
@@ -155,7 +159,7 @@ export default async function BrowsePage({
               All businesses
             </Link>
             {Array.from(
-              new Set(data.businesses.map((b) => b.category).filter(Boolean)),
+              new Set(directoryBusinesses.flatMap((b) => [b.category,...(b.categories||[])]).filter(Boolean)),
             ).map((c) => (
               <Link
                 key={c}
@@ -165,7 +169,9 @@ export default async function BrowsePage({
                 {c}
               </Link>
             ))}
-            <Link href="/directory/submit">List your business</Link>
+            {["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={`/directory?category=${encodeURIComponent(c)}&service=Mobile`}>Mobile {c}</Link>)}
+            <Link href="/directory/submit">Add a listing</Link>
+            <Link href="/directory/manage">Manage my listings</Link>
           </nav>
           {!businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
@@ -183,6 +189,7 @@ export default async function BrowsePage({
           <section className="business-list" aria-label="Businesses">
             {businesses.map((b) => (
               <article key={b._id}>
+                {b.logo && <img src={b.logo} alt="" width="64" height="64" style={{objectFit:"cover"}}/>}
                 <p className="story-label">
                   {b.category || "Independent business"}
                 </p>

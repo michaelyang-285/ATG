@@ -35,7 +35,7 @@ The established community is at https://www.facebook.com/groups/allthingsgwinnet
 - Homepage settings can pin one featured story, three supporting stories and two guides. Recent published content provides the fallback.
 - The old test article is preserved but hidden. No real reporting, photography, business listings or events were supplied for release. Explicit coming-soon states replace illustrative wireframe content.
 - Newsletter collection remains closed until a real hosted signup URL is added in site settings.
-- A basic directory listing is intended to cost $5 as a spam deterrent. Recurrence, approval, refund and payment workflow are unconfirmed. No checkout is active.
+- Owner-submitted listings cost $3 once and require moderator approval. Owners can sign in to edit their content.
 - Public submission APIs return unavailable until a real workflow is configured; they do not log submissions or claim success.
 
 ## Brand Commitments

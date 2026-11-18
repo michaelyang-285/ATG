@@ -855,3 +855,13 @@ img {
 .mobile-menu details[open] .disclosure-vertical {
   display: none;
 }
+
+.directory-owner {max-width: 54rem; margin-inline:auto}
+.directory-owner article,.directory-owner fieldset {margin:1rem 0;padding:1rem;border:1px solid #ddd}
+.directory-owner form label {display:block;margin:.8rem 0}
+.directory-owner :is(input:not([type=checkbox]),select,textarea) {display:block;width:100%;padding:.65rem;border:1px solid #999;background:white;color:#171717}
+.directory-owner input[type=checkbox] {margin-right:.5rem}
+.directory-owner button {border:1px solid currentColor;padding:.4rem .8rem;margin:.3rem .2rem .3rem 0;cursor:pointer}
+.directory-owner button:disabled {opacity:.55}
+.directory-owner img {object-fit:cover}
+.directory-owner h2 {font-size:1.5rem;margin-top:1rem}

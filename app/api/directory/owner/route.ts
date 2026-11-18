@@ -1,0 +1,49 @@
+import { db, owner, human, respond, Failure } from "@/lib/directory/server";
+import { listing } from "@/lib/directory/validate";
+export const dynamic = "force-dynamic";
+export function GET(req: Request) {
+  return respond(async () => {
+    const user = await owner(req);
+    const { data, error } = await db()
+      .from("directory_entries")
+      .select("id,contact,draft,status,revision,review_note")
+      .eq("owner_id", user.id)
+      .order("id");
+    if (error) throw error;
+    return {
+      rows: data,
+      moderator: user.app_metadata.directory_admin === true,
+    };
+  });
+}
+export function POST(req: Request) {
+  return respond(async () => {
+    await human();
+    const user = await owner(req),
+      body = await req.json();
+    const values = listing(body, user.email!, user.id),
+      table = db().from("directory_entries");
+    const result = body.id
+      ? await table
+          .update({
+            ...values,
+            revision: body.revision + 1,
+            status: body.status === "unpaid" ? "unpaid" : "review",
+            review_note: "",
+          })
+          .eq("owner_id", user.id)
+          .eq("id", body.id)
+          .eq("revision", body.revision)
+          .eq("status", body.status)
+          .select("id")
+          .maybeSingle()
+      : await table
+          .insert({ ...values, owner_id: user.id })
+          .select("id")
+          .single();
+    if (result.error) throw result.error;
+    if (!result.data)
+      throw new Failure(409, "This listing changed. Reload before editing.");
+    return result.data;
+  });
+}

@@ -53,7 +53,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
     title: "List your independent business",
     paragraphs: [
       "The directory is for independent small businesses around Gwinnett, including food businesses, beauty professionals, and local services. Franchises and large businesses aren’t the focus.",
-      "The signup price is $5 for a basic directory listing. A listing is not an editorial endorsement, and an exclusive group promotion is not required for a basic listing.",
+      "The signup price is $3 for a basic directory listing. A listing is not an editorial endorsement, and an exclusive group promotion is not required for a basic listing.",
       "Submissions and payment are not open yet. The billing and review details will be shown before you submit or pay. In the meantime, contact the group admins to express interest.",
     ],
   },

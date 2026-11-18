@@ -1,3 +1,4 @@
+import {directoryPublic} from "@/lib/directory/public";
 import type { MetadataRoute } from "next";
 import { getPublication, storyHref } from "@/lib/publication";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -17,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: "https://allthingsgwinnett.com" + storyHref(s),
       lastModified: s.publishedAt,
     })),
-    ...businesses.map((b) => ({
+    ...[...businesses,...await directoryPublic()].map((b) => ({
       url:
         "https://allthingsgwinnett.com/directory/" + encodeURIComponent(b.slug),
     })),

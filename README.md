@@ -34,3 +34,20 @@ No finished reporting or directory listings were provided. Empty sections explic
 Build and test before releasing. For a staged production build in the existing Vercel project, run `vercel deploy --prod --skip-domain --scope 285-marketing`, verify it, then promote the tested deployment. The production project ID is `prj_48R16IDTQ5798CZrJoi1pfDtFwFc`. Keep public Sanity variables set to the IDs above.
 
 To update the existing Studio, run `sanity deploy --yes --schema-required` from `studio/` with an authorized Sanity login. The application ID in the CLI configuration pins the target.
+
+### Owner directory
+
+Use /directory/manage for owner sign-in, listing edits and moderator review. Apply
+supabase/migrations/20261118_directory.sql to the directory Supabase project.
+Set the directory variables in .env.local.example before building. Enable email
+magic links, configure the signup email sender, and allow the exact
+DIRECTORY_SITE_URL/directory/manage redirect in Supabase Auth. Assign trusted
+reviewers the directory_admin boolean in their server-managed Auth app_metadata.
+Register /api/directory/webhook for checkout.session.completed in the same
+Stripe account and mode as STRIPE_SECRET_KEY. Store its signing secret in
+STRIPE_DIRECTORY_WEBHOOK_SECRET. Verify BotID on a Vercel preview.
+
+Sanity continues to publish staff-created business listings. Owner listings use a
+private revision and a separate approved snapshot in Postgres. Moderators sign
+in at the same dashboard to approve, return, or decline a revision. Checkout is
+a one-time USD 3 charge per owner listing. Use Stripe test mode for acceptance.
