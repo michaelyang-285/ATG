@@ -45,29 +45,23 @@ export default function SchoolCalendar() {
         <h1>GCPS school calendar</h1>
         <p>Plan for the 2026–27 Gwinnett County Public Schools year. Find days off, Digital Learning Days, and early dismissal dates for your child’s grade.</p>
       </header>
-      <section>
-        <h2>Upcoming school dates</h2>
-        {!upcoming.length && <p>No upcoming school dates for this school year.</p>}
-        {upcoming.map(event => (
-          <article className="event-day" key={event.day + event.title}>
-            <p><DateRange event={event} /></p>
-            <h3>{event.title}</h3>
-            <p>{details(event)}</p>
-          </article>
-        ))}
-      </section>
-      <section>
-        <h2>Past school dates</h2>
-        {past.length ? (
-          <ul style={{ paddingInlineStart: "1.25rem", listStyle: "disc" }}>
-            {past.map(event => (
-              <li key={event.day + event.title}>
-                <DateRange event={event} /> · <strong>{event.title}</strong> · {details(event)}
-              </li>
-            ))}
-          </ul>
-        ) : <p>No past school dates for this school year.</p>}
-      </section>
+      {[
+        { title: "Upcoming school dates", dates: upcoming },
+        { title: "Past school dates", dates: past },
+      ].map(group => (
+        <section key={group.title} style={{ display: "block" }}>
+          <h2>{group.title}</h2>
+          {group.dates.length ? (
+            <ul style={{ marginTop: "0.5rem", paddingInlineStart: "1.25rem", listStyle: "disc" }}>
+              {group.dates.map(event => (
+                <li key={event.day + event.title}>
+                  <DateRange event={event} /> · <strong>{event.title}</strong> · {details(event)}
+                </li>
+              ))}
+            </ul>
+          ) : <p>No {group.title.toLowerCase()} for this school year.</p>}
+        </section>
+      ))}
     </main>
   );
 }
