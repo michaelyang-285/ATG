@@ -15,13 +15,29 @@ const formatter = new Intl.DateTimeFormat("en-US", {
   weekday: "short", month: "short", day: "numeric", timeZone: "UTC",
 });
 
+type SchoolDate = ReturnType<typeof calendarNotices>[number];
+
+function DateRange({ event }: { event: SchoolDate }) {
+  const format = (day: string) => formatter.format(new Date(day));
+  return <>
+    <time dateTime={event.day}>{format(event.day)}</time>
+    {event.day.slice(0, 4) !== event.end.slice(0, 4) && ", " + event.day.slice(0, 4)}
+    {event.end !== event.day && <> through <time dateTime={event.end}>{format(event.end)}</time></>}
+    {", "}{event.end.slice(0, 4)}
+  </>;
+}
+
+function details(event: SchoolDate) {
+  if (event.kind.includes("DLD")) return event.title === "Digital Learning Day" ? "All grades" : "Digital Learning Day";
+  if (event.kind.includes("closed")) return "No school for students.";
+  return event.kind.replace("GCPS early release · Grades", "Early dismissal for grades").replace("GCPS · All students", "All grades");
+}
+
 export default function SchoolCalendar() {
   const dates = calendarNotices("2026-07-01", "2027-06-30").filter(event => event.school);
   const today = localClock(Date.now()).slice(0, 10);
-  const groups = [
-    { title: "Upcoming school dates", events: dates.filter(event => event.end >= today) },
-    { title: "Past school dates", events: dates.filter(event => event.end < today).reverse() },
-  ];
+  const upcoming = dates.filter(event => event.end >= today);
+  const past = dates.filter(event => event.end < today).reverse();
   return (
     <main id="main" className="site-width page-content atg-desk">
       <header>
@@ -29,24 +45,29 @@ export default function SchoolCalendar() {
         <h1>GCPS school calendar</h1>
         <p>Plan for the 2026–27 Gwinnett County Public Schools year. Find days off, Digital Learning Days, and early dismissal dates for your child’s grade.</p>
       </header>
-      {groups.map(group => (
-        <section key={group.title}>
-          <h2>{group.title}</h2>
-          {!group.events.length && <p>No {group.title.toLowerCase()} for this school year.</p>}
-          {group.events.map(event => (
-        <article className="event-day" key={event.day + event.title}>
-          <p><time dateTime={event.day}>{formatter.format(new Date(event.day))}</time>
-            {event.end !== event.day && <> through <time dateTime={event.end}>{formatter.format(new Date(event.end))}</time></>}
-            {", "}{event.end.slice(0, 4) !== event.day.slice(0, 4) ? "2026–27" : event.day.slice(0, 4)}
-          </p>
-          <h3>{event.title}</h3>
-          <p>{event.kind.includes("DLD") ? (event.title === "Digital Learning Day" ? "All grades" : "Digital Learning Day")
-            : event.kind.includes("closed") ? "No school for students."
-            : event.kind.replace("GCPS early release · Grades", "Early dismissal for grades").replace("GCPS · All students", "All grades")}</p>
-        </article>
-          ))}
-        </section>
-      ))}
+      <section>
+        <h2>Upcoming school dates</h2>
+        {!upcoming.length && <p>No upcoming school dates for this school year.</p>}
+        {upcoming.map(event => (
+          <article className="event-day" key={event.day + event.title}>
+            <p><DateRange event={event} /></p>
+            <h3>{event.title}</h3>
+            <p>{details(event)}</p>
+          </article>
+        ))}
+      </section>
+      <section>
+        <h2>Past school dates</h2>
+        {past.length ? (
+          <ul style={{ paddingInlineStart: "1.25rem", listStyle: "disc" }}>
+            {past.map(event => (
+              <li key={event.day + event.title}>
+                <DateRange event={event} /> · <strong>{event.title}</strong> · {details(event)}
+              </li>
+            ))}
+          </ul>
+        ) : <p>No past school dates for this school year.</p>}
+      </section>
     </main>
   );
 }
