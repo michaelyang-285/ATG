@@ -1,7 +1,7 @@
 import DirectoryLocation from "./DirectoryLocation";
-import { resolveArea } from "@/lib/directory/locations";
+import { places, resolveArea, zipAreas } from "@/lib/directory/locations";
 import {categories as directoryCategories} from "@/lib/directory/categories";
-import {directoryPublic} from "@/lib/directory/public";
+import {directoryPublic, searchDirectory} from "@/lib/directory/public";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import Link from "next/link";
 import {
@@ -63,7 +63,7 @@ export default async function BrowsePage({
   if (filters.topic) stories = stories.filter((s) => s.topic === filters.topic);
   if (filters.area)
     stories = stories.filter((s) => s.location === filters.area);
-  const directoryBusinesses = ["directory","search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
+  const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
   const rawArea = typeof filters.area === "string" ? filters.area : "";
   const matches = kind === "directory" ? resolveArea(rawArea) : null;
   const countyLink = {pathname: "/directory", query: {q: query || undefined, category: filters.category, service: filters.service}};
@@ -78,12 +78,26 @@ export default async function BrowsePage({
       return areas.some(city => ["gwinnett county", "all of gwinnett", "gwinnett"].includes(city)) ||
         matches.some(city => areas.includes(city.toLowerCase()));
     });
-  if (kind === "directory" && query) {
-    const words = query.toLowerCase().split(/\s+/);
-    businesses = businesses.filter(b => {
-      const searchable = [b.name, b.summary, b.category, b.neighborhood, ...(b.categories || []), ...(b.services || [])].join(" ").toLowerCase();
-      return words.every(word => searchable.includes(word));
-    });
+  let unsupportedLocation = matches?.length === 0 ? rawArea : "";
+  if (kind === "directory") {
+    let terms = query;
+    let searchAreas = matches;
+    const location = terms.match(/(?:^|\s)(?:in|near|around)\s+(.+)$/i);
+    if (location) {
+      const inferred = resolveArea(location[1]);
+      if (inferred?.length === 0) unsupportedLocation = location[1];
+      searchAreas = matches && inferred ? matches.filter(city => inferred.includes(city)) : matches || inferred;
+      terms = terms.slice(0, location.index).trim();
+    } else if (!matches) {
+      const suffix = [...places, ...Object.keys(zipAreas)].find(place => terms.toLowerCase().endsWith(" " + place.toLowerCase()) || terms.toLowerCase() === place.toLowerCase());
+      if (suffix) {
+        searchAreas = resolveArea(suffix);
+        terms = terms.slice(0, -suffix.length).trim();
+      }
+    }
+    const mobile = /\bmobile\b/i.test(terms);
+    if (mobile) terms = terms.replace(/\bmobile\b/gi, " ").trim();
+    businesses = await searchDirectory(terms, searchAreas, filters.category || "", mobile ? "Mobile" : filters.service || "", data.businesses);
   }
   let events = data.events;
   if (kind === "search") {
@@ -180,8 +194,8 @@ export default async function BrowsePage({
             <div className="directory-join"><Link className="button" href="/directory/submit">Add your listing</Link><Link href="/directory/manage?mode=signin">Manage my listings</Link></div>
           </section>
           {matches && matches.length > 1 && <nav className="filter-links" aria-label="Cities in this ZIP">Narrow by city {matches.map(city => <Link key={city} href={{pathname: "/directory", query: {...countyLink.query, area: city}}}>{city}</Link>)}</nav>}
-          {matches?.length === 0 ? (
-            <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{rawArea}” to a local city or ZIP. <Link href={countyLink}>Search all of Gwinnett</Link></EmptyState>
+          {unsupportedLocation ? (
+            <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{unsupportedLocation}” to a local city or ZIP. <Link href={{...countyLink, query: {...countyLink.query, q: unsupportedLocation === rawArea ? query : query.replace(/(?:^|\s)(?:in|near|around)\s+(.+)$/i, "").trim()}}}>Search all of Gwinnett</Link></EmptyState>
           ) : (matches || query || filters.category || filters.service) && !businesses.length ? (
             <EmptyState title="No listings match this search yet."><Link href="/directory">Clear filters</Link></EmptyState>
           ) : !businesses.length && (
