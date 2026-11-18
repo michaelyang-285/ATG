@@ -1,3 +1,5 @@
+import DirectorySocialIcon from "@/components/DirectorySocialIcon";
+import {networks} from "@/lib/directory/social";
 import {notFound} from "next/navigation";
 import Link from "next/link";
 import {safeUrl} from "@/lib/publication";
@@ -10,6 +12,8 @@ const sample = {
   category:"Coffee", categories:["Cafés"], services:["Storefront","Pickup"],
   neighborhood:"Duluth", hours:"Monday–Saturday, 7 am–4 pm",
   summary:"Espresso, cold brew, and rotating pastries in downtown Duluth. Stop in for a morning pour-over or pick up a latte on your way to work.",
+  address:"Duluth Town Green, Duluth, GA", url:"https://example.com",
+  instagram:"https://www.instagram.com/",facebook:"https://www.facebook.com/",tiktok:"https://www.tiktok.com/",
   logo:"/directory/lantern-oak.svg",
   gallery:[
     "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=85",
@@ -34,6 +38,12 @@ export default async function Page({params}:Props) {
   const b: Awaited<ReturnType<typeof getListing>> = demo ? sample : await getListing(params.slug);
   if (!b) notFound();
   const photo = demo ? sample.logo : listingPhoto(b);
+  const website = safeUrl(b.url);
+  const destination = b.address?.trim() ? encodeURIComponent(b.address.trim()) : "";
+  const socials = networks.flatMap(n=>{
+    const href = safeUrl(b[n.key]);
+    return href ? [{...n,href}] : [];
+  });
   const tags = Array.from(new Set([b.category,...(b.categories||[]),...(b.services||[])].filter(Boolean)));
   return <main id="main" className="site-width page-content atg-profile">
     {demo ? <p className="story-label">Sample profile · Fictional business</p> : <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(listingSchema(b)).replace(/</g,"\\u003c")}}/>}
@@ -41,7 +51,7 @@ export default async function Page({params}:Props) {
     <header className="listing-heading">
       {photo && <img src={photo} width="112" height="112" alt=""/>}
       <div><p className="story-label">{b.category || "Community directory"}</p><h1>{b.name}</h1>
-      {b.neighborhood && <p>{b.neighborhood}</p>}</div>
+      {b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>Visit website ↗</a>}</div>
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>
       <div className="listing-tags">{tags.map(tag=><span key={tag}>{tag}</span>)}</div>
@@ -50,6 +60,12 @@ export default async function Page({params}:Props) {
       {[[ "City or service area",b.neighborhood],["Address",b.address],["Hours",b.hours]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
       {b.publicPhone && <p><a href={"tel:"+b.publicPhone.replace(/[^+0-9]/g,"")}>{b.publicPhone}</a></p>}
       {b.publicEmail && <p><a href={"mailto:"+b.publicEmail}>{b.publicEmail}</a></p>}
-      {[[b.url,"Visit website"],[b.booking,"Book an appointment"],[b.social,"Social profile"]].map(([url,label])=>safeUrl(url) && <p key={label}><a className="text-link" href={safeUrl(url)!}>{label} ↗</a></p>)}
+      {[[b.booking,"Book an appointment"],[b.social,"Other social profile"]].map(([url,label])=>safeUrl(url) && <p key={label}><a className="text-link" href={safeUrl(url)!}>{label} ↗</a></p>)}
+      {destination && <section><h3>Get directions</h3><div className="profile-links">
+        <a href={"https://www.google.com/maps/dir/?api=1&destination="+destination}>Google Maps ↗</a>
+        <a href={"https://maps.apple.com/?daddr="+destination}>Apple Maps ↗</a>
+      </div></section>}
+      {socials.length>0 && <section><h3>Social profiles</h3><div className="profile-links">{socials.map(n=>
+        <a key={n.key} href={n.href}><DirectorySocialIcon network={n.key}/>{n.label}</a>)}</div></section>}
     </aside></div></main>;
 }
