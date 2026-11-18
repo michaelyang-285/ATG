@@ -1,4 +1,5 @@
-import { db, human, respond, Failure } from "@/lib/directory/server";
+import { human, respond, Failure } from "@/lib/directory/server";
+import { subscribeEmail } from "@/lib/newsletter";
 
 export function POST(request: Request) {
   return respond(async () => {
@@ -8,9 +9,7 @@ export function POST(request: Request) {
     if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw new Failure(400, "Enter a valid email address.");
     }
-    const { error } = await db().from("newsletter_subscribers")
-      .upsert({ email }, { onConflict: "email", ignoreDuplicates: true });
-    if (error) throw error;
+    await subscribeEmail(email);
     return { ok: true };
   });
 }

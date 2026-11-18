@@ -1,0 +1,48 @@
+.listing-correction-prompt {
+  border-top: 1px solid #ded6ca;
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+}
+.listing-correction-prompt button {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: .18em;
+  cursor: pointer;
+}
+.listing-correction-dialog {
+  box-sizing: border-box;
+  width: min(31rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #ded6ca;
+  border-radius: 14px;
+  background: white;
+  color: #171717;
+  box-shadow: 0 16px 64px #17171733;
+}
+.listing-correction-dialog::backdrop { background: rgb(23 23 23 / 55%); }
+.correction-sheet { padding: clamp(1rem, 4vw, 1.75rem); }
+.correction-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.correction-heading h2 { margin: 0; font-size: 1.55rem; line-height: 1.2; }
+.correction-close { width: 2.75rem; height: 2.75rem; background: none; border: 0; cursor: pointer; font: inherit; font-size: 1.75rem; }
+.correction-sheet .correction-business { margin: 0 0 1.25rem; color: #51483c; }
+.correction-sheet fieldset { margin: 0 0 1.25rem; border: 0; padding: 0; min-width: 0; display: grid; gap: .85rem; }
+.correction-names { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.correction-sheet label { display: grid; gap: .25rem; font-weight: 600; }
+.correction-sheet :is(input:not([type=checkbox]), select, textarea) {
+  box-sizing: border-box; width: 100%; min-width: 0; background: white; color: #171717;
+  padding: .6rem .7rem; border: 1px solid #80796f; border-radius: 6px; font: inherit; font-weight: 400;
+}
+.correction-sheet textarea { resize: vertical; }
+.correction-sheet label.correction-opt-in { display: flex; align-items: flex-start; gap: .6rem; font-weight: 400; }
+.correction-opt-in input { flex: none; margin: .2em 0 0; width: 1.15rem; height: 1.15rem; }
+.correction-error { color: #8b2116; }
+@media (max-width: 380px) { .correction-names { grid-template-columns: 1fr; } }
