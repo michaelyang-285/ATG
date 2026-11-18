@@ -70,6 +70,7 @@ export default async function Page({
         <Link className="button button-orange" href="/events/submit">
           Submit an event
         </Link>
+        <p><Link className="text-link" href="/events/gcps">View the GCPS school calendar →</Link></p>
       </header>
       <nav aria-label="Calendar view" className="event-controls">
         {["week", "month", "year"].map((v, i) => (
