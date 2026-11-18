@@ -10,6 +10,11 @@ const sample = {
   category:"Coffee", categories:["Cafés"], services:["Storefront","Pickup"],
   neighborhood:"Duluth", hours:"Monday–Saturday, 7 am–4 pm",
   summary:"Espresso, cold brew, and rotating pastries in downtown Duluth. Stop in for a morning pour-over or pick up a latte on your way to work.",
+  logo:"/directory/lantern-oak.svg",
+  gallery:[
+    "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=85",
+    "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=1000&q=85"
+  ],
   publicPhone:"(770) 555-0142"
 };
 function isSample(slug:string) {
@@ -28,7 +33,7 @@ export default async function Page({params}:Props) {
   const demo = isSample(params.slug);
   const b: Awaited<ReturnType<typeof getListing>> = demo ? sample : await getListing(params.slug);
   if (!b) notFound();
-  const photo = listingPhoto(b);
+  const photo = demo ? sample.logo : listingPhoto(b);
   const tags = Array.from(new Set([b.category,...(b.categories||[]),...(b.services||[])].filter(Boolean)));
   return <main id="main" className="site-width page-content atg-profile">
     {demo ? <p className="story-label">Sample profile · Fictional business</p> : <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(listingSchema(b)).replace(/</g,"\\u003c")}}/>}
@@ -40,7 +45,7 @@ export default async function Page({params}:Props) {
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>
       <div className="listing-tags">{tags.map(tag=><span key={tag}>{tag}</span>)}</div>
-      {b.gallery?.map(src=><img className="listing-photo" key={src} src={src} alt={b.name+" work photo"} loading="lazy"/>)}
+      {b.gallery?.map((src,index)=><img className="listing-photo" key={src} src={src} alt={demo ? ["Café interior","Freshly poured latte"][index] : b.name+" work photo"} loading="lazy"/>)}
     </section><aside><h2>Listing details</h2>
       {[[ "City or service area",b.neighborhood],["Address",b.address],["Hours",b.hours]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
       {b.publicPhone && <p><a href={"tel:"+b.publicPhone.replace(/[^+0-9]/g,"")}>{b.publicPhone}</a></p>}
