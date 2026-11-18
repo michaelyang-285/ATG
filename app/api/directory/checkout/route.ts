@@ -12,6 +12,8 @@ export function POST(req: Request) {
       .eq("owner_id", user.id)
       .single();
     if (error || !data) throw new Failure(404, "Listing unavailable.");
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_DIRECTORY_WEBHOOK_SECRET)
+      throw new Failure(503, "Your listing is saved. Payments are not open yet. Return to Manage listings when checkout opens.");
     if (data.paid_session)
       throw new Failure(409, "This listing is already paid.");
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!),
