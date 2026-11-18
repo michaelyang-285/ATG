@@ -33,6 +33,18 @@ function details(event: SchoolDate) {
   return event.kind.replace("GCPS early release · Grades", "Early dismissal for grades").replace("GCPS · All students", "All grades");
 }
 
+function DateList({ dates }: { dates: SchoolDate[] }) {
+  return (
+    <ul style={{ marginTop: "0.5rem", paddingInlineStart: "1.25rem", listStyle: "disc" }}>
+              {dates.map(event => (
+                <li key={event.day + event.title}>
+                  <DateRange event={event} /> · <strong>{event.title}</strong> · {details(event)}
+                </li>
+              ))}
+            </ul>
+  );
+}
+
 export default function SchoolCalendar() {
   const dates = calendarNotices("2026-07-01", "2027-06-30").filter(event => event.school);
   const today = localClock(Date.now()).slice(0, 10);
@@ -40,12 +52,19 @@ export default function SchoolCalendar() {
   const upcoming = dates.filter(event => event.end >= today);
   const afterWeek = upcoming.filter(event => event.day > saturday);
   const month = today.slice(0, 7);
+  const months: string[] = [];
+  const cursor = new Date(today.slice(0, 7) + "-01T00:00:00Z");
+  cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  while (cursor.toISOString().slice(0, 7) <= "2027-06") {
+    months.push(cursor.toISOString().slice(0, 7));
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
   const groups = [
     { title: "This Week", dates: upcoming.filter(event => event.day <= saturday) },
     { title: "Later This Month", dates: afterWeek.filter(event => event.day.startsWith(month)) },
     { title: "Looking Ahead", dates: afterWeek.filter(event => !event.day.startsWith(month)) },
     { title: "Past school dates", dates: dates.filter(event => event.end < today).sort((a, b) => a.day.localeCompare(b.day)) },
-  ].filter(group => group.title === "This Week" || group.dates.length);
+  ].filter(group => group.title === "This Week" || (group.title === "Looking Ahead" && months.length > 0) || group.dates.length);
   return (
     <main id="main" className="site-width page-content atg-desk">
       <header>
@@ -56,15 +75,18 @@ export default function SchoolCalendar() {
       {groups.map(group => (
         <section key={group.title} style={{ display: "block" }}>
           <h2>{group.title}</h2>
-            {group.dates.length === 0 ? <p>Nothing this week.</p> : (
-            <ul style={{ marginTop: "0.5rem", paddingInlineStart: "1.25rem", listStyle: "disc" }}>
-              {group.dates.map(event => (
-                <li key={event.day + event.title}>
-                  <DateRange event={event} /> · <strong>{event.title}</strong> · {details(event)}
-                </li>
-              ))}
-            </ul>
-          )}
+          {group.title === "Looking Ahead" ? months.map(key => {
+            const entries = group.dates.filter(event => event.day.startsWith(key));
+            const heading = new Date(key + "-01T00:00:00Z").toLocaleDateString("en-US", {
+              month: "long", year: "numeric", timeZone: "UTC",
+            });
+            return (
+              <div key={key} style={{ marginTop: "1rem" }}>
+                <h3>{heading}</h3>
+                {entries.length ? <DateList dates={entries} /> : <p>Nothing happening with GCPS this month.</p>}
+              </div>
+            );
+          }) : group.dates.length ? <DateList dates={group.dates} /> : <p>Nothing this week.</p>}
         </section>
       ))}
     </main>
