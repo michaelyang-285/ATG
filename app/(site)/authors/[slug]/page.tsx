@@ -6,6 +6,28 @@ import { networks } from "@/lib/directory/social";
 import { publication, PUBLISHED, imageUrl, safeUrl, formatDate, storyHref, type Story } from "@/lib/publication";
 import "./author.css";
 
+const authorNetworks = [
+  ...networks.map((network) => ({
+    ...network,
+    icon: <DirectorySocialIcon network={network.key} />,
+  })),
+  {
+    label: "Whatnot",
+    hosts: ["whatnot.com"],
+    icon: <img src="/icons/whatnot.svg" width={20} height={20} alt="" />,
+  },
+];
+
+function WebsiteIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="20" height="20">
+      <circle cx="12" cy="12" r="9" />
+      <ellipse cx="12" cy="12" rx="4" ry="9" />
+      <path d="M3 12h18" />
+    </svg>
+  );
+}
+
 type Author = {
   name: string;
   bio?: string;
@@ -49,7 +71,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     const href = safeUrl(social?.url);
     if (!href) return [];
     const host = new URL(href).hostname.toLowerCase();
-    const network = networks.find(({ hosts }) =>
+    const network = authorNetworks.find(({ hosts }) =>
       hosts.some((domain) => host === domain || host.endsWith("." + domain)),
     );
     const platform = social.platform?.trim();
@@ -73,13 +95,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
             {links.map(({ key, href, network, label }) => (
               <li key={key}>
                 <a href={href} rel="me" aria-label={`${author.name} · ${label}`} title={label}>
-                  {network ? <DirectorySocialIcon network={network.key} /> : (
-                    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="20" height="20">
-                      <circle cx="12" cy="12" r="9" />
-                      <ellipse cx="12" cy="12" rx="4" ry="9" />
-                      <path d="M3 12h18" />
-                    </svg>
-                  )}
+                  {network?.icon || <WebsiteIcon />}
                 </a>
               </li>
             ))}
