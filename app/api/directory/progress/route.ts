@@ -1,7 +1,15 @@
 import { db, human, owner, respond, Failure } from "@/lib/directory/server";
+import { additionalCategories, additionalCategoryError, additionalCategoryLimit } from "@/lib/directory/categories";
+
 export function POST(req:Request){return respond(async()=>{
   await human();const user=await owner(req);const {listingId,step,fields}=await req.json();
   if(!/^[a-f0-9]{8}-[a-f0-9-]{27}$/.test(listingId)||!Number.isInteger(step)||step<0||step>4||!fields||typeof fields!=="object"||Array.isArray(fields)||JSON.stringify(fields).length>20000)throw new Failure(400,"Check your listing details.");
+  if (fields.categories !== undefined) {
+    if (!Array.isArray(fields.categories) || fields.categories.some((value: unknown) => typeof value !== "string"))
+      throw new Failure(400, "Check the additional categories.");
+    fields.categories = additionalCategories(fields.category, fields.categories);
+    if (fields.categories.length > additionalCategoryLimit) throw new Failure(400, additionalCategoryError);
+  }
   if (fields.id) {
     const existing = await db().from("directory_entries").select("id").eq("id", listingId)
       .eq("owner_id", user.id).is("deletion_due_at", null).maybeSingle();
