@@ -4,6 +4,7 @@ export type EventRecord = LocalEvent & {
   eventFormats?: string[];
   gameTopics?: string[];
   cancelled?: boolean;
+  outsideGwinnett?: boolean;
   street?: string;
   city?: string;
   postalCode?: string;
@@ -15,7 +16,7 @@ export type EventRecord = LocalEvent & {
   image?: any;
 };
 export const eventFields =
-  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,ticketUrl,street,city,postalCode,cost,price,organizer,weeklyUntil,image,eventFormats,gameTopics,cancelled';
+  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,ticketUrl,street,city,postalCode,cost,price,organizer,weeklyUntil,image,eventFormats,gameTopics,cancelled,outsideGwinnett';
 export function eventDates(e: EventRecord) {
   if (!e.startsAt || !Number.isFinite(Date.parse(e.startsAt))) return [];
   const start = localClock(e.startsAt),
