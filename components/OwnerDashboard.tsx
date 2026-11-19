@@ -128,6 +128,7 @@ export default function OwnerDashboard() {
     if (!res.ok) throw Error(out.error || "Please try again.");
     return out;
   }
+  const [eventsRefreshKey, setEventsRefreshKey] = useState(0);
   async function refresh() {
     const data = await api("owner");
     setRows(data.rows); setDeletions(data.deletions || []);
@@ -316,13 +317,18 @@ export default function OwnerDashboard() {
         </section>
       ) : !form ? (
         <>
-          <section aria-labelledby="directory-submissions" style={{marginBlock:"2rem"}}>
-          <h2 id="directory-submissions">Directory listings</h2>
-          {!rows.length && !progress.length && <p>No directory listings yet.</p>}
-          <div className="submission-actions">
-            <button onClick={() => edit()}>Add a listing</button>
-            <button disabled={busy} onClick={() => run(refresh)}>Refresh status</button>
+          <section className="owner-submissions-section" aria-labelledby="directory-submissions">
+          <div className="owner-section-heading">
+            <h2 id="directory-submissions">Directory listings</h2>
+            <div className="owner-section-controls">
+              <button className="primary-action" onClick={() => edit()}>Add a listing</button>
+              <button disabled={busy} onClick={() => {
+                setEventsRefreshKey(key => key + 1);
+                run(refresh);
+              }}>Refresh status</button>
+            </div>
           </div>
+          {!rows.length && !progress.length && <p className="submission-status">No directory listings yet.</p>}
           {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}>
             <OwnerListingHeading data={p.fields} />
             <Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button>
@@ -358,7 +364,7 @@ export default function OwnerDashboard() {
             </article>
           ))}
           </section>
-          <MySubmissions key={session.user.id} session={session} />
+          <MySubmissions key={session.user.id} session={session} refreshKey={eventsRefreshKey} />
           {deletions.length > 0 && <section>
             <h2>Profile deletion requests</h2>
             {deletions.map(item => <article key={item.id}><h3>{item.name}</h3>

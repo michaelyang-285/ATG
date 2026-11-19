@@ -994,3 +994,15 @@ img {
   .owner-listing-actions { flex-direction: column; align-items: flex-start; }
   .owner-listing-links { width: 100%; }
 }
+
+.owner-submissions-section { margin-block: 2rem; }
+.owner-section-heading, .owner-section-controls {
+  display: flex; align-items: center; flex-wrap: wrap; gap: .75rem;
+}
+.owner-section-heading { justify-content: space-between; gap: 1rem; }
+.directory-owner .owner-section-heading h2 { margin: 0; }
+.directory-owner .owner-section-heading :is(button, .button) { min-height: 46px; border-radius: 8px; }
+.directory-owner .submission-status { margin-top: 1rem; color: var(--muted); }
+@media (max-width: 520px) {
+  .owner-section-heading { align-items: flex-start; flex-direction: column; }
+}

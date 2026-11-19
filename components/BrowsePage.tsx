@@ -185,13 +185,12 @@ export default async function BrowsePage({
       )}
       {kind === "directory" && (
         <>
-          <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" action="/directory">
+          <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" role="search" aria-label="Search directory listings" action="/directory">
             <label>Keyword<input type="search" name="q" defaultValue={query} maxLength={100} placeholder="Business name, product or service"/></label>
             <label>Category<select name="category" defaultValue={filters.category||""}><option value="">All categories</option>{Object.entries(directoryCategories).map(([group,items])=><optgroup label={group} key={group}>{items.map(v=><option key={v}>{v}</option>)}</optgroup>)}{Array.from(new Set(directoryBusinesses.map(b=>b.category).filter(c=>c&&!Object.values(directoryCategories).flat().includes(c)))).map(c=><option key={c}>{c}</option>)}</select></label>
             <DirectoryLocation key={rawArea} initial={rawArea}/>
             <button className="button button-orange">Find listings</button></form>
-            <nav className="filter-links" aria-label="Mobile services">{["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={"/directory?category="+encodeURIComponent(c)+"&service=Mobile"}>Mobile {c}</Link>)}</nav>
-            <div className="directory-join"><Link className="button" href="/directory/submit">Add your listing</Link><Link href="/directory/manage?mode=signin">Manage my listings</Link></div>
+            <nav className="directory-suggestions" aria-label="Suggested searches">{["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={"/directory?category="+encodeURIComponent(c)+"&service=Mobile"}>Mobile {c}</Link>)}</nav>
           </section>
           {matches && matches.length > 1 && <nav className="filter-links" aria-label="Cities in this ZIP">Narrow by city {matches.map(city => <Link key={city} href={{pathname: "/directory", query: {...countyLink.query, area: city}}}>{city}</Link>)}</nav>}
           {unsupportedLocation ? (
@@ -201,10 +200,7 @@ export default async function BrowsePage({
           ) : !businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
               Independent restaurants, beauty professionals, and local services
-              will be listed here.{" "}
-              <Link href="/directory/submit">
-                Learn about listing your business.
-              </Link>
+              will be listed here.
             </EmptyState>
           )}
         </>
@@ -214,21 +210,29 @@ export default async function BrowsePage({
           <section className="business-list" aria-label="Businesses">
             {businesses.map((b) => (
               <article key={b._id}>
-                {b.logo && <img src={b.logo} alt="" width="64" height="64" style={{objectFit:"cover"}}/>}
-                <p className="story-label">
-                  {b.category || "Independent business"}
-                </p>
-                <h2>
-                  <Link href={`/directory/${encodeURIComponent(b.slug)}`}>
-                    {b.name}
-                  </Link>
-                </h2>
-                <p>{b.summary}</p>
-                {b.neighborhood && <p className="quiet">{b.neighborhood}</p>}
+                <div className="business-card-heading">
+                  {b.logo && <img src={b.logo} alt="" width="56" height="56" style={{objectFit:"contain"}} />}
+                  <div>
+                    <p className="story-label">{b.category || "Independent business"}</p>
+                    <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`}>{b.name}</Link></h2>
+                  </div>
+                </div>
+                {b.summary && <p className="business-excerpt">{b.summary}</p>}
+                <div className="business-card-actions">
+                  {b.neighborhood && <p className="quiet">{b.neighborhood}</p>}
+                  {kind === "directory" && <Link className="button button-orange" href={`/directory/${encodeURIComponent(b.slug)}`}
+                    aria-label={`View profile for ${b.name}`}>View profile</Link>}
+                </div>
               </article>
             ))}
           </section>
         )}
+      {kind === "directory" && (
+        <aside className="directory-owner-tools" aria-labelledby="business-owners">
+          <h2 id="business-owners">For business owners</h2>
+          <div><Link href="/directory/submit">Add your listing</Link><Link href="/directory/manage?mode=signin">Manage my listings</Link></div>
+        </aside>
+      )}
       {(kind === "events" || kind === "search") && (
         <>
           {events.length ? (
