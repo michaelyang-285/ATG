@@ -7,10 +7,13 @@ import type { Draft } from "./OwnerDashboard";
 
 type Listing = { id: string; revision: number; draft: Partial<Draft> };
 type Removal = { id: string; name: string; deletion_due_at: string };
-type EventDraft = { _id: string; title: string; startsAt: string; venue: string; city: string };
+type EventDraft = {
+  _id: string; _rev: string; title: string; summary?: string; startsAt: string; endsAt?: string;
+  weeklyUntil?: string; venue: string; street?: string; city: string; organizer?: string;
+  priceLabel?: string; url?: string; ticketUrl?: string;
+};
 type Overview = { moderator: boolean; deletions: Removal[] | null; events: EventDraft[] | null };
 type Queue = Overview & { listings: Listing[] | null };
-const studio = "https://www.sanity.io/@oUcV9EK10/studio/tg2pib63zu890y3tcluji8jy";
 const localDate = (date: string) => new Date(date).toLocaleString("en-US", {
   timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short",
 }) + " ET";
@@ -42,6 +45,7 @@ export default function ApprovalQueue() {
 function ReviewerQueue({ session }: { session: Session }) {
   const [queue, setQueue] = useState<Queue | null>(null);
   const [message, setMessage] = useState("");
+  const [receipt, setReceipt] = useState("");
   const [busy, setBusy] = useState(false);
   const [version, refresh] = useState(0);
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -59,10 +63,15 @@ function ReviewerQueue({ session }: { session: Session }) {
     return () => { active = false; };
   }, [session.access_token, version]);
 
-  async function act(path: string, body: unknown) {
+  async function act(path: string, body: unknown, confirmation = "") {
     setBusy(true);
     setMessage("");
-    try { await request(session, path, body); refresh(v => v + 1); }
+    setReceipt("");
+    try {
+      await request(session, path, body);
+      setReceipt(confirmation);
+      refresh(v => v + 1);
+    }
     catch (error) { setMessage(error instanceof Error ? error.message : "Please try again."); }
     finally { setBusy(false); }
   }
@@ -70,6 +79,7 @@ function ReviewerQueue({ session }: { session: Session }) {
   return <>
     <div className="owner-session"><a className="text-link" href="/directory/manage">My submissions</a>
       <button disabled={busy} onClick={() => refresh(v => v + 1)}>Refresh queue</button></div>
+    {receipt && <p className="submission-status" role="status">{receipt}</p>}
     {message && <p role="alert">{message}</p>}
     {!queue && !message && <p role="status">Loading submissions…</p>}
     {queue?.moderator && <>
@@ -91,11 +101,32 @@ function ReviewerQueue({ session }: { session: Session }) {
       <section><h2>Events</h2>
         {!queue.events ? <p role="alert">Couldn’t load events. Refresh to try again.</p> :
           queue.events.length === 0 && <p>No events awaiting review.</p>}
-        {queue.events?.map(event => <article key={event._id}><h3>{event.title}</h3>
-          <p>{[event.venue, event.city].filter(Boolean).join(", ")}<br />{localDate(event.startsAt)}</p>
-          <a className="text-link" target="_blank" rel="noopener noreferrer"
-            href={studio + "/intent/edit/id=" + encodeURIComponent(event._id.replace(/^drafts\./, "")) + ";type=event"}>
-            Review event in Sanity Studio</a>
+        {queue.events?.map(event => <article key={event._id} className="break-words">
+          <h3>{event.title}</h3>
+          {event.summary && <p className="mt-2 whitespace-pre-line">{event.summary}</p>}
+          <dl className="mt-4 grid gap-x-4 gap-y-3 sm:grid-cols-2">
+            <div><dt className="font-bold">When</dt>
+              <dd>{localDate(event.startsAt)}{event.endsAt && <> to {localDate(event.endsAt)}</>}
+                {event.weeklyUntil && <div>Weekly through {new Date(event.weeklyUntil + "T12:00:00Z").toLocaleDateString("en-US",
+                  { timeZone: "UTC", dateStyle: "long" })}</div>}
+              </dd>
+            </div>
+            <div><dt className="font-bold">Where</dt><dd>{event.venue}<br />
+              {[event.street, event.city].filter(Boolean).join(", ")}</dd></div>
+            {event.organizer && <div><dt className="font-bold">Organizer</dt><dd>{event.organizer}</dd></div>}
+            {event.priceLabel && <div><dt className="font-bold">Admission</dt><dd>{event.priceLabel}</dd></div>}
+          </dl>
+          {(event.url || event.ticketUrl) && <div className="mt-3 flex flex-wrap gap-4">
+            {event.url && <a className="text-link" href={event.url} target="_blank" rel="noopener noreferrer">Event website</a>}
+            {event.ticketUrl && event.ticketUrl !== event.url && <a className="text-link" href={event.ticketUrl}
+              target="_blank" rel="noopener noreferrer">Tickets</a>}
+          </div>}
+          <div className="submission-actions">
+            <button className="primary-action" disabled={busy} onClick={() => act("/api/admin/approvals/events",
+              { draftId: event._id, revision: event._rev, decision: "approve" }, event.title + " was published.")}>Approve event</button>
+            <button disabled={busy} onClick={() => act("/api/admin/approvals/events",
+              { draftId: event._id, revision: event._rev, decision: "reject" }, event.title + " was rejected.")}>Reject event</button>
+          </div>
         </article>)}
       </section>
     </>}

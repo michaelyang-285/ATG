@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
-type EventRow = { eventId: string; draft?: { title: string }; published?: { title: string; slug?: string } };
+type EventRow = { eventId: string; draft?: { title: string; reviewStatus?: string }; published?: { title: string; slug?: string } };
 type Item = { id: string; title: string; status: string; href?: string };
 export default function MySubmissions({ session, refreshKey }: { session: Session; refreshKey: number }) {
   const [events, setEvents] = useState<Item[] | null>(null);
@@ -18,7 +18,7 @@ export default function MySubmissions({ session, refreshKey }: { session: Sessio
     read("/api/events").then(({ events }: { events: EventRow[] }) => {
       if (controller.signal.aborted) return;
       setEvents(events.map(row => ({ id: row.eventId, title: row.published?.title || row.draft?.title || "Event",
-        status: row.published ? "Published" : "In review",
+        status: row.published ? "Published" : row.draft?.reviewStatus === "rejected" ? "Rejected" : "In review",
         href: row.published?.slug ? "/events/" + encodeURIComponent(row.published.slug) : undefined })));
     }).catch(() => { if (!controller.signal.aborted) setLoadFailed(true); });
     return () => controller.abort();
