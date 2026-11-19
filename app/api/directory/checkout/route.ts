@@ -25,14 +25,17 @@ export function POST(req: Request) {
       throw new Failure(409, "This listing is already paid.");
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!),
       home = new URL("/directory/manage", process.env.DIRECTORY_SITE_URL!).href;
+    const liveMode = process.env.STRIPE_SECRET_KEY.includes("_live_");
     let attempt = data.checkout_attempt;
     if (data.checkout_session) {
-      const prior = await stripe.checkout.sessions.retrieve(
-        data.checkout_session,
-      );
-      if (prior.status === "open" && prior.allow_promotion_codes && prior.url) return { url: prior.url };
-      if (prior.status === "open") await stripe.checkout.sessions.expire(prior.id);
-      if (prior.status === "complete")
+      // A listing started during testing may still reference a sandbox session.
+      const staleTestSession = liveMode && data.checkout_session.startsWith("cs_test_");
+      if (!liveMode && data.checkout_session.startsWith("cs_live_"))
+        throw new Failure(503, "Live checkout is temporarily unavailable. Your listing is saved.");
+      const prior = staleTestSession ? null : await stripe.checkout.sessions.retrieve(data.checkout_session);
+      if (prior?.status === "open" && prior.allow_promotion_codes && prior.url) return { url: prior.url };
+      if (prior?.status === "open") await stripe.checkout.sessions.expire(prior.id);
+      if (prior?.status === "complete")
         throw new Failure(
           409,
           "Payment is processing. Refresh your listing status shortly.",
@@ -61,7 +64,7 @@ export function POST(req: Request) {
             price_data: {
               currency: "usd",
               unit_amount: 300,
-              ...(process.env.STRIPE_SECRET_KEY!.includes("_live_")
+              ...(liveMode
                 ? {product: "prod_atg_directory_profile"}
                 : {product_data: {name: "All Things Gwinnett directory listing"}}),
             },
