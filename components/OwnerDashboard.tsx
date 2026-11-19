@@ -2,7 +2,9 @@
 import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 import BusinessLocationFields from "./BusinessLocationFields";
 import { descriptionLength, descriptionLimit } from "@/lib/directory/description";
-import { galleryLimit } from "@/lib/directory/gallery";
+import { galleryLimit, sourceImageLimit } from "@/lib/directory/gallery";
+import { prepareDirectoryImage } from "@/lib/directory/prepare-image";
+import { directoryThumbnail } from "@/lib/directory/thumbnail";
 import OperatingHoursFields from "./OperatingHoursFields";
 import OperatingHours from "./OperatingHours";
 import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
@@ -221,11 +223,13 @@ export default function OwnerDashboard() {
         const remaining = galleryLimit - form.gallery.length;
         if (k === "gallery" && files.length > remaining)
           throw Error(`Choose up to ${remaining} more photos for this gallery.`);
-        if (files.some(file => !file.size || file.size > 2_000_000))
-          throw Error("Choose JPG, PNG, or WebP files of 2 MB or less each.");
+        if (files.some(file => !file.size || file.size > sourceImageLimit))
+          throw Error("Choose JPG, PNG, or WebP files of 10 MB or less each.");
         for (const file of files) {
+          const {display, preview} = await prepareDirectoryImage(file, k);
           const data = new FormData();
-          data.set("file", file);
+          data.set("file", display, "display");
+          if (preview) data.set("thumbnail", preview, "thumbnail.jpg");
           const {url} = await api("upload", data);
           setForm(current => current && (k === "logo"
             ? {...current, logo: url}
@@ -524,7 +528,7 @@ export default function OwnerDashboard() {
                   {networks.map(({key,label})=><div key={key}>{field(key,label+" URL",false,"url")}</div>)}
                   {field("social","Other social profile",false,"url")}
                 </details>
-                </>}{step===3&&<><p>Logo and photos are optional. Choose a JPG, PNG, or WebP up to 2 MB.</p>
+                </>}{step===3&&<><p>Choose JPG, PNG, or WebP images up to 10 MB each. Your device resizes them before upload. Logo and photos are optional.</p>
                 {(["logo", "gallery"] as const).map((k) => (
                   <section key={k} className="upload-panel">
                     <label>
@@ -550,7 +554,7 @@ export default function OwnerDashboard() {
                     ).map((src, index) => (
                       <div className="upload-preview" key={src}>
                         <img
-                          src={src}
+                          src={k === "gallery" ? directoryThumbnail(src) : src}
                           alt={k === "logo" ? "Uploaded logo" : "Work photo " + (index + 1)}
                           width={80}
                           height={80}
@@ -633,7 +637,7 @@ function ListingPreview({ data: d }: { data: Partial<Draft> }) {
         ))}
       <OperatingHours week={d.weeklyHours} legacy={d.hours} />
       {d.gallery?.map((src) => (
-        <img key={src} src={src} alt="Work sample" width={100} />
+        <img key={src} src={directoryThumbnail(src)} alt="Work sample" width={100} />
       ))}
     </article>
   );
