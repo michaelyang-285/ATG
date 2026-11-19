@@ -39,7 +39,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head><BotIdClient protect={protectedRoutes} /></head>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag() { window.dataLayer.push(arguments); }
+gtag('js', new Date());`,
+          }}
+        />
+        <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MJNC3TZ4" />
+        <BotIdClient protect={protectedRoutes} />
+      </head>
       <body>
         <template
           dangerouslySetInnerHTML={{ __html: `<!-- ${contract} -->` }}
