@@ -309,7 +309,7 @@ export const schemaTypes = [
     type: "object",
     fields: [
       text("heading", "Heading"),
-      text("style", "Style"),
+      { name: "style", type: "string", title: "Style", description: "Use table for a comparison, profile for a vendor, or action for a call to action. For a table, enter one paragraph per row. Use Shift+Enter between cells, with column headings in the first row." },
       { name: "body", type: "array", of: [{ type: "block" }] },
     ],
   }),

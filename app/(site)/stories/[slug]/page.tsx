@@ -11,6 +11,8 @@ import {
   safeUrl,
   type Story,
 } from "@/lib/publication";
+import "@/styles/story-guide.css";
+import { StoryCallout } from "@/components/StoryCallout";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
 export const revalidate = 60;
@@ -34,8 +36,11 @@ export async function generateMetadata({
         alternates: { canonical: `/stories/${encodeURIComponent(s.slug)}` },
         openGraph: {
           type: "article",
+          title: s.title,
+          description: s.excerpt,
+          url: `/stories/${encodeURIComponent(s.slug)}`,
           publishedTime: s.publishedAt,
-          images: imageUrl(s.image) ? [imageUrl(s.image)!] : undefined,
+          images: imageUrl(s.image) ? [{ url: imageUrl(s.image)!, alt: s.image?.alt }] : undefined,
         },
       }
     : { title: "Story not found" };
@@ -43,9 +48,22 @@ export async function generateMetadata({
 export default async function Page({ params }: { params: { slug: string } }) {
   const story = await getStory(params.slug);
   if (!story) notFound();
+  const canonical = "https://allthingsgwinnett.com/stories/" + encodeURIComponent(story.slug);
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: story.title,
+    description: story.excerpt,
+    mainEntityOfPage: canonical,
+    datePublished: story.publishedAt,
+    image: imageUrl(story.image) || undefined,
+    author: story.author?.name ? { "@type": "Person", name: story.author.name } : undefined,
+    publisher: { "@type": "Organization", name: "All Things Gwinnett", url: "https://allthingsgwinnett.com" },
+  };
   return (
     <main id="main" className="site-width page-content">
       <article className="article">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }} />
         <header>
           <p className="story-label">{storyLabel(story)}</p>
           <h1>{story.title}</h1>
@@ -79,7 +97,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 image: ({ value }) =>
                   value.imageUrl ? (
                     <figure>
-                      <img src={value.imageUrl} alt={value.alt || ""} />
+                      <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
                       {value.caption && (
                         <figcaption>{value.caption}</figcaption>
                       )}
@@ -92,16 +110,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </blockquote>
                 ),
                 divider: () => <hr />,
-                callout: ({ value }) => (
-                  <aside>
-                    <h2>{value.heading || value.title}</h2>
-                    {Array.isArray(value.body) ? (
-                      <PortableText value={value.body} />
-                    ) : (
-                      <p>{value.body}</p>
-                    )}
-                  </aside>
-                ),
+                callout: ({ value }) => <StoryCallout value={value} />,
                 tldr: ({ value }) => (
                   <aside>
                     <h2>{value.heading || "At a glance"}</h2>
