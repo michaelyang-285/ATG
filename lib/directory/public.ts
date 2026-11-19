@@ -1,11 +1,14 @@
 import type { Business } from "@/lib/publication";
 import { createClient } from "@supabase/supabase-js";
+// Public profile data can change as soon as an owner hides details or requests removal.
+const fetchCurrentListing: typeof fetch = (input, init) => fetch(input, {...init, cache: "no-store"});
 export async function directoryPublic(id?: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
     key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return [];
   const table = createClient(url, key, {
     auth: { persistSession: false },
+    global: { fetch: fetchCurrentListing },
   }).from("directory_public");
   const rows = [];
   for (let start = 0; ; start += 500) {
@@ -26,6 +29,7 @@ export async function directoryPublic(id?: string) {
 export async function searchDirectory(terms: string, cities: string[] | null, category: string, service: string, editorial: Business[]): Promise<Business[]> {
   const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
     auth: {persistSession: false},
+    global: { fetch: fetchCurrentListing },
   });
   const businesses: Business[] = [];
   for (let start = 0; ; start += 500) {

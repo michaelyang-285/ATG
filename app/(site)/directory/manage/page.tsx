@@ -8,7 +8,7 @@ export default function Manage() {
   return (
     <main id="main" className="site-width page-content directory-owner">
       <BotIdClient
-        protect={["login", "owner", "progress", "upload", "checkout"].map((path) => ({
+        protect={["login", "owner", "progress", "upload", "checkout", "deletion"].map((path) => ({
           path: "/api/directory/" + path,
           method: "POST" as const,
         }))}

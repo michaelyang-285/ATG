@@ -1,4 +1,6 @@
 "use client";
+import { eligibleLocation, areaError } from "@/lib/directory/business-location";
+import BusinessLocationFields from "./BusinessLocationFields";
 import MySubmissions from "./MySubmissions";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
@@ -20,7 +22,8 @@ const blank = {
   categories: [] as string[],
   services: [] as string[],
   neighborhood: "",
-  address: "",
+  address: "", streetAddress: "", city: "", zip: "", businessPhone: "",
+  hideAddress: true, hidePhone: true,
   summary: "",
   publicEmail: "",
   publicPhone: "",
@@ -37,9 +40,17 @@ type Row = {
   revision: number;
   status: string;
   review_note: string;
+  deletion_due_at: string | null;
   contact: Partial<Draft>;
   draft: Partial<Draft>;
 };
+type Removal = {id: string; name: string; deletion_due_at: string};
+const dueDate = (value: string) => new Date(value).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York"}) + " ET";
+function restoreDraft(saved: Partial<Draft>): Draft {
+  return {...blank, ...saved, streetAddress: saved.streetAddress ?? saved.address ?? "",
+    businessPhone: saved.businessPhone || saved.publicPhone || saved.phone || "",
+    hideAddress: saved.hideAddress ?? !saved.address, hidePhone: saved.hidePhone ?? !saved.publicPhone};
+}
 const sections=["Business basics","Service area","Contact & links","Photos","Review"];
 type Progress={listing_id:string,step:number,fields:Draft};
 const labels: Record<string, string> = {
@@ -62,6 +73,7 @@ export default function OwnerDashboard() {
   const [session, setSession] = useState<Session | null>(null),
     [email, setEmail] = useState(""),
     [rows, setRows] = useState<Row[]>([]),
+    [deletions, setDeletions] = useState<Removal[]>([]),
     [queue, setQueue] = useState<Row[]>([]);
   const [form, setForm] = useState<Draft | null>(null),
     [step,setStep]=useState(0),
@@ -105,7 +117,7 @@ export default function OwnerDashboard() {
   }
   async function refresh() {
     const data = await api("owner");
-    setRows(data.rows);
+    setRows(data.rows); setDeletions(data.deletions || []);
     setProgress(data.progress);
     setQueue(data.moderator ? await api("review") : []);
   }
@@ -113,14 +125,14 @@ export default function OwnerDashboard() {
     let active = true;
     if (!session) {
       setLoaded(false);setProgress([]);setRows([]);
-      setQueue([]);
+      setQueue([]);setDeletions([]);
       setForm(null);
       return;
     }
     api("owner")
       .then(async (data) => {
         if (!active) return;
-        setRows(data.rows);setProgress(data.progress);setLoaded(true);
+        setRows(data.rows); setDeletions(data.deletions || []);setProgress(data.progress);setLoaded(true);
         if (data.moderator) {
           const q = await api("review");
           if (active) setQueue(q);
@@ -144,22 +156,23 @@ export default function OwnerDashboard() {
       setBusy(false);
     }
   }
-  function resume(saved:Progress){setForm(saved.fields);setStep(saved.step);setMsg("")}
+  function resume(saved:Progress){setForm(restoreDraft(saved.fields));setStep(saved.step);setMsg("")}
   function edit(row?: Row) {
     const existing=row&&progress.find(p=>p.listing_id===row.id&&p.fields.revision===row.revision);
     if(existing){resume(existing);return}
     const m=session?.user.user_metadata||{};
+    let locationHint: {city?: string; zip?: string} = {};
+    try { locationHint = JSON.parse(sessionStorage.getItem("atg-directory-location") || "{}") || {}; } catch {}
     setForm(
       row
-        ? {
-            ...blank,
+        ? restoreDraft({
             ...row.contact,
             ...row.draft,
             id: row.id,listingId:row.id,
             revision: row.revision,
             status: row.status,
-          }
-        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||m.given_name||"",lastName:m.lastName||m.family_name||"",phone:m.phone||"",name:m.businessName||"" },
+          })
+        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||m.given_name||"",lastName:m.lastName||m.family_name||"",phone:m.phone||"",name:m.businessName||"",city:m.city||locationHint.city||"",zip:m.zip||locationHint.zip||"" },
     );
     setStep(0);
     setMsg("");
@@ -203,6 +216,10 @@ export default function OwnerDashboard() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     await run(async()=>{
+      if ((step === 1 || step === 4) && (!form.streetAddress.trim() || !eligibleLocation(form.city, form.zip))) {
+        setStep(1);
+        throw Error(!form.streetAddress.trim() ? "Enter your business street address." : areaError);
+      }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
       const result=await api("owner",form);
@@ -259,8 +276,20 @@ export default function OwnerDashboard() {
               <h3>{r.draft.name}</h3>
               <p>{labels[r.status]}</p>{r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
               {r.review_note && <p>{r.review_note}</p>}
-              <button onClick={() => edit(r)}>Edit listing</button>{" "}
-              {r.status === "unpaid" && (
+              {r.deletion_due_at ? <>
+                <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>
+                <button disabled={busy} onClick={() => run(async () => {
+                  await api("deletion", {id:r.id, action:"cancel"}); await refresh();
+                })}>Cancel deletion request</button>
+              </> : <>
+                <button onClick={() => edit(r)}>Edit listing</button>{" "}
+                <button disabled={busy} onClick={() => {
+                  if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
+                    run(async () => { await api("deletion", {id:r.id, action:"request"}); await refresh(); });
+                  }
+                }}>Request profile deletion</button>
+              </>}
+              {r.status === "unpaid" && !r.deletion_due_at && (
                 <button
                   disabled={busy}
                   onClick={() =>
@@ -270,13 +299,24 @@ export default function OwnerDashboard() {
                     })
                   }
                 >
-                  Pay $3 and submit
+                  Continue to checkout
                 </button>
               )}
             </article>
           ))}
           </section>
           <MySubmissions key={session.user.id} session={session} />
+          {deletions.length > 0 && <section>
+            <h2>Profile deletion requests</h2>
+            {deletions.map(item => <article key={item.id}><h3>{item.name}</h3>
+              <p>Automatic deletion by {dueDate(item.deletion_due_at)}.</p>
+              <button disabled={busy} onClick={() => {
+                if (window.confirm("Permanently delete " + item.name + " now?")) {
+                  run(async () => { await api("deletion", {id:item.id, action:"approve"}); await refresh(); });
+                }
+              }}>Approve deletion now</button>
+            </article>)}
+          </section>}
           {queue.length > 0 && (
             <section>
               <h2>Review submissions</h2>
@@ -396,20 +436,16 @@ export default function OwnerDashboard() {
                   ))}
                 </fieldset>
                 <ServiceAreas value={form.neighborhood} onChange={v=>change("neighborhood",v)}/>
-                {field("address", "Public street address (optional)")}
+                {field("streetAddress", "Business street address", true)}
+                <BusinessLocationFields city={form.city} zip={form.zip} onChange={change} />
+                <label><input type="checkbox" checked={form.hideAddress}
+                  onChange={e => change("hideAddress", e.target.checked)} />Hide address on profile</label>
                 {field("hours", "Hours or appointment availability")}
                 </>}{step===2&&<>
-                {field("publicPhone", "Public phone", false, "tel")}
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={!!form.phone && form.publicPhone === form.phone}
-                    onChange={(e) =>
-                      change("publicPhone", e.target.checked ? form.phone : "")
-                    }
-                  />
-                  Use my phone publicly
-                </label>
+                <label><input type="checkbox" checked={form.hidePhone}
+                  onChange={e => setForm(current => current && ({...current, hidePhone:e.target.checked,
+                    businessPhone: current.businessPhone || current.phone}))} />Hide phone number on profile</label>
+                {!form.hidePhone && field("businessPhone", "Business phone shown on profile", true, "tel")}
                 {field("publicEmail", "Public email", false, "email")}
                 <label>
                   <input
@@ -479,7 +515,7 @@ export default function OwnerDashboard() {
               </>
             )}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>setStep(step-1)}>Back</button>}
-              {step===4 && (!form.status || form.status==="unpaid") && <p>The one-time $3 listing fee helps prevent spam. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
+              {step===4 && (!form.status || form.status==="unpaid") && <p>The one-time listing fee is $3. You can enter a promotion code at Stripe checkout. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
               <button className="primary-action">{busy?"Saving…":step<4?"Next":form.status&&form.status!=="unpaid"?"Submit edits for review":"Continue to payment · $3"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
@@ -511,9 +547,9 @@ function ListingPreview({ data: d }: { data: Partial<Draft> }) {
       <p>{d.summary}</p>
       {[
         d.neighborhood,
-        d.address,
+        d.hideAddress ? "" : (d.streetAddress ? [d.streetAddress, d.city, "GA " + d.zip].join(", ") : d.address),
         d.hours,
-        d.publicPhone,
+        d.hidePhone ? "" : d.businessPhone || d.publicPhone,
         d.publicEmail,
         d.url,
         d.booking,
