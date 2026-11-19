@@ -1,12 +1,10 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { BotIdClient } from "botid/client";
 import { correctionOptIn, correctionRoles } from "@/lib/directory/correction";
 import "./listing-correction.css";
 
 const endpoint = "/api/directory/corrections";
-const protect = [{ path: endpoint, method: "POST" as const }];
 
 export default function ListingCorrection({ name, slug, sample = false }: { name: string; slug: string; sample?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -48,7 +46,6 @@ export default function ListingCorrection({ name, slug, sample = false }: { name
   }
 
   return <>
-    <BotIdClient protect={protect} />
     <p className="listing-correction-prompt">
       Is this information not right?{" "}
       <button type="button" aria-haspopup="dialog" onClick={() => dialog.current?.showModal()}>Let us know.</button>

@@ -1,6 +1,5 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import { BotIdClient } from "botid/client";
 
 export default function NewsletterSignup() {
   const [busy, setBusy] = useState(false);
@@ -24,7 +23,6 @@ export default function NewsletterSignup() {
     } finally { setBusy(false); }
   }
   return <div>
-    <BotIdClient protect={[{ path: "/api/subscribe", method: "POST" }]} />
     {!saved && <form onSubmit={subscribe}>
       <label htmlFor="atg-newsletter-email">Email address</label>
       <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:6}}>

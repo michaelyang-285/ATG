@@ -1,7 +1,20 @@
+import { BotIdClient } from "botid/client";
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 const contract =
   "THESIS: A useful guide leads; recent local stories support it. OWN-WORLD: White, ink #171717, orange #FF4D22, DM Sans, Soft Serif artwork, thin rules. STORY: Discover a local read, find a guide, make a plan. FIRST VIEWPORT: Compact logo and search above four topic links; tagline above a two-thirds lead and one-third story rail. FORM: The guide desk, grounded candidate 3, seed ff5b2443; approved November 4, 2026. FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance";
+const protectedRoutes = [
+  "/api/directory/login",
+  "/api/directory/owner",
+  "/api/directory/progress",
+  "/api/directory/upload",
+  "/api/directory/checkout",
+  "/api/directory/deletion",
+  "/api/directory/corrections",
+  "/api/events",
+  "/api/subscribe",
+].map(path => ({path, method: "POST" as const}));
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://allthingsgwinnett.com"),
   title: {
@@ -26,6 +39,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head><BotIdClient protect={protectedRoutes} /></head>
       <body>
         <template
           dangerouslySetInnerHTML={{ __html: `<!-- ${contract} -->` }}
