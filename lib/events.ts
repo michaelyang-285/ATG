@@ -1,6 +1,9 @@
 import { publication, type LocalEvent } from "./publication";
 import { localClock, easternInstant, shift } from "./event-time";
 export type EventRecord = LocalEvent & {
+  eventFormats?: string[];
+  gameTopics?: string[];
+  cancelled?: boolean;
   street?: string;
   city?: string;
   postalCode?: string;
@@ -12,7 +15,7 @@ export type EventRecord = LocalEvent & {
   image?: any;
 };
 export const eventFields =
-  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,ticketUrl,street,city,postalCode,cost,price,organizer,weeklyUntil,image';
+  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,ticketUrl,street,city,postalCode,cost,price,organizer,weeklyUntil,image,eventFormats,gameTopics,cancelled';
 export function eventDates(e: EventRecord) {
   if (!e.startsAt || !Number.isFinite(Date.parse(e.startsAt))) return [];
   const start = localClock(e.startsAt),
@@ -40,7 +43,7 @@ export function occurrencePath(e: { slug: string; day: string }) {
 }
 export async function calendar(from: string, to: string) {
   const events = await publication.fetch<EventRecord[]>(
-    '*[_type=="event" && defined(startsAt) && startsAt < $end && (coalesce(endsAt,startsAt) >= $start || weeklyUntil >= $first)]{' +
+    '*[_type=="event" && cancelled != true && defined(startsAt) && startsAt < $end && (coalesce(endsAt,startsAt) >= $start || weeklyUntil >= $first)]{' +
       eventFields +
       "}",
     {
@@ -50,13 +53,27 @@ export async function calendar(from: string, to: string) {
     },
     { next: { revalidate: 60 } },
   );
+  return orderedOccurrences(events, e =>
+    e.day <= to && localClock(e.endsAt || e.startsAt).slice(0, 10) >= from
+  );
+}
+
+export async function upcomingGameEvents(topics: string[], now = Date.now()) {
+  if (!topics.length) return [];
+  const today = localClock(now).slice(0, 10);
+  const events = await publication.fetch<EventRecord[]>(
+    '*[_type=="event" && defined(startsAt) && cancelled != true && outsideGwinnett != true && count(gameTopics[@ in $topics]) > 0 && (coalesce(endsAt,startsAt) >= $since || weeklyUntil >= $today)]{' + eventFields + '}',
+    { topics, today, since: shift(today, -1) + "T00:00:00Z" },
+    { next: { revalidate: 60 } },
+  );
+  return orderedOccurrences(events, e => Date.parse(e.endsAt || e.startsAt) >= now);
+}
+
+export type EventOccurrence = ReturnType<typeof eventDates>[number];
+
+function orderedOccurrences(events: EventRecord[], include: (e: EventOccurrence) => boolean) {
   const seen = new Set<string>();
-  return events
-    .flatMap(eventDates)
-    .filter(
-      (e) =>
-        e.day <= to && localClock(e.endsAt || e.startsAt).slice(0, 10) >= from,
-    )
+  return events.flatMap(eventDates).filter(include)
     .sort(
       (a, b) =>
         Date.parse(a.startsAt) - Date.parse(b.startsAt) ||

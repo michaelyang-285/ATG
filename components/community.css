@@ -192,3 +192,5 @@
 @media (max-width: 480px) {
   .calendar-run > .calendar-list-row { grid-template-columns: minmax(0, 1fr); row-gap: .5rem; }
 }
+
+.game-event-filters { flex-wrap: wrap; column-gap: 1.25rem; row-gap: 0; }

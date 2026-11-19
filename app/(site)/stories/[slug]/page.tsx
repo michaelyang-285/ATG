@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { GameEventTable } from "@/components/GameEventTable";
+import { upcomingGameEvents } from "@/lib/events";
 import { notFound } from "next/navigation";
 import { PortableText } from "@portabletext/react";
 import type { Metadata } from "next";
@@ -48,6 +51,9 @@ export async function generateMetadata({
 export default async function Page({ params }: { params: { slug: string } }) {
   const story = await getStory(params.slug);
   if (!story) notFound();
+  const topics = story.gameTopics || [];
+  const hasCalendar = topics.length > 0 && story.body?.some(block => block._type === "upcomingGameEvents");
+  const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];
   const canonical = "https://allthingsgwinnett.com/stories/" + encodeURIComponent(story.slug);
   const structured = {
     "@context": "https://schema.org",
@@ -94,6 +100,13 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 },
               },
               types: {
+                upcomingGameEvents: ({ value }) => hasCalendar ? (
+                  <section>
+                    <h2>{value.heading || "Upcoming events"}</h2>
+                    <GameEventTable events={nextEvents} caption="Next five events" />
+                    {topics.includes("pokemon") && <p><Link className="button button-orange" href="/events/pokemon">See all Gwinnett Pokémon events</Link></p>}
+                  </section>
+                ) : null,
                 image: ({ value }) =>
                   value.imageUrl ? (
                     <figure>

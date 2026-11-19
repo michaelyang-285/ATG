@@ -40,6 +40,7 @@ export default async function Page({ params, searchParams }: Props) {
     "@type": "Event",
     name: e.title,
     startDate: e.startsAt,
+    eventStatus: e.cancelled ? "https://schema.org/EventCancelled" : "https://schema.org/EventScheduled",
     endDate: e.endsAt,
     description: e.summary,
     image: atgOrganizesEvent ? eventPublisher.logo.url : imageUrl(e.image) || undefined,
@@ -91,6 +92,7 @@ export default async function Page({ params, searchParams }: Props) {
         />
         <Link href="/events">← Events calendar</Link>
         <h1>{e.title}</h1>
+        {e.cancelled && <p><strong>This event has been cancelled.</strong></p>}
         <p>
           <time dateTime={e.startsAt}>{when(e.startsAt)}</time>
           {e.endsAt && <> to {when(e.endsAt)}</>} (Eastern)

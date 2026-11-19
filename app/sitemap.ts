@@ -20,6 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       "/local-life",
       "/guides",
       "/events",
+      "/events/pokemon",
       "/directory",
       "/about","/advertise","/contact","/contribute",
     ].map((p) => ({ url: "https://allthingsgwinnett.com" + p })),
