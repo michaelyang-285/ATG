@@ -8,6 +8,7 @@ import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/
 import MySubmissions from "./MySubmissions";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
+import { allOfGwinnett, formatServiceAreas, serviceAreaCities } from "@/lib/directory/locations";
 import { useEffect, useState, FormEvent } from "react";
 import { createClient, Session } from "@supabase/supabase-js";
 import { categories, services } from "@/lib/directory/categories";
@@ -25,7 +26,7 @@ const blank = {
   category: "",
   categories: [] as string[],
   services: [] as string[],
-  neighborhood: "",
+  neighborhood: allOfGwinnett,
   address: "", streetAddress: "", city: "", zip: "", businessPhone: "",
   hideAddress: true, hidePhone: true,
   summary: "",
@@ -53,7 +54,8 @@ type Removal = {id: string; name: string; deletion_due_at: string};
 const dueDate = (value: string) => new Date(value).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York"}) + " ET";
 function restoreDraft(saved: Partial<Draft>): Draft {
   const weeklyHours = isWeek(saved.weeklyHours) ? saved.weeklyHours : saved.hours ? null : defaultWeek();
-  return {...blank, ...saved, weeklyHours, streetAddress: saved.streetAddress ?? saved.address ?? "",
+  const neighborhood = formatServiceAreas(serviceAreaCities(saved.neighborhood ?? allOfGwinnett));
+  return {...blank, ...saved, weeklyHours, neighborhood, streetAddress: saved.streetAddress ?? saved.address ?? "",
     businessPhone: saved.businessPhone || saved.publicPhone || saved.phone || "",
     hideAddress: saved.hideAddress ?? !saved.address, hidePhone: saved.hidePhone ?? !saved.publicPhone};
 }

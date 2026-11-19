@@ -4,6 +4,25 @@ import { cities } from "@/lib/gwinnett";
 // search areas, not an address-level determination of county residency.
 // https://www.gwinnettcounty.com/static/departments/planning/Data_Maps_Reports/gwinnett_county_zipcode_map.pdf
 export const county = "Gwinnett County";
+export const allOfGwinnett = "All of Gwinnett";
+function isCountywide(area: string) {
+  return ["gwinnett", county.toLowerCase(), allOfGwinnett.toLowerCase()].includes(area.toLowerCase());
+}
+
+export function serviceAreaCities(value: string): string[] {
+  const areas = value.split(",").map(area => area.trim()).filter(Boolean);
+  const named = areas.filter(area => !isCountywide(area)).map(area =>
+    cities.find(city => city.toLowerCase() === area.toLowerCase()) ?? area
+  );
+  return Array.from(new Set(areas.some(isCountywide) ? [...cities, ...named] : named));
+}
+
+export function formatServiceAreas(selected: string[]): string {
+  if (cities.every(city => selected.includes(city))) {
+    return [allOfGwinnett, ...selected.filter(city => !cities.includes(city))].join(", ");
+  }
+  return selected.join(", ");
+}
 export const zipAreas: Record<string, string[]> = {
   "30011": ["Auburn", "Mulberry"], "30012": ["Conyers"], "30017": ["Grayson"],
   "30019": ["Dacula", "Mulberry"], "30024": ["Suwanee", "Sugar Hill"],
@@ -23,7 +42,7 @@ export const zipAreas: Record<string, string[]> = {
 export const places = Array.from(new Set([...cities, ...Object.values(zipAreas).flat()])).sort();
 export function resolveArea(raw: string) {
   const query = raw.trim().replace(/,?\s+(ga|georgia)$/i, "").trim().toLowerCase();
-  if (["", "gwinnett", "gwinnett county", "all of gwinnett"].includes(query)) return null;
+  if (!query || isCountywide(query)) return null;
   const zip = query.match(/^(\d{5})(?:-\d{4})?$/);
   return zip ? zipAreas[zip[1]] || [] : places.filter(city => city.toLowerCase() === query);
 }
