@@ -938,9 +938,14 @@ img {
 .hours-time span { display: none; }
 .directory-owner .hours-time input { margin-top: 0; }
 .hours-closed, .hours-overnight { color: #595750; grid-column: 2 / -1; }
-.listing-hours dl { margin: .5rem 0; }
-.listing-hours dl > div { display: flex; flex-wrap: wrap; gap: .25rem 1rem; justify-content: space-between; padding: .3rem 0; }
-.listing-hours dd { margin: 0; font-variant-numeric: tabular-nums; }
+.listing-hours dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: .5rem 1.25rem;
+  margin: .75rem 0 0;
+}
+.listing-hours dd { margin: 0; text-align: start; font-variant-numeric: tabular-nums; }
 @media (max-width: 560px) {
   .hours-editor .hours-columns { display: none; }
   .hours-editor .hours-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }

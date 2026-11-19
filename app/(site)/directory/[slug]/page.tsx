@@ -54,6 +54,10 @@ export default async function Page({params}:Props) {
   const website = safeUrl(b.url);
   const instagramWebsite = website && /^(?:[a-z0-9-]+\.)*(?:instagram\.com|instagr\.am)$/i.test(new URL(website).hostname.replace(/\.$/, ""));
   const destination = b.address?.trim() ? encodeURIComponent(b.address.trim()) : "";
+  const phone = b.publicPhone?.trim();
+  const phoneLabel = phone?.replace(/^(?:\+?1[ .-]?)?\(?(\d{3})\)?[ .-]?(\d{3})[ .-]?(\d{4})$/, "($1) $2-$3");
+  const booking = safeUrl(b.booking);
+  const otherSocial = safeUrl(b.social);
   const socials = networks.flatMap(n=>{
     const href = safeUrl(b[n.key]);
     return href ? [{...n,href}] : [];
@@ -79,8 +83,18 @@ export default async function Page({params}:Props) {
     </section><aside><h2>Listing details</h2>
       {[[ "City or service area",b.neighborhood],["Address",b.address]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
       <OperatingHours week={b.weeklyHours} legacy={b.hours} />
-      {b.publicPhone && <p><a href={"tel:"+b.publicPhone.replace(/[^+0-9]/g,"")}>{b.publicPhone}</a></p>}
-      {[[b.booking,"Book an appointment"],[b.social,"Other social profile"]].map(([url,label])=>safeUrl(url) && <p key={label}><a className="text-link" href={safeUrl(url)!}>{label} ↗</a></p>)}
+      {(phone || booking) && <section className="listing-contact">
+        <h3>Contact info</h3>
+        {phone && <a className="listing-phone" href={"tel:" + phone.replace(/[^+0-9]/g, "")}>
+          <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.69 2.79a2 2 0 0 1-.45 2.11L8.08 9.89a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.33 1.83.56 2.79.69A2 2 0 0 1 22 16.92Z"/>
+          </svg>
+          <span><span className="sr-only">Call </span>{phoneLabel}</span>
+        </a>}
+        {booking && <a className="text-link" href={booking}>Book an appointment ↗</a>}
+      </section>}
+      {otherSocial && <p><a className="text-link" href={otherSocial}>Other social profile ↗</a></p>}
       {destination && <section><h3>Get directions</h3><div className="profile-links">
         <a href={"https://www.google.com/maps/dir/?api=1&destination="+destination}>Google Maps ↗</a>
         <a href={"https://maps.apple.com/?daddr="+destination}>Apple Maps ↗</a>
