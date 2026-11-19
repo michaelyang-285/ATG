@@ -48,7 +48,18 @@
 .atg-profile{overflow-wrap:anywhere}.listing-columns aside p{margin:1rem 0}
 .listing-summary{white-space:pre-line;font-size:1.15rem;line-height:1.65}
 .listing-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}.listing-tags span{background:#faf6ef;padding:.3rem .75rem;border-radius:2rem}
-.listing-photo{max-width:100%;height:auto;margin:1rem 0}
+.listing-gallery { margin-block: 2rem; }
+.listing-thumbnails { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 6rem), 9rem)); gap: .75rem; }
+.listing-thumbnails button { padding: 0; background: var(--surface); border: 1px solid var(--rule); border-radius: .5rem; overflow: hidden; cursor: zoom-in; }
+.listing-thumbnails img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
+.listing-lightbox { margin: auto; padding: 0; border: 0; border-radius: .65rem; background: #171717; color: white; max-width: calc(100vw - 2rem); max-height: 94dvh; }
+.listing-lightbox::backdrop { background: rgb(0 0 0 / 82%); }
+.listing-lightbox-content { padding: .75rem; display: grid; gap: .5rem; }
+.listing-lightbox-content > img { display: block; width: auto; height: auto; max-width: min(80rem, 100%); max-height: 65dvh; object-fit: contain; justify-self: center; }
+.listing-lightbox-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.listing-lightbox-bar button { min-height: 44px; padding: .4rem .85rem; border: 1px solid currentColor; border-radius: .4rem; color: white; background: transparent; }
+.listing-gallery button:focus-visible { outline: 3px solid var(--orange, #ff4d22); outline-offset: 2px; }
+html:has(.listing-lightbox[open]) { overflow: hidden; }
 @media(max-width:660px){.listing-columns{grid-template-columns:1fr}.listing-heading{align-items:start;flex-direction:column}}
 
 .listing-heading .button{margin-top:1rem}

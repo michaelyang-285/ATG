@@ -1,5 +1,6 @@
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { revalidatePath } from "next/cache";
+import { listingPath } from "@/lib/directory/profile";
 import { db, Failure, human, owner, respond } from "@/lib/directory/server";
 
 export function POST(req: Request) {
@@ -25,10 +26,11 @@ export function POST(req: Request) {
     } else {
       throw new Failure(400, "Choose a valid action.");
     }
-    const { data, error } = await query.eq("id", id).select("id").maybeSingle();
+    const { data, error } = await query.eq("id", id).select("id,profile_slug").maybeSingle();
     if (error) throw error;
     if (!data) throw new Failure(409, "The listing or request has changed. Refresh your dashboard.");
     revalidatePath("/directory/local-" + id);
+    if (data.profile_slug) revalidatePath(listingPath(data.profile_slug));
     revalidatePath("/directory");
     revalidatePath("/sitemap.xml");
     return { ok: true };

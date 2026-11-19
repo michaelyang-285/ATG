@@ -1,4 +1,6 @@
 import { db, owner, respond, Failure } from "@/lib/directory/server";
+import { revalidatePath } from "next/cache";
+import { listingPath } from "@/lib/directory/profile";
 export const dynamic = "force-dynamic";
 async function reviewer(req: Request) {
   if ((await owner(req)).app_metadata.directory_admin !== true)
@@ -28,7 +30,7 @@ export function POST(req: Request) {
       throw new Failure(400, "Invalid review.");
     const table = db().from("directory_entries");
     const { data } = await table
-      .select("draft")
+      .select("draft,profile_slug")
       .eq("id", id)
       .eq("revision", revision)
       .is("deletion_due_at", null)
@@ -45,10 +47,16 @@ export function POST(req: Request) {
       .eq("revision", revision)
       .is("deletion_due_at", null)
       .eq("status", "review")
-      .select("id")
+      .select("id,profile_slug")
       .maybeSingle();
     if (result.error) throw result.error;
     if (!result.data) throw new Failure(409, "Refresh the review queue.");
+    if (status === "published") {
+      if (data.profile_slug) revalidatePath(listingPath(data.profile_slug));
+      revalidatePath(listingPath(result.data.profile_slug));
+      revalidatePath("/directory");
+      revalidatePath("/sitemap.xml");
+    }
     return { ok: true };
   });
 }

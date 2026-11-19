@@ -6,12 +6,15 @@ import {directoryPublic} from "./public";
 import {categories} from "./categories";
 
 type Listing = Business & SocialFields & {
+  source?: "local";
   weeklyHours?: DayHours[]; hours?: string; publicPhone?: string; publicEmail?: string;
   booking?: string; social?: string; gallery?: string[];
 };
 export const getListing = cache(async (slug: string): Promise<Listing | null> => {
-  const local = /^local-([a-f0-9-]{36})$/.exec(slug);
-  if (local) return (await directoryPublic(local[1]))[0] ?? null;
+  const legacy = /^local-([a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.exec(slug);
+  const [local] = await directoryPublic(legacy ? {id: legacy[1]} : {path: slug});
+  if (local) return {...local, source: "local"};
+  if (legacy) return null;
   return publication.fetch('*[_type=="business" && slug.current==$slug][0]{_id,name,"slug":slug.current,category,neighborhood,summary,address,url,image}', {slug}, {next:{revalidate:60}});
 });
 const types: Record<string,string> = {
