@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 const guidelines = [
-  ["Start with Gwinnett", "I want every story to help someone understand what’s happening here in Gwinnett. If a state decision changes a local bus route, tell riders which stops are affected."],
+  ["Start with Gwinnett", "Every story we publish must be about Gwinnett County. You can cover news from anywhere in the world if the focus is on how it affects people here."],
   ["Cover faith and politics", "I want readers to understand how faith and politics shape everyday life in Gwinnett. You might cover a church opening its doors as a warming shelter or explain how a city council vote affects your neighborhood. Leave campaigning and religious persuasion out of the piece."],
   ["Give us your honest take", "I want readers to hear the same honest opinion you’d give a neighbor who asked if a place was worth the trip. If you’re reviewing a restaurant, tell us what you ordered, what you loved, and what fell short. Back factual claims with details we can check. You can write about your own shop or event. Tell readers your connection and give them something useful beyond what you sell."],
   ["Show how you know", "I want readers to know why you’re the person to tell this story. If you’re sharing a birding spot, tell us how often you walk that trail, what you’ve spotted, and where readers can check the details. In search, that’s called E-E-A-T. It stands for experience, expertise, authoritativeness, and trustworthiness."],
