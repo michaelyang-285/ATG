@@ -4,7 +4,7 @@ import {publication} from "@/lib/publication";
 import {directoryPublic} from "@/lib/directory/public";
 import type { MetadataRoute } from "next";
 import { getPublication, storyHref } from "@/lib/publication";
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { stories, businesses } = await getPublication();

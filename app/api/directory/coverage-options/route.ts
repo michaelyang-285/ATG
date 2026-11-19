@@ -1,7 +1,7 @@
 import {directoryPublic} from "@/lib/directory/public";
 import {publication} from "@/lib/publication";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 export async function GET() {
   const [local, editorial] = await Promise.all([
     directoryPublic(),
