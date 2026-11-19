@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import SignupCard from "./SignupCard";
-import { cities } from "@/lib/gwinnett";
+import { cities, cityOptionLabel } from "@/lib/gwinnett";
 import { browserClient } from "@/lib/browser-client";
 export default function EventSubmission({ generalAccount = false }: { generalAccount?: boolean } = {}) {
   const client = useMemo(browserClient, []);
@@ -206,7 +206,7 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
               <select name="city" required defaultValue="">
                 <option value="">Choose a city</option>
                 {cities.map((c) => (
-                  <option key={c}>{c}</option>
+                  <option key={c} value={c}>{cityOptionLabel(c)}</option>
                 ))}
               </select>
             </label>
