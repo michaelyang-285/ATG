@@ -84,6 +84,8 @@ export default function OwnerDashboard() {
     [deletions, setDeletions] = useState<Removal[]>([]),
     [queue, setQueue] = useState<Row[]>([]);
   const [form, setForm] = useState<Draft | null>(null),
+    [checkout, setCheckout] = useState<{id: string; url?: string} | null>(null),
+    [uploadIssue, setUploadIssue] = useState<{field: "logo" | "gallery"; message: string} | null>(null),
     [step,setStep]=useState(0),
     [progress,setProgress]=useState<Progress[]>([]),
     [signin,setSignin]=useState(false),
@@ -136,7 +138,7 @@ export default function OwnerDashboard() {
     if (!session) {
       setLoaded(false);setProgress([]);setRows([]);
       setQueue([]);setDeletions([]);
-      setForm(null);
+      setForm(null);setCheckout(null);setUploadIssue(null);
       return;
     }
     api("owner")
@@ -166,8 +168,9 @@ export default function OwnerDashboard() {
       setBusy(false);
     }
   }
-  function resume(saved:Progress){setForm(restoreDraft(saved.fields));setStep(saved.step);setMsg("")}
+  function resume(saved:Progress){setUploadIssue(null);setForm(restoreDraft(saved.fields));setStep(saved.step);setMsg("")}
   function edit(row?: Row) {
+    setUploadIssue(null);
     const existing=row&&progress.find(p=>p.listing_id===row.id&&p.fields.revision===row.revision);
     if(existing){resume(existing);return}
     const m=session?.user.user_metadata||{};
@@ -217,12 +220,26 @@ export default function OwnerDashboard() {
   }
   function upload(file: File, k: "logo" | "gallery") {
     run(async () => {
-      const data = new FormData();
-      data.set("file", file);
-      const out = await api("upload", data);
-      change(k, k === "logo" ? out.url : [...form.gallery, out.url]);
+      setUploadIssue(null);
+      try {
+        if (!file.size || file.size > 2_000_000) throw Error("Choose a JPG, PNG, or WebP file of 2 MB or less.");
+        const data = new FormData();
+        data.set("file", file);
+        const out = await api("upload", data);
+        change(k, k === "logo" ? out.url : [...form.gallery, out.url]);
+      } catch (error) {
+        setUploadIssue({field: k, message: error instanceof Error ? error.message : "The upload failed. Please try again."});
+      }
     });
   }
+  async function openCheckout(id: string) {
+    setCheckout({id});
+    const {url} = await api("checkout", {id});
+    if (!url) throw Error("Stripe Checkout couldn’t open. Please try again.");
+    setCheckout({id, url});
+    window.location.assign(url);
+  }
+
   const descriptionCount = descriptionLength(form?.summary || "");
   const descriptionOver = descriptionCount > descriptionLimit;
   const descriptionBlocked = descriptionOver && (step === 0 || step === 4);
@@ -244,12 +261,14 @@ export default function OwnerDashboard() {
       }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
-      const result=await api("owner",form);
-      setForm(null);await refresh();
-      if(!form.status || form.status==="unpaid"){
-        const checkout=await api("checkout",{id:result.id});
-        window.location.assign(checkout.url);
-      }else setMsg("Edits submitted for review.");
+      const result = await api("owner", form);
+      setForm(null);
+      if (!form.status || form.status === "unpaid") {
+        await openCheckout(result.id);
+        return;
+      }
+      await refresh();
+      setMsg("Edits submitted for review.");
     });
   }
   async function checkpoint(next:number){
@@ -267,8 +286,8 @@ export default function OwnerDashboard() {
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
-      {!form && status}
-      <h1>{form?"Build your listing":"My submissions"}</h1>
+      {!form && !checkout && status}
+      <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My submissions"}</h1>
       <div className="owner-session">
         <span>Signed in as {session.user.email}</span>
         <button
@@ -283,7 +302,18 @@ export default function OwnerDashboard() {
           Sign out
         </button>
       </div>
-      {!form ? (
+      {checkout ? (
+        <section className="checkout-handoff" aria-label="Listing payment">
+          <p>Your listing is saved.</p>
+          {busy && <p role="status">Opening Stripe Checkout…</p>}
+          {msg && <p role="alert" className="wizard-error">{msg}</p>}
+          <div className="submission-actions">
+            {checkout.url ? <a className="button button-orange" href={checkout.url}>Open Stripe Checkout</a>
+              : !busy && <button className="primary-action" onClick={() => run(() => openCheckout(checkout.id))}>Retry checkout</button>}
+            {!busy && <button type="button" onClick={() => run(async () => { await refresh(); setCheckout(null); })}>Back to my listings</button>}
+          </div>
+        </section>
+      ) : !form ? (
         <>
           <section aria-labelledby="directory-submissions" style={{marginBlock:"2rem"}}>
           <h2 id="directory-submissions">Directory listings</h2>
@@ -310,12 +340,7 @@ export default function OwnerDashboard() {
                     {r.status === "unpaid" && (
                       <button
                         disabled={busy}
-                        onClick={() =>
-                          run(async () => {
-                            const out = await api("checkout", { id: r.id });
-                            window.location.assign(out.url);
-                          })
-                        }
+                        onClick={() => run(() => openCheckout(r.id))}
                       >
                         Continue to checkout
                       </button>
@@ -517,19 +542,21 @@ export default function OwnerDashboard() {
                         }}
                       />
                     </label>
-                    {(k === "logo"
+                    {uploadIssue?.field === k && <p role="alert" className="wizard-error">{uploadIssue.message}</p>}
+                    <div className="upload-previews">{(k === "logo"
                       ? [form.logo].filter(Boolean)
                       : form.gallery
-                    ).map((src) => (
-                      <span key={src}>
+                    ).map((src, index) => (
+                      <div className="upload-preview" key={src}>
                         <img
                           src={src}
-                          alt="Upload preview"
+                          alt={k === "logo" ? "Uploaded logo" : "Work photo " + (index + 1)}
                           width={80}
                           height={80}
                         />
                         <button
                           type="button"
+                          aria-label={k === "logo" ? "Remove logo" : "Remove work photo " + (index + 1)}
                           onClick={() =>
                             change(
                               k,
@@ -541,16 +568,16 @@ export default function OwnerDashboard() {
                         >
                           Remove
                         </button>
-                      </span>
-                    ))}
+                      </div>
+                    ))}</div>
                   </section>
                 ))}</>}
               </>
             )}
             {msg && <p className="wizard-error" role="alert">{msg}</p>}
+            {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">The one-time listing fee is $3. You can enter a promotion code at Stripe Checkout. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>{setMsg("");setStep(step-1)}}>Back</button>}
-              {step===4 && (!form.status || form.status==="unpaid") && <p>The one-time listing fee is $3. You can enter a promotion code at Stripe checkout. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
-              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy?"Saving…":step<4?"Next":form.status&&form.status!=="unpaid"?"Submit edits for review":"Continue to payment · $3"}</button>
+              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : "Continue to Stripe Checkout · $3"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
         </form>
