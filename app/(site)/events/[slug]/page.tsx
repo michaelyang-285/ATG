@@ -33,6 +33,7 @@ export default async function Page({ params, searchParams }: Props) {
   const url = safeUrl(e.url),
     pageUrl = eventPublisher.url + occurrencePath(e),
     atgOrganizesEvent = /^(all things gwinnett|atg)$/i.test(e.organizer?.trim() || ""),
+    ticketUrl = safeUrl(e.ticketUrl),
     price = e.cost === "free" ? 0 : e.price;
   const schema = {
     "@context": "https://schema.org",
@@ -57,6 +58,7 @@ export default async function Page({ params, searchParams }: Props) {
                 "@type": "PostalAddress",
                 streetAddress: e.street,
                 addressLocality: e.city,
+                postalCode: e.postalCode,
                 addressRegion: "GA",
                 addressCountry: "US",
               }
@@ -68,8 +70,8 @@ export default async function Page({ params, searchParams }: Props) {
       : undefined,
     isAccessibleForFree: e.cost ? e.cost === "free" : undefined,
     offers:
-      url && typeof price === "number"
-        ? { "@type": "Offer", url, price, priceCurrency: "USD" }
+      typeof price === "number"
+        ? { "@type": "Offer", url: ticketUrl || undefined, price, priceCurrency: "USD" }
         : undefined,
   };
   const when = (time: string) =>
@@ -94,13 +96,14 @@ export default async function Page({ params, searchParams }: Props) {
           {e.endsAt && <> to {when(e.endsAt)}</>} (Eastern)
         </p>
         <p>
-          {[e.venue, e.street, e.city || e.neighborhood]
+          {[e.venue, e.street, [e.city || e.neighborhood, e.postalCode].filter(Boolean).join(" ")]
             .filter(Boolean)
             .join(" · ")}
         </p>
         <p>{e.summary}</p>
         <p>{e.priceLabel}</p>
         {e.organizer && <p>Organized by {e.organizer}</p>}
+        {ticketUrl && ticketUrl !== url && <p><a className="button button-orange" href={ticketUrl}>Tickets and registration</a></p>}
         {url && (
           <a className="button button-orange" href={url}>
             Visit event website ↗

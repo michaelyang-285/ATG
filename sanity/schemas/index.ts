@@ -244,6 +244,8 @@ export const schemaTypes = [
       text("neighborhood", "Area"),
       text("street", "Street address"),
       text("city", "City"),
+      text("postalCode", "ZIP code"),
+      defineField({name: "ticketUrl", type: "url", title: "Direct ticket or registration page", description: "Use a link where attendees can actually book this event."}),
       text("organizer", "Public organizer name"),
       defineField({name:"weeklyUntil",title:"Repeat weekly through",type:"date"}),
       defineField({name:"cost",title:"Admission",type:"string",options:{list:["free","paid"]}}),
