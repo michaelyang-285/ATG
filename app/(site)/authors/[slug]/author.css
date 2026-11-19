@@ -1,0 +1,120 @@
+.author-intro,
+.author-articles {
+  max-width: 64rem;
+}
+
+.author-intro {
+  display: grid;
+  align-items: start;
+  gap: 1rem 2rem;
+}
+
+.author-intro.has-portrait {
+  grid-template-columns: 12rem minmax(0, 1fr);
+}
+
+.author-portrait {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.author-identity .story-label {
+  margin: .5rem 0 0;
+}
+
+.author-bio {
+  max-width: 65ch;
+  white-space: pre-line;
+}
+
+.author-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.author-socials a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+.author-socials a:hover,
+.author-socials a:focus-visible {
+  color: var(--text-orange);
+  border-color: currentColor;
+}
+
+.author-socials svg {
+  width: 20px;
+  height: 20px;
+}
+
+.author-articles {
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+}
+
+.author-articles h2 {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.author-story {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding-block: 1.25rem;
+}
+
+.author-articles li + li {
+  border-top: 1px solid var(--rule);
+}
+
+.author-story img {
+  flex: none;
+  width: 24%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.author-story time {
+  display: block;
+  margin-bottom: .375rem;
+  font-size: .875rem;
+  color: var(--muted, #62625e);
+}
+
+.author-story p,
+.author-empty {
+  margin-top: .5rem;
+  max-width: 65ch;
+  font-size: 1rem;
+}
+
+.author-story:hover {
+  text-decoration: none;
+}
+
+.author-story:is(:hover, :focus-visible) h3 {
+  text-decoration: underline;
+}
+
+@media (max-width: 640px) {
+  .author-intro.has-portrait {
+    grid-template-columns: 5rem minmax(0, 1fr);
+    column-gap: 1rem;
+  }
+
+  .author-portrait { grid-row: 1; }
+  .author-identity { align-self: center; }
+  .author-bio, .author-socials { grid-column: 1 / -1; }
+  .author-story { flex-direction: column; gap: .75rem; }
+  .author-story img { width: 100%; max-width: 24rem; }
+}
