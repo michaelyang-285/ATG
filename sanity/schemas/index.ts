@@ -1,3 +1,4 @@
+import { eventFormats, gameTopics } from "../../lib/game-topics";
 import {DirectoryCoverageInput} from "../../studio/components/DirectoryCoverageInput";
 import { defineField, defineType } from "sanity";
 const image = (name: string, title: string) =>
@@ -22,6 +23,15 @@ const reference = (name: string, type: string, title: string) =>
   defineField({ name, title, type: "reference", to: [{ type }] });
 const text = (name: string, title: string) =>
   defineField({ name, title, type: "string" });
+const gameTopicField = defineField({
+  name: "gameTopics", title: "Game topics", type: "array", of: [{ type: "string" }],
+  options: { list: gameTopics },
+  description: "Select each game explicitly featured. Stories and the calendar share these tags.",
+  validation: rule => rule.unique(),
+});
+const categoryField = defineField({
+  name: "categories", type: "array", of: [{ type: "reference", to: [{ type: "category" }] }],
+});
 const bodyBlocks = [
   {
     type: "block",
@@ -59,6 +69,7 @@ const bodyBlocks = [
     ],
   },
   ...[
+    "upcomingGameEvents",
     "pullQuote",
     "callout",
     "divider",
@@ -140,11 +151,8 @@ export const schemaTypes = [
       }),
       image("mainImage", "Main image"),
       reference("author", "author", "Author"),
-      defineField({
-        name: "categories",
-        type: "array",
-        of: [{ type: "reference", to: [{ type: "category" }] }],
-      }),
+      categoryField,
+      gameTopicField,
       text("location", "Area / neighborhood"),
       defineField({
         name: "publishedAt",
@@ -233,6 +241,13 @@ export const schemaTypes = [
     type: "document",
     fields: [
       text("title", "Event name"),
+      categoryField,
+      gameTopicField,
+      defineField({ name: "eventFormats", title: "Event formats", type: "array",
+        of: [{ type: "string" }], options: { list: eventFormats }, validation: rule => rule.unique() }),
+      defineField({ name: "outsideGwinnett", title: "Venue is outside Gwinnett County", type: "boolean",
+        description: "Nearby events stay on the main calendar. County-specific lists show local venues." }),
+      defineField({ name: "cancelled", title: "Event cancelled", type: "boolean" }),
       slug,
       defineField({
         name: "startsAt",
@@ -297,6 +312,11 @@ export const schemaTypes = [
       }),
     ],
     preview: { prepare: () => ({ title: "Homepage & site settings" }) },
+  }),
+  defineType({
+    name: "upcomingGameEvents", title: "Upcoming game events", type: "object",
+    fields: [text("heading", "Heading")],
+    preview: { prepare: () => ({ title: "Next five calendar events for this story’s game topic" }) },
   }),
   defineType({
     name: "pullQuote",
