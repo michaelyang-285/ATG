@@ -77,7 +77,7 @@ function ReviewerQueue({ session }: { session: Session }) {
   }
 
   return <>
-    <div className="owner-session"><a className="text-link" href="/directory/manage">My submissions</a>
+    <div className="owner-session"><a className="text-link" href="/directory/manage">My account</a>
       <button disabled={busy} onClick={() => refresh(v => v + 1)}>Refresh queue</button></div>
     {receipt && <p className="submission-status" role="status">{receipt}</p>}
     {message && <p role="alert">{message}</p>}

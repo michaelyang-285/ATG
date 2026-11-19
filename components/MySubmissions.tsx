@@ -25,13 +25,13 @@ export default function MySubmissions({ session, refreshKey }: { session: Sessio
   }, [session.access_token, refreshKey]);
   return <section className="owner-submissions-section" aria-labelledby="event-submissions">
     <div className="owner-section-heading">
-      <h2 id="event-submissions">Events</h2>
+      <h3 id="event-submissions">Events</h3>
       <a className="button button-orange" href="/events/submit">Submit an event</a>
     </div>
     {loadFailed && <p className="submission-status" role="status">Your event list is temporarily unavailable.</p>}
     {events?.map(event => (
       <article key={event.id}>
-        <h3>{event.href ? <a href={event.href}>{event.title}</a> : event.title}</h3>
+        <h4 className="text-lg font-bold leading-tight">{event.href ? <a href={event.href}>{event.title}</a> : event.title}</h4>
         <p>{event.status}</p>
       </article>
     ))}
