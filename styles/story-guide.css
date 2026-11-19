@@ -1,0 +1,63 @@
+.story-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.6rem 0 2.25rem;
+}
+.story-table-wrap:focus-visible, .article-body .story-action a:focus-visible,
+.article-body .story-profile a:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+.story-table {
+  width: 100%;
+  min-width: min(34rem, 150%);
+  border-collapse: collapse;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.story-table caption {
+  text-align: left;
+  font-weight: 750;
+  font-size: 1.15rem;
+  padding-bottom: .65rem;
+}
+.story-table th, .story-table td {
+  padding: .7rem .75rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  text-align: left;
+}
+.story-table thead { color: white; background: var(--ink); }
+.story-table tbody tr:nth-child(even) { background: var(--surface); }
+.story-table th[scope="row"] { font-weight: 700; }
+.story-table a, .story-profile a { overflow-wrap: anywhere; }
+.story-action, .story-profile {
+  border: 1px solid var(--rule);
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+  border-radius: .4rem;
+}
+.story-action { background: var(--surface); border-left: 5px solid var(--orange); }
+.story-profile { border-left: 4px solid var(--ink); }
+.article-body .story-action h3, .article-body .story-profile h3 { margin: 0 0 .45rem; }
+.article-body .story-action p, .article-body .story-profile p { margin: .35rem 0; }
+.story-profile p:first-of-type { font-size: .9rem; color: #50504a; }
+.article-body .story-action a, .article-body .story-profile a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  max-width: 100%;
+  border-radius: .25rem;
+  padding: .5rem .85rem;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.35;
+}
+.article-body .story-action a { background: var(--orange); color: var(--ink); }
+.article-body .story-profile a { background: var(--ink); color: white; }
+.article-body .story-action a:hover, .article-body .story-profile a:hover { text-decoration: underline; }
+@media (max-width: 560px) {
+  .story-table { min-width: 0; font-size: .92rem; }
+  .story-table thead th, .story-table tbody th, .story-table td { padding: .55rem .35rem; overflow-wrap: anywhere; }
+  .story-table th[scope="row"] { min-width: 4rem; }
+}

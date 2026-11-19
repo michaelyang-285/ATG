@@ -3,6 +3,8 @@ import { localClock, easternInstant, shift } from "./event-time";
 export type EventRecord = LocalEvent & {
   street?: string;
   city?: string;
+  postalCode?: string;
+  ticketUrl?: string;
   cost?: string;
   price?: number;
   organizer?: string;
@@ -10,7 +12,7 @@ export type EventRecord = LocalEvent & {
   image?: any;
 };
 export const eventFields =
-  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,street,city,cost,price,organizer,weeklyUntil,image';
+  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,ticketUrl,street,city,postalCode,cost,price,organizer,weeklyUntil,image';
 export function eventDates(e: EventRecord) {
   if (!e.startsAt || !Number.isFinite(Date.parse(e.startsAt))) return [];
   const start = localClock(e.startsAt),

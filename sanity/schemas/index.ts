@@ -244,6 +244,8 @@ export const schemaTypes = [
       text("neighborhood", "Area"),
       text("street", "Street address"),
       text("city", "City"),
+      text("postalCode", "ZIP code"),
+      defineField({name: "ticketUrl", type: "url", title: "Direct ticket or registration page", description: "Use a link where attendees can actually book this event."}),
       text("organizer", "Public organizer name"),
       defineField({name:"weeklyUntil",title:"Repeat weekly through",type:"date"}),
       defineField({name:"cost",title:"Admission",type:"string",options:{list:["free","paid"]}}),
@@ -309,7 +311,7 @@ export const schemaTypes = [
     type: "object",
     fields: [
       text("heading", "Heading"),
-      text("style", "Style"),
+      { name: "style", type: "string", title: "Style", description: "Use table for a comparison, profile for a vendor, or action for a call to action. For a table, enter one paragraph per row. Use Shift+Enter between cells, with column headings in the first row." },
       { name: "body", type: "array", of: [{ type: "block" }] },
     ],
   }),
