@@ -4,8 +4,12 @@ import { publication, safeUrl } from "@/lib/publication";
 import { easternInstant, validDay, shift } from "@/lib/event-time";
 import { cities } from "@/lib/gwinnett";
 function eventStore() {
-  if (!process.env.SANITY_WRITE_TOKEN) throw new Error("Event storage unavailable");
-  return publication.withConfig({ token: process.env.SANITY_WRITE_TOKEN, useCdn: false, perspective: "raw" });
+  const token = process.env.SANITY_WRITE_TOKEN?.trim();
+  if (!token) {
+    console.error("Event storage token is missing");
+    throw new Error("Event storage unavailable");
+  }
+  return publication.withConfig({ token, useCdn: false, perspective: "raw" });
 }
 
 export const dynamic = "force-dynamic";
@@ -20,7 +24,11 @@ export function GET(req: Request) {
         eventId
       }[defined(published) || defined(draft)]`,
       { ownerId: user.id }, { cache: "no-store" }
-    );
+    ).catch((error: unknown) => {
+      const status = error && typeof error === "object" && "statusCode" in error ? error.statusCode : undefined;
+      console.error("Unable to read owner events from Sanity", { status });
+      throw error;
+    });
     return { events };
   });
 }

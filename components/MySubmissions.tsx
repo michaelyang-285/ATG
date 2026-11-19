@@ -4,10 +4,9 @@ import type { Session } from "@supabase/supabase-js";
 
 type EventRow = { eventId: string; draft?: { title: string }; published?: { title: string; slug?: string } };
 type Item = { id: string; title: string; status: string; href?: string };
-export default function MySubmissions({ session }: { session: Session }) {
+export default function MySubmissions({ session, refreshKey }: { session: Session; refreshKey: number }) {
   const [events, setEvents] = useState<Item[] | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
     setLoadFailed(false);
@@ -23,18 +22,21 @@ export default function MySubmissions({ session }: { session: Session }) {
         href: row.published?.slug ? "/events/" + encodeURIComponent(row.published.slug) : undefined })));
     }).catch(() => { if (!controller.signal.aborted) setLoadFailed(true); });
     return () => controller.abort();
-  }, [session.access_token, attempt]);
-  return <section aria-labelledby="event-submissions" style={{ marginBlock: "2rem", paddingTop: "1.5rem", borderTop: "1px solid #dedad3" }}>
-    <h2 id="event-submissions">Events</h2>
-    {events?.length ? events.map(event => (
-        <article key={event.id}>
-          <h3>{event.href ? <a href={event.href}>{event.title}</a> : event.title}</h3>
-          <p>{event.status}</p>
-        </article>
-      )) : <p role="status">{events || loadFailed ? "No events to show." : "Loading events…"}</p>}
-    <div className="submission-actions">
-      {loadFailed && <button type="button" className="text-action" onClick={() => setAttempt(n => n + 1)}>Retry loading events</button>}
-      <a className="text-link" href="/events/submit">Submit an event</a>
+  }, [session.access_token, refreshKey]);
+  return <section className="owner-submissions-section" aria-labelledby="event-submissions">
+    <div className="owner-section-heading">
+      <h2 id="event-submissions">Events</h2>
+      <a className="button button-orange" href="/events/submit">Submit an event</a>
     </div>
+    {loadFailed && <p className="submission-status" role="status">Your event list is temporarily unavailable.</p>}
+    {events?.map(event => (
+      <article key={event.id}>
+        <h3>{event.href ? <a href={event.href}>{event.title}</a> : event.title}</h3>
+        <p>{event.status}</p>
+      </article>
+    ))}
+    {!loadFailed && !events?.length && <p className="submission-status" role="status">
+      {events ? "No events to show." : "Loading events…"}
+    </p>}
   </section>;
 }
