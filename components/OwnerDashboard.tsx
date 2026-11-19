@@ -10,7 +10,7 @@ import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
 import { allOfGwinnett, formatServiceAreas, serviceAreaCities } from "@/lib/directory/locations";
 import { useEffect, useState, FormEvent } from "react";
-import { createClient, Session } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import { categories, services } from "@/lib/directory/categories";
 import {blankSocial, networks} from "@/lib/directory/social";
 const blank = {
@@ -70,16 +70,9 @@ const labels: Record<string, string> = {
   changes: "Changes requested",
   declined: "Declined",
 };
+import { browserClient } from "@/lib/browser-client";
 export default function OwnerDashboard() {
-  const [client] = useState(() =>
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-      ? createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL,
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-        )
-      : null,
-  );
+  const [client] = useState(browserClient);
   const [session, setSession] = useState<Session | null>(null),
     [email, setEmail] = useState(""),
     [rows, setRows] = useState<Row[]>([]),

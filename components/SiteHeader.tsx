@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { browserClient } from "@/lib/browser-client";
 export type NavItem = {
   label: string;
   href: string;
@@ -41,6 +42,13 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
   const dialog = useRef<HTMLDialogElement>(null),
     trigger = useRef<HTMLButtonElement>(null),
     header = useRef<HTMLElement>(null);
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  useEffect(() => {
+    const client = browserClient();
+    if (!client) { setSignedIn(false); return; }
+    const { data } = client.auth.onAuthStateChange((_, session) => setSignedIn(Boolean(session)));
+    return () => data.subscription.unsubscribe();
+  }, []);
   const pathname = usePathname();
   useEffect(() => {
     setMenu(false);
@@ -69,6 +77,14 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
     setMenu(false);
     setExpanded(null);
   };
+  const accountLinks = signedIn === null ? null : signedIn ? (
+    <Link className="text-link" href="/directory/manage" onClick={collapse}>My account</Link>
+  ) : (
+    <>
+      <a className="text-link" href="/directory/manage?mode=signin">Sign in</a>
+      <a className="text-link" href="/directory/manage?mode=signup">Create an account</a>
+    </>
+  );
   return (
     <header
       className="site-header"
@@ -96,8 +112,8 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
             height="86"
           />
         </Link>
-        <Link style={{marginInlineStart:"auto",whiteSpace:"nowrap"}} className="text-link" href="/directory/manage?mode=signin">Sign in</Link>
         <div className="desktop-tools">
+          <div style={{display:"flex", gap:"1rem", whiteSpace:"nowrap"}}>{accountLinks}</div>
           <Search id="desktop-search" />
           <Link className="button button-orange" href="/newsletter">
             Get the newsletter
@@ -238,6 +254,7 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
             </details>
           ))}
           <div className="menu-shortcuts">
+            {accountLinks}
             <Link href="/guides" onClick={collapse}>
               Browse all guides
             </Link>

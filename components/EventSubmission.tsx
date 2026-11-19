@@ -1,15 +1,12 @@
 "use client";
 
 import { useState, useEffect, useMemo, type FormEvent } from "react";
-import { createClient, type Session } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 import SignupCard from "./SignupCard";
 import { cities } from "@/lib/gwinnett";
+import { browserClient } from "@/lib/browser-client";
 export default function EventSubmission() {
-  const client = useMemo(() => {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL,
-      key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    return url && key ? createClient(url, key) : null;
-  }, []);
+  const client = useMemo(browserClient, []);
   const [session, setSession] = useState<Session | null>(null),
     [ready, setReady] = useState(false),
     [message, setMessage] = useState(""),
