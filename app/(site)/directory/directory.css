@@ -25,6 +25,7 @@
   background: #fff; border: 1px solid var(--ink); border-radius: 12px;
   box-shadow: 5px 5px 0 var(--ink);
 }
+.atg-directory .business-list > article:only-child { justify-self: center; }
 .atg-directory .business-card-heading, .atg-directory .business-card-actions {
   display: flex; align-items: center; gap: .875rem;
 }
