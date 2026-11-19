@@ -14,6 +14,13 @@ export type Story = {
   title: string;
   slug: string;
   excerpt?: string;
+  seo?: {
+    title?: string;
+    description?: string;
+    ogTitle?: string;
+    ogDescription?: string;
+    ogImage?: Story["image"];
+  };
   section?: string;
   format?: string;
   topic?: string;
@@ -114,16 +121,10 @@ export function storyLabel(s: Story) {
 export function storyHref(s: Story) {
   return `/stories/${encodeURIComponent(s.slug)}`;
 }
-export function imageUrl(image: any, width = 1200, height = 675) {
-  return image?.asset
-    ? imageUrlBuilder(publication)
-        .image(image)
-        .width(width)
-        .height(height)
-        .fit("crop")
-        .auto("format")
-        .url()
-    : null;
+export function imageUrl(image: any, width = 1200, height = 675, format?: "jpg") {
+  if (!image?.asset) return null;
+  const builder = imageUrlBuilder(publication).image(image).width(width).height(height).fit("crop");
+  return (format ? builder.format(format) : builder.auto("format")).url();
 }
 export function safeUrl(value?: string) {
   if (!value) return null;
