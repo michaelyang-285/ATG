@@ -1,3 +1,4 @@
+import { descriptionLimit, descriptionLength } from "./description";
 import { eligibleLocation, areaError } from "./business-location";
 import {networks} from "./social";
 import { categories, services } from "./categories";
@@ -39,6 +40,10 @@ export function listing(input: any, email: string, uid: string) {
     throw new Failure(400, "Choose your address and phone visibility.");
   const businessPhone = field("businessPhone") || phone;
   if (businessPhone.replace(/\D/g, "").length < 7) invalid("business phone");
+  const summary = input.summary;
+  if (typeof summary !== "string" || !summary.trim()) invalid("business description");
+  if (descriptionLength(summary) > descriptionLimit)
+    throw new Failure(400, "Shorten your business description to 1,000 characters or fewer.");
   const all = Object.values(categories).flat(),
     category = field("category", true);
   if (!all.includes(category)) invalid("category");
@@ -68,7 +73,7 @@ export function listing(input: any, email: string, uid: string) {
     },
     draft: {
       name: field("name", true),
-      summary: field("summary", true, 2000),
+      summary: summary.trim(),
       category,
       categories: choices("categories", all),
       services: choices("services", services),

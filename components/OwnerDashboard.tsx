@@ -1,6 +1,7 @@
 "use client";
 import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 import BusinessLocationFields from "./BusinessLocationFields";
+import { descriptionLength, descriptionLimit } from "@/lib/directory/description";
 import MySubmissions from "./MySubmissions";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
@@ -213,9 +214,17 @@ export default function OwnerDashboard() {
       change(k, k === "logo" ? out.url : [...form.gallery, out.url]);
     });
   }
+  const descriptionCount = descriptionLength(form?.summary || "");
+  const descriptionOver = descriptionCount > descriptionLimit;
+  const descriptionBlocked = descriptionOver && (step === 0 || step === 4);
+
   async function submit(e: FormEvent) {
     e.preventDefault();
     await run(async()=>{
+      if (descriptionBlocked) {
+        setStep(0);
+        throw Error("Shorten your business description to 1,000 characters or fewer.");
+      }
       if ((step === 1 || step === 4) && (!form.streetAddress.trim() || !eligibleLocation(form.city, form.zip))) {
         setStep(1);
         throw Error(!form.streetAddress.trim() ? "Enter your business street address." : areaError);
@@ -266,42 +275,46 @@ export default function OwnerDashboard() {
           <section aria-labelledby="directory-submissions" style={{marginBlock:"2rem"}}>
           <h2 id="directory-submissions">Directory listings</h2>
           {!rows.length && !progress.length && <p>No directory listings yet.</p>}
-          <button onClick={() => edit()}>Add a listing</button>{" "}
-          <button disabled={busy} onClick={() => run(refresh)}>
-            Refresh status
-          </button>
+          <div className="submission-actions">
+            <button onClick={() => edit()}>Add a listing</button>
+            <button disabled={busy} onClick={() => run(refresh)}>Refresh status</button>
+          </div>
           {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}><h3>{p.fields.name||"New listing"}</h3><Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button></article>)}
           {rows.map((r) => (
             <article key={r.id}>
               <h3>{r.draft.name}</h3>
               <p>{labels[r.status]}</p>{r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
               {r.review_note && <p>{r.review_note}</p>}
-              {r.deletion_due_at ? <>
-                <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>
-                <button disabled={busy} onClick={() => run(async () => {
-                  await api("deletion", {id:r.id, action:"cancel"}); await refresh();
-                })}>Cancel deletion request</button>
-              </> : <>
-                <button onClick={() => edit(r)}>Edit listing</button>{" "}
-                <button disabled={busy} onClick={() => {
-                  if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
-                    run(async () => { await api("deletion", {id:r.id, action:"request"}); await refresh(); });
-                  }
-                }}>Request profile deletion</button>
-              </>}
-              {r.status === "unpaid" && !r.deletion_due_at && (
-                <button
-                  disabled={busy}
-                  onClick={() =>
-                    run(async () => {
-                      const out = await api("checkout", { id: r.id });
-                      window.location.assign(out.url);
-                    })
-                  }
-                >
-                  Continue to checkout
-                </button>
-              )}
+              {r.deletion_due_at && <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>}
+              <div className="submission-actions">
+                {r.deletion_due_at ? (
+                  <button disabled={busy} onClick={() => run(async () => {
+                    await api("deletion", {id:r.id, action:"cancel"}); await refresh();
+                  })}>Cancel deletion request</button>
+                ) : (
+                  <>
+                    <button onClick={() => edit(r)}>Edit listing</button>
+                    {r.status === "unpaid" && (
+                      <button
+                        disabled={busy}
+                        onClick={() =>
+                          run(async () => {
+                            const out = await api("checkout", { id: r.id });
+                            window.location.assign(out.url);
+                          })
+                        }
+                      >
+                        Continue to checkout
+                      </button>
+                    )}
+                    <button disabled={busy} onClick={() => {
+                      if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
+                        run(async () => { await api("deletion", {id:r.id, action:"request"}); await refresh(); });
+                      }
+                    }}>Request profile deletion</button>
+                  </>
+                )}
+              </div>
             </article>
           ))}
           </section>
@@ -332,6 +345,7 @@ export default function OwnerDashboard() {
                       }
                     />
                   </label>
+                  <div className="submission-actions">
                   {["published", "changes", "declined"].map((s, i) => (
                     <button
                       key={s}
@@ -351,6 +365,7 @@ export default function OwnerDashboard() {
                       {["Approve", "Request changes", "Decline"][i]}
                     </button>
                   ))}
+                  </div>
                 </article>
               ))}
             </section>
@@ -363,6 +378,10 @@ export default function OwnerDashboard() {
               <>
                 <p className="quiet">Here’s what neighbors will see in the directory.</p>
                 <ListingPreview data={form} />
+                {descriptionOver && <p className="description-count" data-over="true">
+                  Your description exceeds 1,000 characters.{" "}
+                  <button type="button" onClick={() => setStep(0)}>Edit description</button>
+                </p>}
 
               </>
             ) : (
@@ -374,15 +393,15 @@ export default function OwnerDashboard() {
                 <p>Email · {session.user.email}</p>
                 </details>
                 {field("name", "Business, organization, or working name", true)}
-                <label>
-                  Description
-                  <textarea
-                    required
-                    maxLength={2000}
-                    value={form.summary}
-                    onChange={(e) => change("summary", e.target.value)}
-                  />
+                <label htmlFor="business-description">Business description
+                  <textarea id="business-description" required value={form.summary}
+                    aria-invalid={descriptionOver} aria-describedby="business-description-count"
+                    onChange={e => change("summary", e.target.value)} />
                 </label>
+                <p id="business-description-count" className="description-count" data-over={descriptionOver}>
+                  {descriptionCount.toLocaleString("en-US")} / {descriptionLimit.toLocaleString("en-US")} characters
+                  {descriptionOver && " · Shorten your description to continue."}
+                </p>
                 <label>
                   Primary category
                   <select
@@ -516,7 +535,7 @@ export default function OwnerDashboard() {
             )}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>setStep(step-1)}>Back</button>}
               {step===4 && (!form.status || form.status==="unpaid") && <p>The one-time listing fee is $3. You can enter a promotion code at Stripe checkout. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
-              <button className="primary-action">{busy?"Saving…":step<4?"Next":form.status&&form.status!=="unpaid"?"Submit edits for review":"Continue to payment · $3"}</button>
+              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy?"Saving…":step<4?"Next":form.status&&form.status!=="unpaid"?"Submit edits for review":"Continue to payment · $3"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
         </form>
