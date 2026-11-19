@@ -16,16 +16,15 @@
 .directory-owner-tools h2 { margin: 0; font-size: 1.25rem; }
 .directory-owner-tools a { display: inline-flex; align-items: center; min-height: 44px; }
 .atg-directory .business-list {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  display: grid; grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem; padding: 0 5px 5px 0;
 }
 .atg-directory .business-list article {
   display: flex; flex-direction: column; gap: .875rem;
-  width: 100%; max-width: 58rem; min-width: 0; padding: 1.25rem; overflow-wrap: anywhere;
+  min-width: 0; padding: 1.25rem; overflow-wrap: anywhere;
   background: #fff; border: 1px solid var(--ink); border-radius: 12px;
   box-shadow: 5px 5px 0 var(--ink);
 }
-.atg-directory .business-list > article:only-child { justify-self: center; }
 .atg-directory .business-card-heading, .atg-directory .business-card-actions {
   display: flex; align-items: center; gap: .875rem;
 }
