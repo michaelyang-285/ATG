@@ -82,7 +82,7 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
   ) : (
     <>
       <a className="text-link" href="/directory/manage?mode=signin">Sign in</a>
-      <a className="text-link" href="/directory/manage?mode=signup">Create an account</a>
+      <a className="text-link" href="/create-account">Create an account</a>
     </>
   );
   return (

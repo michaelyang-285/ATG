@@ -4,7 +4,7 @@ import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 export function POST(req: Request) {
   return respond(async () => {
     await human();
-    const { email, account, eventSignup } = await req.json();
+    const { email, account, eventSignup, generalAccount } = await req.json();
     if (account) {
       for (const k of eventSignup === true
         ? ["firstName", "lastName"]
@@ -42,7 +42,7 @@ export function POST(req: Request) {
             }
           : {}),
         emailRedirectTo: new URL(
-          eventSignup === true ? "/events/submit" : "/directory/manage",
+          generalAccount === true ? "/create-account" : eventSignup === true ? "/events/submit" : "/directory/manage",
           process.env.DIRECTORY_SITE_URL!,
         ).href,
       },

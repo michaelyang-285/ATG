@@ -13,6 +13,7 @@ export type SignupDetails = {
 };
 type Props = {
   event?: boolean;
+  generalAccount?: boolean;
   client: SupabaseClient;
   signin: boolean;
   setSignin: (v: boolean) => void;
@@ -55,6 +56,7 @@ export function Completion({
 }
 export default function SignupCard({
   event = false,
+  generalAccount = false,
   client,
   signin,
   setSignin,
@@ -75,8 +77,8 @@ export default function SignupCard({
     if (!event && !signin && !eligibleLocation(account.city, account.zip)) throw Error(areaError);
   }
   return (
-    <section className="signup-layout">
-      <aside className="signup-intro">
+    <section className={generalAccount ? undefined : "signup-layout"}>
+      {!generalAccount && <aside className="signup-intro">
         <a href={event ? "/events" : "/directory"}>
           ← {event ? "Events" : "Directory"}
         </a>
@@ -101,9 +103,9 @@ export default function SignupCard({
             ? "Create your free account, then add your event details for review."
             : "Free to create an account. The one-time $3 listing fee comes at the end."}
         </p>
-      </aside>
+      </aside>}
       <div className="signup-card">
-        {!signin && <Completion completed={0} total={event ? 2 : 6} />}
+        {!generalAccount && !signin && <Completion completed={0} total={event ? 2 : 6} />}
         {sent ? (
           <>
             <h2>Check your inbox</h2>
@@ -167,7 +169,7 @@ export default function SignupCard({
                         provider: "google",
                         options: {
                           redirectTo: new URL(
-                            event ? "/events/submit" : "/directory/manage",
+                            generalAccount ? "/create-account" : event ? "/events/submit" : "/directory/manage",
                             window.location.origin,
                           ).href,
                           queryParams: { prompt: "select_account" },
@@ -262,7 +264,7 @@ export default function SignupCard({
               </div>
               {!signin && (
                 <p className="quiet">
-                  {event
+                  {generalAccount ? "We’ll email you a secure link to confirm your account." : event
                     ? "Your email stays private. You’ll choose a public organizer name on the next step."
                     : "Your name, phone, and email stay private. You’ll choose public contact details later."}
                 </p>

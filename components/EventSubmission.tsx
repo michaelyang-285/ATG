@@ -5,7 +5,7 @@ import type { Session } from "@supabase/supabase-js";
 import SignupCard from "./SignupCard";
 import { cities } from "@/lib/gwinnett";
 import { browserClient } from "@/lib/browser-client";
-export default function EventSubmission() {
+export default function EventSubmission({ generalAccount = false }: { generalAccount?: boolean } = {}) {
   const client = useMemo(browserClient, []);
   const [session, setSession] = useState<Session | null>(null),
     [ready, setReady] = useState(false),
@@ -26,7 +26,7 @@ export default function EventSubmission() {
     }),
     [googleEnabled, setGoogleEnabled] = useState(false);
   useEffect(() => {
-    if (!client) return;
+    if (!client) { setReady(true); return; }
     const controller = new AbortController();
     fetch(process.env.NEXT_PUBLIC_SUPABASE_URL + "/auth/v1/settings", {
       headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
@@ -79,14 +79,16 @@ export default function EventSubmission() {
       setDone(true);
     });
   }
+  if (!ready) return <p role="status">Loading your account…</p>;
   if (!client)
     return (
       <p>Organizer accounts are unavailable here. Please try again later.</p>
     );
-  if (!ready) return <p>Loading your account…</p>;
+
   if (!session)
     return (
       <SignupCard
+        generalAccount={generalAccount}
         event
         {...{
           client,
@@ -111,6 +113,7 @@ export default function EventSubmission() {
             body: JSON.stringify({
               email,
               eventSignup: true,
+              generalAccount,
               ...(signin
                 ? {}
                 : {
@@ -128,6 +131,7 @@ export default function EventSubmission() {
         }}
       />
     );
+  if (generalAccount) return <section className="signup-card"><h2>You’re signed in</h2><p>What would you like to do?</p><p><a className="text-link" href="/events/submit">Submit an event</a></p><p><a className="text-link" href="/directory/manage">Manage or create a directory listing</a></p></section>;
   if (done)
     return (
       <>
