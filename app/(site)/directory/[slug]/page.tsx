@@ -1,3 +1,5 @@
+import { defaultWeek } from "@/lib/directory/hours";
+import OperatingHours from "@/components/OperatingHours";
 import ListingCorrection from "@/components/ListingCorrection";
 import DirectorySocialIcon from "@/components/DirectorySocialIcon";
 import {networks} from "@/lib/directory/social";
@@ -11,7 +13,8 @@ type Props = {params:{slug:string}};
 const sample = {
   _id:"sample", slug:"sample-coffee-profile", name:"Lantern & Oak Coffee",
   category:"Coffee", categories:["Cafés"], services:["Storefront","Pickup"],
-  neighborhood:"Duluth", hours:"Monday–Saturday, 7 am–4 pm",
+  neighborhood:"Duluth",
+  weeklyHours:defaultWeek().map(row => ({...row, open:row.day !== "Sunday", opens:"07:00", closes:"16:00"})),
   summary:"Espresso, cold brew, and rotating pastries in downtown Duluth. Stop in for a morning pour-over or pick up a latte on your way to work.",
   address:"Duluth Town Green, Duluth, GA", url:"https://example.com",
   instagram:"https://www.instagram.com/",facebook:"https://www.facebook.com/",tiktok:"https://www.tiktok.com/",
@@ -70,7 +73,8 @@ export default async function Page({params}:Props) {
       </section>}
       {b.gallery?.map((src,index)=><img className="listing-photo" key={src} src={src} alt={demo ? ["Café interior","Freshly poured latte"][index] : b.name+" work photo"} loading="lazy"/>)}
     </section><aside><h2>Listing details</h2>
-      {[[ "City or service area",b.neighborhood],["Address",b.address],["Hours",b.hours]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
+      {[[ "City or service area",b.neighborhood],["Address",b.address]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
+      <OperatingHours week={b.weeklyHours} legacy={b.hours} />
       {b.publicPhone && <p><a href={"tel:"+b.publicPhone.replace(/[^+0-9]/g,"")}>{b.publicPhone}</a></p>}
       {b.publicEmail && <p><a href={"mailto:"+b.publicEmail}>{b.publicEmail}</a></p>}
       {[[b.booking,"Book an appointment"],[b.social,"Other social profile"]].map(([url,label])=>safeUrl(url) && <p key={label}><a className="text-link" href={safeUrl(url)!}>{label} ↗</a></p>)}

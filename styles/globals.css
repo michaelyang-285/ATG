@@ -917,3 +917,29 @@ img {
 .directory-owner .description-count { margin: -.5rem 0 1rem; color: var(--muted); font-size: .9rem; }
 .directory-owner .description-count[data-over="true"] { color: #a1261b; font-weight: 600; }
 .directory-owner #business-description[aria-invalid="true"] { border-color: #a1261b; }
+
+.hours-editor .hours-row, .hours-editor .hours-columns {
+  display: grid; grid-template-columns: minmax(7.75rem, 1fr) repeat(2, minmax(0, 1fr));
+  gap: .5rem .75rem; align-items: center;
+}
+.hours-editor .hours-row { border-top: 1px solid #e5e0d7; padding-block: .5rem; min-height: 3.25rem; }
+.hours-columns { color: #595750; font-size: .875rem; padding-block: .4rem; }
+.directory-owner .listing-wizard .hours-editor .hours-day {
+  display: flex; align-items: center; gap: .5rem; margin: 0; padding: .4rem 0;
+  border: 0; border-radius: 0; background: transparent;
+}
+.directory-owner .hours-editor .hours-time { margin: 0; min-width: 0; }
+.hours-time span { display: none; }
+.directory-owner .hours-time input { margin-top: 0; }
+.hours-closed, .hours-overnight { color: #595750; grid-column: 2 / -1; }
+.listing-hours dl { margin: .5rem 0; }
+.listing-hours dl > div { display: flex; flex-wrap: wrap; gap: .25rem 1rem; justify-content: space-between; padding: .3rem 0; }
+.listing-hours dd { margin: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 560px) {
+  .hours-editor .hours-columns { display: none; }
+  .hours-editor .hours-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hours-row .hours-day { grid-column: 1 / -1; }
+  .hours-row:has(.hours-closed) .hours-day { grid-column: 1; }
+  .hours-time span { display: block; font-size: .875rem; }
+  .hours-overnight { grid-column: 1 / -1; }
+}
