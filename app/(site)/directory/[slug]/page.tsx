@@ -79,7 +79,6 @@ export default async function Page({params}:Props) {
       {[[ "City or service area",b.neighborhood],["Address",b.address]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
       <OperatingHours week={b.weeklyHours} legacy={b.hours} />
       {b.publicPhone && <p><a href={"tel:"+b.publicPhone.replace(/[^+0-9]/g,"")}>{b.publicPhone}</a></p>}
-      {b.publicEmail && <p><a href={"mailto:"+b.publicEmail}>{b.publicEmail}</a></p>}
       {[[b.booking,"Book an appointment"],[b.social,"Other social profile"]].map(([url,label])=>safeUrl(url) && <p key={label}><a className="text-link" href={safeUrl(url)!}>{label} ↗</a></p>)}
       {destination && <section><h3>Get directions</h3><div className="profile-links">
         <a href={"https://www.google.com/maps/dir/?api=1&destination="+destination}>Google Maps ↗</a>

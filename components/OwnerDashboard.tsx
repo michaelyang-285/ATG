@@ -32,7 +32,6 @@ const blank = {
   address: "", streetAddress: "", city: "", zip: "", businessPhone: "",
   hideAddress: true, hidePhone: true,
   summary: "",
-  publicEmail: "",
   publicPhone: "",
   url: "",
   social: "",
@@ -519,20 +518,6 @@ export default function OwnerDashboard() {
                   onChange={e => setForm(current => current && ({...current, hidePhone:e.target.checked,
                     businessPhone: current.businessPhone || current.phone}))} />Hide phone number on profile</label>
                 {!form.hidePhone && field("businessPhone", "Business phone shown on profile", true, "tel")}
-                {field("publicEmail", "Public email", false, "email")}
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={form.publicEmail === session.user.email}
-                    onChange={(e) =>
-                      change(
-                        "publicEmail",
-                        e.target.checked ? session.user.email : "",
-                      )
-                    }
-                  />
-                  Use my email publicly
-                </label>
                 {field("url", "Website", false, "url")}
                 {field("booking", "Booking or ordering link", false, "url")}
                 <details><summary>Social profiles (optional)</summary>
@@ -637,7 +622,6 @@ function ListingPreview({ data: d }: { data: Partial<Draft> }) {
         d.neighborhood,
         d.hideAddress ? "" : (d.streetAddress ? [d.streetAddress, d.city, "GA " + d.zip].join(", ") : d.address),
         d.hidePhone ? "" : d.businessPhone || d.publicPhone,
-        d.publicEmail,
         d.url,
         d.booking,
         ...networks.map(n=>d[n.key]),

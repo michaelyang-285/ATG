@@ -31,11 +31,8 @@ export function listing(input: any, email: string, uid: string) {
     if (v && !/^https?:\/\/[^\s/]+(?:[/?#][^\s]*)?$/i.test(v)) invalid(k);
     return v;
   }
-  const phone = field("phone", true),
-    publicEmail = field("publicEmail");
+  const phone = field("phone", true);
   if (phone.replace(/\D/g, "").length < 7) invalid("phone");
-  if (publicEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(publicEmail))
-    invalid("public email");
   const city = field("city", true, 80), zip = field("zip", true, 10);
   const streetAddress = field("streetAddress");
   if (!streetAddress) throw new Failure(400, "Enter your business street address.");
@@ -93,7 +90,6 @@ export function listing(input: any, email: string, uid: string) {
       services: choices("services", services),
       neighborhood,
       address: input.hideAddress ? "" : [streetAddress, city, "GA " + zip].join(", "),
-      publicEmail,
       publicPhone: input.hidePhone ? "" : businessPhone,
       url: url("url"),
       booking: url("booking"),
