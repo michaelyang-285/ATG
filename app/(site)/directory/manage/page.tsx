@@ -1,6 +1,6 @@
 import OwnerDashboard from "@/components/OwnerDashboard";
 export const metadata = {
-  title: "Manage your directory listings",
+  title: "My account",
   robots: { index: false },
 };
 export default function Manage() {

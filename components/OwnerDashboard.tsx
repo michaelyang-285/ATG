@@ -9,6 +9,7 @@ import OperatingHoursFields from "./OperatingHoursFields";
 import ListingPreview from "./ListingPreview";
 import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
 import MySubmissions from "./MySubmissions";
+import ApprovalNotifications from "./ApprovalNotifications";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
 import { allOfGwinnett, formatServiceAreas, serviceAreaCities } from "@/lib/directory/locations";
@@ -128,11 +129,12 @@ export default function OwnerDashboard() {
     if (!res.ok) throw Error(out.error || "Please try again.");
     return out;
   }
-  const [eventsRefreshKey, setEventsRefreshKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
   async function refresh() {
     const data = await api("owner");
     setRows(data.rows); setCanOpenQueue(data.canOpenQueue);
     setProgress(data.progress);
+    setRefreshKey(key => key + 1);
   }
   useEffect(() => {
     let active = true;
@@ -361,7 +363,7 @@ export default function OwnerDashboard() {
   return (
     <>
       {!form && !checkout && status}
-      <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My submissions"}</h1>
+      <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My account"}</h1>
       <div className="owner-session">
         <span>Signed in as {session.user.email}</span>
         <button
@@ -389,55 +391,55 @@ export default function OwnerDashboard() {
         </section>
       ) : !form ? (
         <>
-          {canOpenQueue && <p><a className="text-link" href="/admin/approvals">Open approval queue</a></p>}
-          <section className="owner-submissions-section" aria-labelledby="directory-submissions">
-          <div className="owner-section-heading">
-            <h2 id="directory-submissions">Directory listings</h2>
-            <div className="owner-section-controls">
-              <button className="primary-action" onClick={() => edit()}>Add a listing</button>
-              <button disabled={busy} onClick={() => {
-                setEventsRefreshKey(key => key + 1);
-                run(refresh);
-              }}>Refresh status</button>
-            </div>
-          </div>
-          {!rows.length && !progress.length && <p className="submission-status">No directory listings yet.</p>}
-          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}>
-            <OwnerListingHeading data={p.fields} />
-            <Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button>
-          </article>)}
-          {rows.map((r) => (
-            <article key={r.id}>
-              <OwnerListingHeading data={r.draft} href={r.profilePath} status={labels[r.status]} />
-              {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
-              {r.review_note && <p>{r.review_note}</p>}
-              {r.deletion_due_at && <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>}
-              <div className="owner-listing-actions">
-                {r.deletion_due_at ? (
-                  <button disabled={busy} onClick={() => run(async () => {
-                    await api("deletion", {id:r.id, action:"cancel"}); await refresh();
-                  })}>Cancel deletion request</button>
-                ) : (
-                  <>
-                    <div className="owner-listing-links">
-                      {r.profilePath && <a className="button button-orange" href={r.profilePath}>View public profile</a>}
-                      <button onClick={() => edit(r)}>Edit listing</button>
-                      {r.status === "unpaid" && (
-                        <button disabled={busy} onClick={() => run(() => openCheckout(r.id))}>Continue to checkout</button>
-                      )}
-                    </div>
-                    <button className="request-deletion" disabled={busy} onClick={() => {
-                      if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
-                        run(async () => { await api("deletion", {id:r.id, action:"request"}); await refresh(); });
-                      }
-                    }}>Request profile deletion</button>
-                  </>
-                )}
+          {canOpenQueue && <ApprovalNotifications key={session.user.id} session={session} refreshKey={refreshKey} />}
+          <section aria-labelledby="my-submissions">
+            <h2 id="my-submissions">My submissions</h2>
+            <section className="owner-submissions-section" aria-labelledby="directory-submissions">
+              <div className="owner-section-heading">
+                <h3 id="directory-submissions">Directory listings</h3>
+                <div className="owner-section-controls">
+                  <button className="primary-action" onClick={() => edit()}>Add a listing</button>
+                  <button disabled={busy} onClick={() => run(refresh)}>Refresh status</button>
+                </div>
               </div>
-            </article>
-          ))}
+              {!rows.length && !progress.length && <p className="submission-status">No directory listings yet.</p>}
+              {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}>
+                <OwnerListingHeading data={p.fields} />
+                <Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button>
+              </article>)}
+              {rows.map((r) => (
+                <article key={r.id}>
+                  <OwnerListingHeading data={r.draft} href={r.profilePath} status={labels[r.status]} />
+                  {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
+                  {r.review_note && <p>{r.review_note}</p>}
+                  {r.deletion_due_at && <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>}
+                  <div className="owner-listing-actions">
+                    {r.deletion_due_at ? (
+                      <button disabled={busy} onClick={() => run(async () => {
+                        await api("deletion", {id:r.id, action:"cancel"}); await refresh();
+                      })}>Cancel deletion request</button>
+                    ) : (
+                      <>
+                        <div className="owner-listing-links">
+                          {r.profilePath && <a className="button button-orange" href={r.profilePath}>View public profile</a>}
+                          <button onClick={() => edit(r)}>Edit listing</button>
+                          {r.status === "unpaid" && (
+                            <button disabled={busy} onClick={() => run(() => openCheckout(r.id))}>Continue to checkout</button>
+                          )}
+                        </div>
+                        <button className="request-deletion" disabled={busy} onClick={() => {
+                          if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
+                            run(async () => { await api("deletion", {id:r.id, action:"request"}); await refresh(); });
+                          }
+                        }}>Request profile deletion</button>
+                      </>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </section>
+            <MySubmissions key={session.user.id} session={session} refreshKey={refreshKey} />
           </section>
-          <MySubmissions key={session.user.id} session={session} refreshKey={eventsRefreshKey} />
         </>
       ) : (
         <form className="listing-wizard" onSubmit={submit}><Completion completed={step+1}/><h2>{sections[step]}</h2>
@@ -631,7 +633,7 @@ function OwnerListingHeading({data, href, status}: {data: Partial<Draft>; href?:
   return <header className="owner-listing-heading">
     {data.logo && <img src={data.logo} alt="" width={56} height={56} />}
     <div>
-      <h3>{href ? <a href={href}>{name}</a> : name}</h3>
+      <h4 className="text-lg font-bold leading-tight">{href ? <a href={href}>{name}</a> : name}</h4>
       {status && <p>{status}</p>}
     </div>
   </header>;
