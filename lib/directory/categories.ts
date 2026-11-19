@@ -81,3 +81,10 @@ export const services = [
   "Delivery",
   "Appointment only",
 ];
+
+export const additionalCategoryLimit = 3;
+export const additionalCategoryError = `Choose up to ${additionalCategoryLimit} additional categories.`;
+
+export function additionalCategories(primary: string, selected: string[]) {
+  return Array.from(new Set(selected.filter(category => category !== primary)));
+}

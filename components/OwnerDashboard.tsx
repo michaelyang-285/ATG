@@ -14,7 +14,7 @@ import {ServiceAreas} from "./ServiceAreas";
 import { allOfGwinnett, formatServiceAreas, serviceAreaCities } from "@/lib/directory/locations";
 import { useEffect, useState, FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { categories, services } from "@/lib/directory/categories";
+import { additionalCategories, additionalCategoryError, additionalCategoryLimit, categories, services } from "@/lib/directory/categories";
 import {blankSocial, networks} from "@/lib/directory/social";
 const blank = {
   ...blankSocial,
@@ -58,10 +58,17 @@ const dueDate = (value: string) => new Date(value).toLocaleString("en-US", {date
 function restoreDraft(saved: Partial<Draft>): Draft {
   const weeklyHours = isWeek(saved.weeklyHours) ? saved.weeklyHours : saved.hours ? null : defaultWeek();
   const neighborhood = formatServiceAreas(serviceAreaCities(saved.neighborhood ?? allOfGwinnett));
-  return {...blank, ...saved, weeklyHours, neighborhood, streetAddress: saved.streetAddress ?? saved.address ?? "",
+  const knownCategories = Object.values(categories).flat();
+  const selected = Array.isArray(saved.categories) ? saved.categories.filter(c => knownCategories.includes(c)) : [];
+  return {...blank, ...saved, categories: additionalCategories(saved.category, selected), weeklyHours, neighborhood, streetAddress: saved.streetAddress ?? saved.address ?? "",
     businessPhone: saved.businessPhone || saved.publicPhone || saved.phone || "",
     hideAddress: saved.hideAddress ?? !saved.address, hidePhone: saved.hidePhone ?? !saved.publicPhone};
 }
+const listingTypes = [
+  { value: "independent", label: "Myself", description: "Customers hire me directly, even if I use a business name." },
+  { value: "organization", label: "A business or organization", description: "I’m listing a company, team, or community group." },
+];
+
 const sections=["Business basics","Service area","Contact & links","Photos","Review"];
 type Progress={listing_id:string,step:number,fields:Draft};
 const labels: Record<string, string> = {
@@ -206,7 +213,14 @@ export default function OwnerDashboard() {
       setBusy(false);
     }
   }
-  function resume(saved:Progress){setUploadIssue(null);setForm(restoreDraft(saved.fields));setStep(saved.step);setMsg("")}
+  function resume(saved: Progress) {
+    const draft = restoreDraft(saved.fields);
+    const overLimit = draft.categories.length > additionalCategoryLimit;
+    setUploadIssue(null);
+    setForm(draft);
+    setStep(overLimit ? 0 : saved.step);
+    setMsg(overLimit ? additionalCategoryError : "");
+  }
   function edit(row?: Row) {
     setUploadIssue(null);
     const existing=row&&progress.find(p=>p.listing_id===row.id&&p.fields.revision===row.revision);
@@ -251,10 +265,13 @@ export default function OwnerDashboard() {
     );
   }
   function toggle(k: "services" | "categories", v: string) {
-    change(
-      k,
-      form[k].includes(v) ? form[k].filter((x) => x !== v) : [...form[k], v],
-    );
+    setForm(current => {
+      if (!current) return current;
+      const selected = current[k];
+      if (selected.includes(v)) return { ...current, [k]: selected.filter(item => item !== v) };
+      if (k === "categories" && (v === current.category || selected.length >= additionalCategoryLimit)) return current;
+      return { ...current, [k]: [...selected, v] };
+    });
   }
   function upload(files: File[], k: "logo" | "gallery") {
     run(async () => {
@@ -300,6 +317,10 @@ export default function OwnerDashboard() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     await run(async()=>{
+      if (form.categories.length > additionalCategoryLimit) {
+        setStep(0);
+        throw Error(additionalCategoryError);
+      }
       if (descriptionBlocked) {
         setStep(0);
         throw Error("Shorten your business description to 1,000 characters or fewer.");
@@ -433,15 +454,22 @@ export default function OwnerDashboard() {
               </>
             ) : (
               <>
-                {step===0&&<><details open={!form.firstName||!form.lastName||!form.phone}><summary>Private listing contact</summary>
-                {field("firstName", "First name", true)}
-                {field("lastName", "Last name", true)}
-                {field("phone", "Phone number", true, "tel")}
-                <p>Email · {session.user.email}</p>
-                </details>
-                <fieldset><legend>Who are you creating this listing for?</legend>
-                  <label><input type="radio" name="providerType" required checked={form.providerType==="independent"} onChange={()=>change("providerType","independent")}/> Myself · Customers hire me directly, even if I use a business name.</label>
-                  <label><input type="radio" name="providerType" required checked={form.providerType==="organization"} onChange={()=>change("providerType","organization")}/> A business, team, or organization · This listing represents the organization.</label>
+                {step===0&&<>
+                <fieldset className="listing-type">
+                  <legend>Who is this listing for?</legend>
+                  <div className="listing-type-options">
+                    {listingTypes.map(({ value, label, description }) => (
+                      <label key={value} className="listing-type-choice">
+                        <input type="radio" name="providerType" value={value} required
+                          aria-labelledby={`provider-${value}-label`} aria-describedby={`provider-${value}-help`}
+                          checked={form.providerType === value} onChange={() => change("providerType", value)} />
+                        <span>
+                          <strong id={`provider-${value}-label`}>{label}</strong>
+                          <span className="listing-type-help" id={`provider-${value}-help`}>{description}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </fieldset>
                 {field("name", "Public listing name", true)}
                 <label htmlFor="business-description">Business description
@@ -458,7 +486,10 @@ export default function OwnerDashboard() {
                   <select
                     required
                     value={form.category}
-                    onChange={(e) => change("category", e.target.value)}
+                    onChange={e => {
+                      const category = e.target.value;
+                      setForm(current => current && { ...current, category, categories: additionalCategories(category, current.categories) });
+                    }}
                   >
                     <option value="">Select your primary category</option>
                     {Object.entries(categories).map(([group, items]) => (
@@ -470,10 +501,13 @@ export default function OwnerDashboard() {
                     ))}
                   </select>
                 </label>
-                <details>
-                  <summary>
-                    Additional categories ({form.categories.length})
-                  </summary>
+                <details className="additional-categories">
+                  <summary>Additional categories <span>({form.categories.length} of {additionalCategoryLimit})</span></summary>
+                  <p className="quiet" role="status">
+                    {form.categories.length > additionalCategoryLimit ? additionalCategoryError :
+                      form.categories.length === additionalCategoryLimit ? "Deselect a category to choose another." :
+                        "Optional. Choose up to three in addition to your primary category."}
+                  </p>
                   {Object.entries(categories).map(([group, items]) => (
                     <fieldset key={group}>
                       <legend>{group}</legend>
@@ -483,6 +517,7 @@ export default function OwnerDashboard() {
                           <label key={v}>
                             <input
                               type="checkbox"
+                              disabled={!form.categories.includes(v) && form.categories.length >= additionalCategoryLimit}
                               checked={form.categories.includes(v)}
                               onChange={() => toggle("categories", v)}
                             />
@@ -491,6 +526,12 @@ export default function OwnerDashboard() {
                         ))}
                     </fieldset>
                   ))}
+                </details>
+                <details open={!form.firstName||!form.lastName||!form.phone}><summary>Private listing contact</summary>
+                {field("firstName", "First name", true)}
+                {field("lastName", "Last name", true)}
+                {field("phone", "Phone number", true, "tel")}
+                <p>Email · {session.user.email}</p>
                 </details>
                 </>}{step===1&&<><fieldset>
                   <legend>Service options</legend>

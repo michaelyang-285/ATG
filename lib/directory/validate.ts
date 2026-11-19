@@ -3,7 +3,7 @@ import { hoursError, validTime, type DayHours } from "./hours";
 import { descriptionLimit, descriptionLength } from "./description";
 import { eligibleLocation, areaError } from "./business-location";
 import {networks} from "./social";
-import { categories, services } from "./categories";
+import { additionalCategories, additionalCategoryError, additionalCategoryLimit, categories, services } from "./categories";
 import { Failure } from "./server";
 import { galleryLimit } from "./gallery";
 export function listing(input: any, email: string, uid: string) {
@@ -57,6 +57,8 @@ export function listing(input: any, email: string, uid: string) {
   const providerType = field("providerType");
   if (providerType && !["independent", "organization"].includes(providerType)) invalid("listing type");
   if (!all.includes(category)) invalid("category");
+  const extras = additionalCategories(category, choices("categories", all));
+  if (extras.length > additionalCategoryLimit) throw new Failure(400, additionalCategoryError);
   const logo = field("logo", false, 1000),
     gallery = input.gallery ?? [];
   if (!Array.isArray(gallery) || gallery.length > galleryLimit) invalid("photos");
@@ -86,7 +88,7 @@ export function listing(input: any, email: string, uid: string) {
       name: field("name", true),
       summary: summary.trim(),
       category,
-      categories: choices("categories", all),
+      categories: extras,
       services: choices("services", services),
       neighborhood,
       address: input.hideAddress ? "" : [streetAddress, city, "GA " + zip].join(", "),
