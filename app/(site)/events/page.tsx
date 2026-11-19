@@ -22,9 +22,11 @@ function label(day: string, options: Intl.DateTimeFormatOptions) {
 export default async function Page({
   searchParams: q,
 }: {
-  searchParams: { view?: string; date?: string };
+  searchParams: { view?: string; date?: string; section?: string };
 }) {
   const view = ["year", "month"].includes(q.view || "") ? q.view : "week";
+  const showOngoing = q.section === "ongoing";
+  const sectionQuery = showOngoing ? "&section=ongoing" : "";
   const day =
     q.date &&
     validDay(q.date) &&
@@ -82,7 +84,7 @@ export default async function Page({
           <Link
             key={v}
             aria-current={view === v ? "page" : undefined}
-            href={`/events?view=${v}&date=${day}`}
+            href={`/events?view=${v}&date=${day}${sectionQuery}`}
           >
             {["Week", "Month", "Year list"][i]}
           </Link>
@@ -90,72 +92,87 @@ export default async function Page({
       </nav>
       <h2>{period}</h2>
       <nav className="event-controls" aria-label="Calendar period">
-        <Link href={`?view=${view}&date=${prev}`}>← Previous {view}</Link>
-        <Link href={`?view=${view}`}>Today</Link>
-        <Link href={`?view=${view}&date=${next}`}>Next {view} →</Link>
-        {ongoing.length > 0 && <a className="ongoing-jump" href="#ongoing-events">Ongoing events ({ongoing.length})</a>}
+        <Link href={`?view=${view}&date=${prev}${sectionQuery}`}>← Previous {view}</Link>
+        <Link href={`?view=${view}${sectionQuery}`}>Today</Link>
+        <Link href={`?view=${view}&date=${next}${sectionQuery}`}>Next {view} →</Link>
       </nav>
-      {view !== "year" && (
-        <CalendarGrid from={from} to={to} period={period} limit={view === "month" ? 2 : 3}
-          events={items} notices={observances} />
-      )}
-      {ongoing.length > 0 && <OngoingEvents runs={ongoing} view={view} />}
-      {items.length || observances.length ? (
-        [
-          ...items.map((e) => ({
-            day: e.day,
-            element: (
-              <article className="event-day" key={e._id + e.day}>
-                <p>
-                  {new Date(e.startsAt).toLocaleString("en-US", {
-                    timeZone: zone,
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}
-                </p>
-                <h3>
-                  <Link href={occurrencePath(e)}>{e.title}</Link>
-                </h3>
-                <p>
-                  {[e.venue, e.city || e.neighborhood, e.priceLabel]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-              </article>
-            ),
-          })),
-          ...observances.map((h, index) => ({
-            day: h.day,
-            element: (
-              <article className="event-day" id={"calendar-notice-" + index} key={h.day + h.title}>
-                <h3>{h.title}</h3>
-                <p>
-                  {h.kind === "GCPS schools closed for students"
-                    ? "GCPS students have no school"
-                    : h.kind}
-                  {h.end === h.day ? " on " : " from "}
-                  {label(h.day, { weekday: "long", month: "short", day: "numeric" })}
-                  {h.end !== h.day && (
-                    <> through {label(h.end, { weekday: "long", month: "short", day: "numeric" })}</>
-                  )}.
-                </p>
-                {h.overlaps?.map((o) => (
-                  <p key={o.day + o.title}>
-                    {o.title} is {o.kind === "U.S. federal holiday" ? "a U.S. federal holiday " : ""}
-                    on {label(o.day, { weekday: "long", month: "short", day: "numeric" })}.
-                  </p>
-                ))}
-              </article>
-            ),
-          })),
-        ]
-          .sort((a, b) => a.day.localeCompare(b.day))
-          .map((row) => row.element)
+      <nav className="calendar-tabs" aria-label="Event lists">
+        <Link id="dated-events-tab" href={`/events?view=${view}&date=${day}`}
+          aria-current={!showOngoing ? "page" : undefined} scroll={false}>
+          Events by date
+        </Link>
+        <Link id="ongoing-events-tab" href={`/events?view=${view}&date=${day}&section=ongoing`}
+          aria-current={showOngoing ? "page" : undefined} scroll={false}>
+          Ongoing events ({ongoing.length})
+        </Link>
+      </nav>
+      {showOngoing ? (
+        <section className="calendar-event-list" id="ongoing-events" aria-labelledby="ongoing-events-tab">
+          {ongoing.length ? <OngoingEvents runs={ongoing} view={view} /> : <p>No ongoing events for this {view}.</p>}
+        </section>
       ) : (
-        !ongoing.length && <p>No published events for this {view} yet.</p>
+        <section className="calendar-event-list" id="dated-events" aria-labelledby="dated-events-tab">
+          {view !== "year" && (
+            <CalendarGrid from={from} to={to} period={period} limit={view === "month" ? 2 : 3}
+              events={items} notices={observances} />
+          )}
+          {items.length || observances.length ? (
+            [
+              ...items.map((e) => ({
+                day: e.day,
+                element: (
+                  <article className="event-day calendar-list-row" key={e._id + e.day}>
+                    <time className="calendar-list-date" dateTime={e.startsAt}>
+                      {new Date(e.startsAt).toLocaleString("en-US", {
+                        timeZone: zone,
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </time>
+                    <h3 className="calendar-list-title">
+                      <Link href={occurrencePath(e)}>{e.title}</Link>
+                    </h3>
+                    <p className="calendar-list-meta">
+                      {[e.venue, e.city || e.neighborhood, e.priceLabel]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </article>
+                ),
+              })),
+              ...observances.map((h, index) => ({
+                day: h.day,
+                element: (
+                  <article className="event-day calendar-list-row" id={"calendar-notice-" + index} key={h.day + h.title}>
+                    <p className="calendar-list-date">
+                      <time dateTime={h.day}>{label(h.day, { weekday: "short", month: "short", day: "numeric" })}</time>
+                      {h.end !== h.day && (
+                        <> – <time dateTime={h.end}>{label(h.end, { weekday: "short", month: "short", day: "numeric" })}</time></>
+                      )}
+                    </p>
+                    <h3 className="calendar-list-title">{h.title}</h3>
+                    <p className="calendar-list-meta">
+                      {h.kind === "GCPS schools closed for students" ? "GCPS students have no school" : h.kind}
+                    </p>
+                    {h.overlaps?.map((o) => (
+                      <p className="calendar-list-meta" key={o.day + o.title}>
+                        {o.title} is {o.kind === "U.S. federal holiday" ? "a U.S. federal holiday " : ""}
+                        on {label(o.day, { weekday: "long", month: "short", day: "numeric" })}.
+                      </p>
+                    ))}
+                  </article>
+                ),
+              })),
+            ]
+              .sort((a, b) => a.day.localeCompare(b.day))
+              .map((row) => row.element)
+          ) : (
+            <p>No dated events for this {view}.</p>
+          )}
+        </section>
       )}
       <p className="event-day">
         <a className="text-link" href={facebookGroup}>
