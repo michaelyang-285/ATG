@@ -14,7 +14,7 @@ export function GET(req: Request) {
     const events = await eventStore().fetch(
       `*[_type == "communityEventOwner" && ownerId == $ownerId]{
         "published": *[_id == ^.eventId][0]{title, "slug": slug.current},
-        "draft": *[_id == "drafts." + ^.eventId][0]{title},
+        "draft": *[_id == "drafts." + ^.eventId][0]{title, reviewStatus},
         eventId
       }[defined(published) || defined(draft)]`,
       { ownerId: user.id }, { cache: "no-store" }
