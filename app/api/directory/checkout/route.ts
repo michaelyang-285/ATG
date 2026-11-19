@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
+import { eligibleLocation } from "@/lib/directory/business-location";
 export function POST(req: Request) {
   return respond(async () => {
     await human();
@@ -7,11 +8,14 @@ export function POST(req: Request) {
       { id } = await req.json(),
       table = db().from("directory_entries");
     const { data, error } = await table
-      .select("id,paid_session,checkout_session,checkout_attempt")
+      .select("id,paid_session,checkout_session,checkout_attempt,contact,deletion_due_at")
       .eq("id", id)
       .eq("owner_id", user.id)
       .single();
     if (error || !data) throw new Failure(404, "Listing unavailable.");
+    if (data.deletion_due_at) throw new Failure(409, "This listing is pending deletion.");
+    if (!data.contact?.streetAddress || !eligibleLocation(data.contact.city, data.contact.zip))
+      throw new Failure(409, "Edit your listing and complete the business address before checkout.");
     if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_DIRECTORY_WEBHOOK_SECRET)
       throw new Failure(503, "Your listing is saved. Payments are not open yet. Return to Manage listings when checkout opens.");
     if (data.paid_session)
@@ -23,7 +27,8 @@ export function POST(req: Request) {
       const prior = await stripe.checkout.sessions.retrieve(
         data.checkout_session,
       );
-      if (prior.status === "open" && prior.url) return { url: prior.url };
+      if (prior.status === "open" && prior.allow_promotion_codes && prior.url) return { url: prior.url };
+      if (prior.status === "open") await stripe.checkout.sessions.expire(prior.id);
       if (prior.status === "complete")
         throw new Failure(
           409,
@@ -43,6 +48,7 @@ export function POST(req: Request) {
     const session = await stripe.checkout.sessions.create(
       {
         mode: "payment",
+        allow_promotion_codes: true,
         allowed_payment_method_types: ["card"],
         client_reference_id: id,
         metadata: { directory_entry: id },
@@ -52,14 +58,16 @@ export function POST(req: Request) {
             price_data: {
               currency: "usd",
               unit_amount: 300,
-              product_data: { name: "All Things Gwinnett directory listing" },
+              ...(process.env.STRIPE_SECRET_KEY!.includes("_live_")
+                ? {product: "prod_atg_directory_profile"}
+                : {product_data: {name: "All Things Gwinnett directory listing"}}),
             },
           },
         ],
         success_url: home + "?payment=returned",
         cancel_url: home,
       },
-      { idempotencyKey: "directory-" + id + "-" + attempt },
+      { idempotencyKey: "directory-promo-v2-" + id + "-" + attempt },
     );
     const saved = await table
       .update({ checkout_session: session.id })

@@ -1,3 +1,4 @@
+import { eligibleLocation, areaError } from "./business-location";
 import {networks} from "./social";
 import { categories, services } from "./categories";
 import { Failure } from "./server";
@@ -31,6 +32,13 @@ export function listing(input: any, email: string, uid: string) {
   if (phone.replace(/\D/g, "").length < 7) invalid("phone");
   if (publicEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(publicEmail))
     invalid("public email");
+  const city = field("city", true, 80), zip = field("zip", true, 10);
+  const streetAddress = field("streetAddress", true);
+  if (!eligibleLocation(city, zip)) throw new Failure(400, areaError);
+  if (typeof input.hideAddress !== "boolean" || typeof input.hidePhone !== "boolean")
+    throw new Failure(400, "Choose your address and phone visibility.");
+  const businessPhone = field("businessPhone") || phone;
+  if (businessPhone.replace(/\D/g, "").length < 7) invalid("business phone");
   const all = Object.values(categories).flat(),
     category = field("category", true);
   if (!all.includes(category)) invalid("category");
@@ -55,7 +63,8 @@ export function listing(input: any, email: string, uid: string) {
       firstName: field("firstName", true),
       lastName: field("lastName", true),
       phone,
-      email,
+      email, streetAddress, city, zip, businessPhone,
+      hideAddress: input.hideAddress, hidePhone: input.hidePhone,
     },
     draft: {
       name: field("name", true),
@@ -64,9 +73,9 @@ export function listing(input: any, email: string, uid: string) {
       categories: choices("categories", all),
       services: choices("services", services),
       neighborhood: field("neighborhood", true),
-      address: field("address"),
+      address: input.hideAddress ? "" : [streetAddress, city, "GA " + zip].join(", "),
       publicEmail,
-      publicPhone: field("publicPhone"),
+      publicPhone: input.hidePhone ? "" : businessPhone,
       url: url("url"),
       booking: url("booking"),
       social: url("social"),

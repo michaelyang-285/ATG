@@ -10,6 +10,7 @@ export function GET(req: Request) {
     const { data, error } = await db()
       .from("directory_entries")
       .select("id,draft,revision")
+      .is("deletion_due_at", null)
       .eq("status", "review");
     if (error) throw error;
     return data;
@@ -30,6 +31,7 @@ export function POST(req: Request) {
       .select("draft")
       .eq("id", id)
       .eq("revision", revision)
+      .is("deletion_due_at", null)
       .eq("status", "review")
       .single();
     if (!data) throw new Failure(409, "Refresh the review queue.");
@@ -41,6 +43,7 @@ export function POST(req: Request) {
       })
       .eq("id", id)
       .eq("revision", revision)
+      .is("deletion_due_at", null)
       .eq("status", "review")
       .select("id")
       .maybeSingle();

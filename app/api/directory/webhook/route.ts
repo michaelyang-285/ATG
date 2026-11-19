@@ -19,9 +19,11 @@ export function POST(req: Request) {
       if (
         id &&
         id === s.client_reference_id &&
-        s.payment_status === "paid" &&
+        s.mode === "payment" &&
+        (s.payment_status === "paid" || (s.amount_total === 0 && s.payment_status === "no_payment_required")) &&
         s.currency === "usd" &&
-        s.amount_total === 300
+        s.amount_subtotal === 300 && s.amount_total !== null &&
+        s.amount_total >= 0 && s.amount_total === 300 - (s.total_details?.amount_discount ?? 0)
       ) {
         const { error } = await db()
           .from("directory_entries")
