@@ -20,12 +20,13 @@
   gap: 1.5rem; padding: 0 5px 5px 0;
 }
 .atg-directory .business-list article {
-  display: flex; flex-direction: column; gap: .875rem;
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  align-content: start; gap: .875rem;
   min-width: 0; padding: 1.25rem; overflow-wrap: anywhere;
   background: #fff; border: 1px solid var(--ink); border-radius: 12px;
   box-shadow: 5px 5px 0 var(--ink);
 }
-.atg-directory .business-card-heading, .atg-directory .business-card-actions {
+.atg-directory .business-card-heading {
   display: flex; align-items: center; gap: .875rem;
 }
 .atg-directory .business-card-heading img { flex: none; border-radius: .35rem; }
@@ -33,8 +34,19 @@
 .atg-directory .business-excerpt {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
 }
-.atg-directory .business-card-actions { flex-wrap: wrap; justify-content: space-between; margin-top: auto; }
-.atg-directory .business-card-actions .button { margin-left: auto; }
+.atg-directory .business-card-cta { justify-self: start; align-self: start; }
+@media (min-width: 800px) {
+  .atg-directory .business-list article:has(.business-excerpt) {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-areas: "heading description" "action description";
+    column-gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+  .atg-directory article:has(.business-excerpt) .business-card-heading { grid-area: heading; }
+  .atg-directory article:has(.business-excerpt) .business-card-cta { grid-area: action; }
+  .atg-directory .business-list .business-excerpt { grid-area: description; -webkit-line-clamp: 4; }
+  .atg-directory article:has(.business-card-heading img) .business-card-cta { margin-inline-start: calc(56px + .875rem); }
+}
 .atg-directory .directory-find { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
 .directory-context { margin: 1rem 0 0; }
 @media (max-width: 720px) {

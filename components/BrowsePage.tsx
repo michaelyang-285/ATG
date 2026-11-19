@@ -212,11 +212,10 @@ export default async function BrowsePage({
                   </div>
                 </div>
                 {b.summary && <p className="business-excerpt">{b.summary}</p>}
-                <div className="business-card-actions">
-                  {b.neighborhood && <p className="quiet">{b.neighborhood}</p>}
-                  {kind === "directory" && <Link className="button button-orange" href={`/directory/${encodeURIComponent(b.slug)}`}
-                    aria-label={`View profile for ${b.name}`}>View profile</Link>}
-                </div>
+                {kind === "directory" && (
+                  <Link className="business-card-cta button button-orange" href={`/directory/${encodeURIComponent(b.slug)}`}
+                    aria-label={`View profile for ${b.name}`}>View profile</Link>
+                )}
               </article>
             ))}
           </section>
