@@ -1,3 +1,4 @@
+import { descriptionLimit, descriptionLength } from "@/lib/directory/description";
 import Stripe from "stripe";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
 import { eligibleLocation } from "@/lib/directory/business-location";
@@ -8,12 +9,14 @@ export function POST(req: Request) {
       { id } = await req.json(),
       table = db().from("directory_entries");
     const { data, error } = await table
-      .select("id,paid_session,checkout_session,checkout_attempt,contact,deletion_due_at")
+      .select("id,paid_session,checkout_session,checkout_attempt,contact,deletion_due_at,summary:draft->>summary")
       .eq("id", id)
       .eq("owner_id", user.id)
       .single();
     if (error || !data) throw new Failure(404, "Listing unavailable.");
     if (data.deletion_due_at) throw new Failure(409, "This listing is pending deletion.");
+    if (descriptionLength(data.summary || "") > descriptionLimit)
+      throw new Failure(409, "Edit your listing and shorten the description to 1,000 characters or fewer.");
     if (!data.contact?.streetAddress || !eligibleLocation(data.contact.city, data.contact.zip))
       throw new Failure(409, "Edit your listing and complete the business address before checkout.");
     if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_DIRECTORY_WEBHOOK_SECRET)
