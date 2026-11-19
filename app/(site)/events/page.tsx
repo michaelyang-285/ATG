@@ -1,6 +1,7 @@
 import { eventPageMetadata } from "@/lib/event-metadata";
 import { calendarNotices } from "@/lib/gcps-calendar";
 import Link from "next/link";
+import CalendarGrid from "@/components/CalendarGrid";
 import { calendar, occurrencePath } from "@/lib/events";
 import { localClock, shift, validDay, zone } from "@/lib/event-time";
 import { facebookGroup } from "@/lib/gwinnett";
@@ -90,54 +91,8 @@ export default async function Page({
         <Link href={`?view=${view}&date=${next}`}>Next {view} →</Link>
       </nav>
       {view !== "year" && (
-        <div className="calendar-grid" aria-label={period}>
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-            <strong key={d}>{d}</strong>
-          ))}
-          {Array.from({ length: new Date(from).getUTCDay() }, (_, i) => (
-            <div aria-hidden="true" key={"blank" + i} />
-          ))}
-          {Array.from(
-            {
-              length:
-                1 + Math.round((Date.parse(to) - Date.parse(from)) / 86400000),
-            },
-            (_, i) => {
-              const date = shift(from, i),
-                matches = items.filter(
-                  (e) =>
-                    e.day <= date &&
-                    localClock(e.endsAt || e.startsAt).slice(0, 10) >= date,
-                );
-              return (
-                <div key={date}>
-                  <time dateTime={date}>{Number(date.slice(8))}</time>
-                  {observances
-                    .filter((h) => h.day <= date && h.end >= date)
-                    .map((h) => (
-                      <small
-                        key={h.title}
-                        style={{ display: "block", overflowWrap: "anywhere" }}
-                      >
-                        {h.title}
-                        {h.school && <> · {h.kind}</>}
-                        {h.overlaps
-                          ?.filter((o) => o.day === date && o.title !== h.title)
-                          .map((o) => (
-                            <span key={o.title}> · {o.title}</span>
-                          ))}
-                      </small>
-                    ))}
-                  {matches.map((e) => (
-                    <Link key={e._id + e.day} href={occurrencePath(e)}>
-                      {e.title}
-                    </Link>
-                  ))}
-                </div>
-              );
-            },
-          )}
-        </div>
+        <CalendarGrid from={from} to={to} period={period} limit={view === "month" ? 2 : 3}
+          events={items} notices={observances} />
       )}
       {items.length || observances.length ? (
         [
@@ -166,10 +121,10 @@ export default async function Page({
               </article>
             ),
           })),
-          ...observances.map((h) => ({
+          ...observances.map((h, index) => ({
             day: h.day,
             element: (
-              <article className="event-day" key={h.day + h.title}>
+              <article className="event-day" id={"calendar-notice-" + index} key={h.day + h.title}>
                 <h3>{h.title}</h3>
                 <p>
                   {h.kind === "GCPS schools closed for students"
