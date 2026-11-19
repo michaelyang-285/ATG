@@ -1,3 +1,4 @@
+import { formatServiceAreas, serviceAreaCities } from "./locations";
 import { hoursError, validTime, type DayHours } from "./hours";
 import { descriptionLimit, descriptionLength } from "./description";
 import { eligibleLocation, areaError } from "./business-location";
@@ -46,6 +47,8 @@ export function listing(input: any, email: string, uid: string) {
   if (typeof summary !== "string" || !summary.trim()) invalid("business description");
   if (descriptionLength(summary) > descriptionLimit)
     throw new Failure(400, "Shorten your business description to 1,000 characters or fewer.");
+  const neighborhood = formatServiceAreas(serviceAreaCities(field("neighborhood", true)));
+  if (!neighborhood) invalid("service area");
   const week = input.weeklyHours;
   if (week != null) {
     const error = hoursError(week);
@@ -84,7 +87,7 @@ export function listing(input: any, email: string, uid: string) {
       category,
       categories: choices("categories", all),
       services: choices("services", services),
-      neighborhood: field("neighborhood", true),
+      neighborhood,
       address: input.hideAddress ? "" : [streetAddress, city, "GA " + zip].join(", "),
       publicEmail,
       publicPhone: input.hidePhone ? "" : businessPhone,

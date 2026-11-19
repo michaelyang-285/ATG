@@ -1,4 +1,5 @@
 import { cities } from "@/lib/gwinnett";
+import { allOfGwinnett, formatServiceAreas, serviceAreaCities } from "@/lib/directory/locations";
 export function ServiceAreas({
   value,
   onChange,
@@ -6,10 +7,8 @@ export function ServiceAreas({
   value: string;
   onChange: (v: string) => void;
 }) {
-  const selected = (value || "")
-    .split(",")
-    .map((v) => v.trim())
-    .filter(Boolean);
+  const selected = serviceAreaCities(value);
+  const select = (areas: string[]) => onChange(formatServiceAreas(areas));
   const options = Array.from(new Set([...cities, ...selected]));
   const all = cities.every((city) => selected.includes(city));
   return (
@@ -19,16 +18,9 @@ export function ServiceAreas({
         <input
           type="checkbox"
           checked={all}
-          onChange={() =>
-            onChange(
-              (all
-                ? selected.filter((c) => !cities.includes(c))
-                : options
-              ).join(", "),
-            )
-          }
+          onChange={() => select(all ? selected.filter(city => !cities.includes(city)) : options)}
         />{" "}
-        All of Gwinnett
+        {allOfGwinnett}
       </label>
       <div
         style={{
@@ -43,12 +35,9 @@ export function ServiceAreas({
               type="checkbox"
               checked={selected.includes(city)}
               onChange={() =>
-                onChange(
-                  (selected.includes(city)
-                    ? selected.filter((c) => c !== city)
-                    : [...selected, city]
-                  ).join(", "),
-                )
+                select(selected.includes(city)
+                  ? selected.filter(c => c !== city)
+                  : [...selected, city])
               }
             />{" "}
             {city}
