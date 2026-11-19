@@ -1,4 +1,5 @@
 import DirectoryLocation from "./DirectoryLocation";
+import ThingsToDo from "./ThingsToDo";
 import { places, resolveArea, zipAreas } from "@/lib/directory/locations";
 import {categories as directoryCategories} from "@/lib/directory/categories";
 import {directoryPublic, searchDirectory} from "@/lib/directory/public";
@@ -63,6 +64,9 @@ export default async function BrowsePage({
   if (filters.topic) stories = stories.filter((s) => s.topic === filters.topic);
   if (filters.area)
     stories = stories.filter((s) => s.location === filters.area);
+  if (kind === "things-to-do") {
+    return <ThingsToDo stories={stories} filtered={Boolean(filters.format || filters.topic || filters.area)} />;
+  }
   const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
   const rawArea = typeof filters.area === "string" ? filters.area : "";
   const matches = kind === "directory" ? resolveArea(rawArea) : null;
