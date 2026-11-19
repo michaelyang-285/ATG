@@ -2,6 +2,35 @@ import { descriptionLimit, descriptionLength } from "@/lib/directory/description
 import Stripe from "stripe";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
 import { eligibleLocation } from "@/lib/directory/business-location";
+export function GET(req: Request) {
+  return respond(async () => {
+    const user = await owner(req);
+    const id = new URL(req.url).searchParams.get("id");
+    if (!id || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id))
+      throw new Failure(400, "Invalid listing ID.");
+
+    const { data, error } = await db()
+      .from("directory_entries")
+      .select("paid_session,checkout_session")
+      .eq("id", id)
+      .eq("owner_id", user.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Failure(404, "Listing unavailable.");
+    if (data.paid_session) return { completed: true };
+    if (!data.checkout_session || !process.env.STRIPE_SECRET_KEY)
+      return { completed: false };
+
+    // Stripe can confirm the checkout before the webhook updates the listing.
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const session = await stripe.checkout.sessions.retrieve(data.checkout_session);
+    return {
+      completed: session.status === "complete" &&
+        (session.payment_status === "paid" || session.payment_status === "no_payment_required"),
+    };
+  });
+}
+
 export function POST(req: Request) {
   return respond(async () => {
     await human();
