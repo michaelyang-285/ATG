@@ -1,3 +1,4 @@
+import ExternalLinkTargets from "@/components/ExternalLinkTargets";
 import SiteHeader from "@/components/SiteHeader";
 import { Footer } from "@/components/Publication";
 import { getPublication } from "@/lib/publication";
@@ -15,6 +16,7 @@ export default async function SiteLayout({
   }
   return (
     <>
+      <ExternalLinkTargets />
       <SiteHeader items={navigation(data.stories, data.businesses)} />
       {children}
       <Footer />
