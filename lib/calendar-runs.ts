@@ -15,7 +15,7 @@ function identity(e: Occurrence) {
 
 function isLongRun(dates: Occurrence[]) {
   if (dates.some(e => endDay(e) >= shift(e.day, 6))) return true;
-  const days = [...new Set(dates.map(e => e.day))];
+  const days = Array.from(new Set(dates.map(e => e.day)));
   if (days.length < 4 || days[days.length - 1] < shift(days[0], 7)) return false;
   // A regular weekly meetup stays in the grid. A run needs at least four operating days in two weeks.
   return days.some((day, i) => i >= 3 && day <= shift(days[i - 3], 13));
@@ -32,16 +32,16 @@ export function arrangeCalendar(occurrences: Occurrence[], from: string, to: str
   }
   const ongoing: CalendarRun[] = [];
   const grouped = new Set<Occurrence>();
-  for (const [key, dates] of bySeries) {
+  bySeries.forEach((dates, key) => {
     let run: Occurrence[] = [];
     let lastDay = "";
-    function finishRun() {
+    const finishRun = () => {
       const visible = run.filter(inView);
       if (visible.length && isLongRun(run)) {
         ongoing.push({ key: key + run[0].day, dates: visible });
         visible.forEach(e => grouped.add(e));
       }
-    }
+    };
     // calendar() supplies chronological occurrences. A gap of more than a week starts a new run.
     for (const event of dates) {
       if (lastDay && event.day > shift(lastDay, 7)) {
@@ -54,7 +54,7 @@ export function arrangeCalendar(occurrences: Occurrence[], from: string, to: str
       if (end > lastDay) lastDay = end;
     }
     finishRun();
-  }
+  });
   ongoing.sort((a, b) => a.dates[0].title.localeCompare(b.dates[0].title));
   return { daily: occurrences.filter(e => inView(e) && !grouped.has(e)), ongoing };
 }
