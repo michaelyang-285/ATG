@@ -46,6 +46,7 @@ type Row = {
   revision: number;
   status: string;
   review_note: string;
+  profilePath?: string | null;
   deletion_due_at: string | null;
   contact: Partial<Draft>;
   draft: Partial<Draft>;
@@ -322,30 +323,31 @@ export default function OwnerDashboard() {
             <button onClick={() => edit()}>Add a listing</button>
             <button disabled={busy} onClick={() => run(refresh)}>Refresh status</button>
           </div>
-          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}><h3>{p.fields.name||"New listing"}</h3><Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button></article>)}
+          {progress.filter(p=>!rows.some(r=>r.id===p.listing_id)).map(p=><article key={p.listing_id}>
+            <OwnerListingHeading data={p.fields} />
+            <Completion completed={p.step+1}/><p>Next up: {sections[p.step]}</p><button onClick={()=>resume(p)}>Continue listing</button>
+          </article>)}
           {rows.map((r) => (
             <article key={r.id}>
-              <h3>{r.draft.name}</h3>
-              <p>{labels[r.status]}</p>{r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
+              <OwnerListingHeading data={r.draft} href={r.profilePath} status={labels[r.status]} />
+              {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
               {r.review_note && <p>{r.review_note}</p>}
               {r.deletion_due_at && <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>}
-              <div className="submission-actions">
+              <div className="owner-listing-actions">
                 {r.deletion_due_at ? (
                   <button disabled={busy} onClick={() => run(async () => {
                     await api("deletion", {id:r.id, action:"cancel"}); await refresh();
                   })}>Cancel deletion request</button>
                 ) : (
                   <>
-                    <button onClick={() => edit(r)}>Edit listing</button>
-                    {r.status === "unpaid" && (
-                      <button
-                        disabled={busy}
-                        onClick={() => run(() => openCheckout(r.id))}
-                      >
-                        Continue to checkout
-                      </button>
-                    )}
-                    <button disabled={busy} onClick={() => {
+                    <div className="owner-listing-links">
+                      {r.profilePath && <a className="button button-orange" href={r.profilePath}>View public profile</a>}
+                      <button onClick={() => edit(r)}>Edit listing</button>
+                      {r.status === "unpaid" && (
+                        <button disabled={busy} onClick={() => run(() => openCheckout(r.id))}>Continue to checkout</button>
+                      )}
+                    </div>
+                    <button className="request-deletion" disabled={busy} onClick={() => {
                       if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
                         run(async () => { await api("deletion", {id:r.id, action:"request"}); await refresh(); });
                       }
@@ -585,6 +587,17 @@ export default function OwnerDashboard() {
     </>
   );
 }
+function OwnerListingHeading({data, href, status}: {data: Partial<Draft>; href?: string | null; status?: string}) {
+  const name = data.name || "New listing";
+  return <header className="owner-listing-heading">
+    {data.logo && <img src={data.logo} alt="" width={56} height={56} />}
+    <div>
+      <h3>{href ? <a href={href}>{name}</a> : name}</h3>
+      {status && <p>{status}</p>}
+    </div>
+  </header>;
+}
+
 function ListingPreview({ data: d }: { data: Partial<Draft> }) {
   return (
     <article>

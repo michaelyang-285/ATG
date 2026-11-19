@@ -1,6 +1,7 @@
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
 import { listing } from "@/lib/directory/validate";
+import { listingPath } from "@/lib/directory/profile";
 import { revalidatePath } from "next/cache";
 export const dynamic = "force-dynamic";
 export function GET(req: Request) {
@@ -8,7 +9,7 @@ export function GET(req: Request) {
     const user = await owner(req);
     const { data, error } = await db()
       .from("directory_entries")
-      .select("id,contact,draft,status,revision,review_note,deletion_due_at")
+      .select("id,contact,draft,status,revision,review_note,deletion_due_at,published_name:published->>name")
       .eq("owner_id", user.id)
       .order("id");
     if (error) throw error;
@@ -20,7 +21,10 @@ export function GET(req: Request) {
       : {data: [], error: null};
     if (removalQueue.error) throw removalQueue.error;
     return {deletions: removalQueue.data, progress:progress.data,
-      rows: data,
+      rows: data.map(({published_name, ...row}) => ({
+        ...row,
+        profilePath: published_name && !row.deletion_due_at ? listingPath("local-" + row.id) : null,
+      })),
       moderator: user.app_metadata.directory_admin === true,
     };
   });

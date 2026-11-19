@@ -967,3 +967,30 @@ img {
 .upload-preview { display: flex; align-items: center; gap: .75rem; }
 .upload-preview img { width: 5rem; height: 5rem; }
 .checkout-note { margin-top: 1rem; }
+
+.owner-listing-heading, .owner-listing-actions, .owner-listing-links {
+  display: flex;
+  align-items: center;
+}
+.owner-listing-heading { gap: .875rem; }
+.directory-owner .owner-listing-heading img {
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: none;
+  object-fit: contain;
+}
+.owner-listing-heading > div { min-width: 0; }
+.owner-listing-heading h3 a:hover, .owner-listing-heading h3 a:focus-visible { text-decoration: underline; }
+.owner-listing-actions { flex-wrap: wrap; gap: 1.25rem 2rem; margin-top: 1.25rem; }
+.owner-listing-links { flex-wrap: wrap; gap: .75rem; }
+.directory-owner button.request-deletion {
+  margin-inline-start: auto;
+  border-color: #b53c35;
+  color: #a12b25;
+}
+.directory-owner button.request-deletion:hover,
+.directory-owner button.request-deletion:focus-visible { background: #fff1f0; }
+@media (max-width: 640px) {
+  .owner-listing-actions { flex-direction: column; align-items: flex-start; }
+  .owner-listing-links { width: 100%; }
+}
