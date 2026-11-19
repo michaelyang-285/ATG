@@ -7,7 +7,7 @@ import {categories} from "./categories";
 
 type Listing = Business & SocialFields & {
   source?: "local";
-  weeklyHours?: DayHours[]; hours?: string; publicPhone?: string; publicEmail?: string;
+  weeklyHours?: DayHours[]; hours?: string; publicPhone?: string;
   booking?: string; social?: string; gallery?: string[];
 };
 export const getListing = cache(async (slug: string): Promise<Listing | null> => {
@@ -35,7 +35,7 @@ export function listingSchema(b:Listing) {
   return {"@context":"https://schema.org","@type":"WebPage","@id":url,url,name:b.name,
     mainEntity:{"@type":type,"@id":url+"#listing",name:b.name,description:b.summary||undefined,
       url:safeUrl(b.url)||url,image:listingPhoto(b)||undefined,logo:safeUrl(b.logo)||undefined,
-      telephone:b.publicPhone||undefined,email:b.publicEmail||undefined,address:b.address||undefined,
+      telephone:b.publicPhone||undefined,address:b.address||undefined,
       areaServed:["Church","Mosque","Synagogue","PlaceOfWorship"].includes(type)?undefined:areas,
       sameAs:Array.from(new Set([...networks.map(n=>safeUrl(b[n.key])),safeUrl(b.social)].filter(Boolean)))}};
 }
