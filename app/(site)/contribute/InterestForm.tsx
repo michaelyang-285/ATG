@@ -23,7 +23,7 @@ export default function InterestForm() {
   return <form onSubmit={submit}>
     <label>Your name<input name="name" autoComplete="name" required maxLength={100} /></label>
     <label>Email address<input type="email" name="email" autoComplete="email" required maxLength={254} /></label>
-    <label>I’d like to<select name="intent"><option>Pitch a story</option><option>Get a topic from Michael</option></select></label>
+    <label>I’d like to<select name="intent"><option>Pitch a story</option><option>Get a topic from Michael</option><option>Become a regular writer</option></select></label>
     <label>Your idea or interests<textarea name="idea" rows={4} required maxLength={2500} placeholder="What part of Gwinnett do you know firsthand?" /></label>
     {error && <p role="alert">{error}</p>}
     <button className="button button-orange" disabled={status === "sending"}>{status === "sending" ? "Sending…" : "Send my interest"}</button>

@@ -12,7 +12,7 @@ export function POST(request: Request) {
       return value.trim();
     }
     const name = field("name", 100), email = field("email", 254), idea = field("idea", 2500), intent = field("intent", 40);
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["Pitch a story","Get a topic from Michael"].includes(intent))
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !["Pitch a story","Get a topic from Michael","Become a regular writer"].includes(intent))
       throw new Failure(400, "Check your email address and topic choice.");
     const key = process.env.SUBMISSION_ALERT_RESEND_KEY;
     if (!key) throw new Error("Mail unavailable");
