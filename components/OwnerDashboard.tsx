@@ -120,6 +120,8 @@ export default function OwnerDashboard() {
       cache: "no-store",
     });
     const out = await res.json();
+    if (res.status === 403 && path === "progress")
+      throw Error("We couldn’t verify this draft save. Your entries are still here. Please try again.");
     if (!res.ok) throw Error(out.error || "Please try again.");
     return out;
   }
@@ -265,10 +267,10 @@ export default function OwnerDashboard() {
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
-      {status}
+      {!form && status}
       <h1>{form?"Build your listing":"My submissions"}</h1>
-      <p>
-        Signed in as {session.user.email} ·{" "}
+      <div className="owner-session">
+        <span>Signed in as {session.user.email}</span>
         <button
           disabled={busy}
           onClick={() =>
@@ -280,7 +282,7 @@ export default function OwnerDashboard() {
         >
           Sign out
         </button>
-      </p>
+      </div>
       {!form ? (
         <>
           <section aria-labelledby="directory-submissions" style={{marginBlock:"2rem"}}>
@@ -545,7 +547,8 @@ export default function OwnerDashboard() {
                 ))}</>}
               </>
             )}
-            <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>setStep(step-1)}>Back</button>}
+            {msg && <p className="wizard-error" role="alert">{msg}</p>}
+            <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>{setMsg("");setStep(step-1)}}>Back</button>}
               {step===4 && (!form.status || form.status==="unpaid") && <p>The one-time listing fee is $3. You can enter a promotion code at Stripe checkout. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
               <button className="primary-action" disabled={busy || descriptionBlocked}>{busy?"Saving…":step<4?"Next":form.status&&form.status!=="unpaid"?"Submit edits for review":"Continue to payment · $3"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
