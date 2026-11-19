@@ -1,3 +1,4 @@
+import { deletionReviewEmail } from "@/lib/directory/deletion-review";
 import { db, human, respond, Failure } from "@/lib/directory/server";
 import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 export function POST(req: Request) {
@@ -27,7 +28,8 @@ export function POST(req: Request) {
     const { error } = await db().auth.signInWithOtp({
       email,
       options: {
-        shouldCreateUser: Boolean(account),
+        // The designated reviewer can enter the dashboard with a verified email link.
+        shouldCreateUser: Boolean(account) || email.trim().toLowerCase() === deletionReviewEmail,
         ...(account
           ? {
               data: {
