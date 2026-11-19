@@ -170,7 +170,8 @@ export default function SignupCard({
                         provider: "google",
                         options: {
                           redirectTo: new URL(
-                            generalAccount ? "/create-account" : event ? "/events/submit" : "/directory/manage",
+                            generalAccount ? "/create-account" : event ? "/events/submit" :
+                              new URLSearchParams(location.search).get("next") === "approvals" ? "/admin/approvals" : "/directory/manage",
                             window.location.origin,
                           ).href,
                           queryParams: { prompt: "select_account" },

@@ -1,3 +1,4 @@
+import { notifySubmission } from "@/lib/submission-alerts";
 import Stripe from "stripe";
 import { db, respond, Failure } from "@/lib/directory/server";
 export function POST(req: Request) {
@@ -31,6 +32,7 @@ export function POST(req: Request) {
           .eq("id", id)
           .is("paid_session", null);
         if (error) throw error;
+        await notifySubmission("profile", id);
       }
     }
     return { ok: true };
