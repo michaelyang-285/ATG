@@ -1,4 +1,4 @@
-import { cities, cityOptionLabel } from "@/lib/gwinnett";
+import { cities } from "@/lib/gwinnett";
 import { allOfGwinnett, formatServiceAreas, serviceAreaCities } from "@/lib/directory/locations";
 export function ServiceAreas({
   value,
@@ -40,7 +40,7 @@ export function ServiceAreas({
                   : [...selected, city])
               }
             />{" "}
-            {cityOptionLabel(city)}
+            {city}
           </label>
         ))}
       </div>
