@@ -106,7 +106,7 @@ export default async function Page({ params, searchParams }: Props) {
         {ticketUrl && ticketUrl !== url && <p><a className="button button-orange" href={ticketUrl}>Tickets and registration</a></p>}
         {url && (
           <a className="button button-orange" href={url}>
-            Visit event website ↗
+            Visit event website
           </a>
         )}
       </article>

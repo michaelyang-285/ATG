@@ -128,18 +128,11 @@ img {
   align-items: center;
 }
 .button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 46px;
-  padding: 10px 20px;
   border: 0;
-  border-radius: 4px;
-  font-size: 16px;
   font-weight: 700;
-  line-height: 1.4;
 }
-.button:hover {
+.button:hover,
+.directory-owner .owner-submissions-section button.primary-action:hover {
   text-decoration: underline;
 }
 .button-orange {
@@ -514,7 +507,7 @@ img {
 .article-body h3 {
   margin-block: 30px 16px;
 }
-.article-body a {
+.article-body a:where(:not(.button)) {
   color: var(--text-orange);
   text-decoration: underline;
 }
@@ -551,7 +544,7 @@ img {
 .prose h2 {
   margin-block: 36px 14px;
 }
-.prose a {
+.prose a:where(:not(.button)) {
   color: var(--text-orange);
   text-decoration: underline;
 }
@@ -1002,15 +995,16 @@ img {
 }
 .owner-section-controls { display: flex; }
 .directory-owner .owner-section-heading h2 { margin: 0; }
-.directory-owner .owner-submissions-section :is(button, .button),
+.button,
+.directory-owner .owner-submissions-section button,
 .directory-owner .owner-session button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.75rem;
-  padding: .5rem 1rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  line-height: 1.25;
+  min-height: 46px;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 1.4;
 }
 .directory-owner .submission-status { margin-top: 1rem; color: var(--muted); }
