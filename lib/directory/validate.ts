@@ -5,6 +5,7 @@ import { eligibleLocation, areaError } from "./business-location";
 import {networks} from "./social";
 import { categories, services } from "./categories";
 import { Failure } from "./server";
+import { galleryLimit } from "./gallery";
 export function listing(input: any, email: string, uid: string) {
   const invalid = (label: string) => {
     throw new Failure(400, "Check the " + label + " field.");
@@ -61,7 +62,7 @@ export function listing(input: any, email: string, uid: string) {
   if (!all.includes(category)) invalid("category");
   const logo = field("logo", false, 1000),
     gallery = input.gallery ?? [];
-  if (!Array.isArray(gallery) || gallery.length > 6) invalid("photos");
+  if (!Array.isArray(gallery) || gallery.length > galleryLimit) invalid("photos");
   const prefix =
     process.env.NEXT_PUBLIC_SUPABASE_URL +
     "/storage/v1/object/public/directory-media/" +

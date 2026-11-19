@@ -9,7 +9,7 @@ export function GET(req: Request) {
     const user = await owner(req);
     const { data, error } = await db()
       .from("directory_entries")
-      .select("id,contact,draft,status,revision,review_note,deletion_due_at,published_name:published->>name")
+      .select("id,contact,draft,status,revision,review_note,deletion_due_at,profile_slug,published_name:published->>name")
       .eq("owner_id", user.id)
       .order("id");
     if (error) throw error;
@@ -21,9 +21,9 @@ export function GET(req: Request) {
       : {data: [], error: null};
     if (removalQueue.error) throw removalQueue.error;
     return {deletions: removalQueue.data, progress:progress.data,
-      rows: data.map(({published_name, ...row}) => ({
+      rows: data.map(({published_name, profile_slug, ...row}) => ({
         ...row,
-        profilePath: published_name && !row.deletion_due_at ? listingPath("local-" + row.id) : null,
+        profilePath: published_name && profile_slug && !row.deletion_due_at ? listingPath(profile_slug) : null,
       })),
       moderator: user.app_metadata.directory_admin === true,
     };
@@ -49,18 +49,18 @@ export function POST(req: Request) {
           .is("deletion_due_at", null)
           .eq("revision", body.revision)
           .eq("status", body.status)
-          .select("id")
+          .select("id,profile_slug")
           .maybeSingle()
       : await table
           .insert({ ...values, ...(body.listingId?{id:body.listingId}:{}),owner_id: user.id })
-          .select("id")
+          .select("id,profile_slug")
           .single();
     if (result.error) throw result.error;
     if (!result.data)
       throw new Failure(409, "This listing changed. Reload before editing.");
     if(body.listingId)await db().from("directory_progress").delete().eq("owner_id",user.id).eq("listing_id",body.listingId);
-    revalidatePath("/directory/local-" + result.data.id);
+    if (result.data.profile_slug) revalidatePath(listingPath(result.data.profile_slug));
     revalidatePath("/directory");
-    return result.data;
+    return {id: result.data.id};
   });
 }

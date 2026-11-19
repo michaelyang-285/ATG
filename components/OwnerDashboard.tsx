@@ -2,6 +2,7 @@
 import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 import BusinessLocationFields from "./BusinessLocationFields";
 import { descriptionLength, descriptionLimit } from "@/lib/directory/description";
+import { galleryLimit } from "@/lib/directory/gallery";
 import OperatingHoursFields from "./OperatingHoursFields";
 import OperatingHours from "./OperatingHours";
 import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
@@ -214,15 +215,23 @@ export default function OwnerDashboard() {
       form[k].includes(v) ? form[k].filter((x) => x !== v) : [...form[k], v],
     );
   }
-  function upload(file: File, k: "logo" | "gallery") {
+  function upload(files: File[], k: "logo" | "gallery") {
     run(async () => {
       setUploadIssue(null);
       try {
-        if (!file.size || file.size > 2_000_000) throw Error("Choose a JPG, PNG, or WebP file of 2 MB or less.");
-        const data = new FormData();
-        data.set("file", file);
-        const out = await api("upload", data);
-        change(k, k === "logo" ? out.url : [...form.gallery, out.url]);
+        const remaining = galleryLimit - form.gallery.length;
+        if (k === "gallery" && files.length > remaining)
+          throw Error(`Choose up to ${remaining} more photos for this gallery.`);
+        if (files.some(file => !file.size || file.size > 2_000_000))
+          throw Error("Choose JPG, PNG, or WebP files of 2 MB or less each.");
+        for (const file of files) {
+          const data = new FormData();
+          data.set("file", file);
+          const {url} = await api("upload", data);
+          setForm(current => current && (k === "logo"
+            ? {...current, logo: url}
+            : {...current, gallery: [...current.gallery, url]}));
+        }
       } catch (error) {
         setUploadIssue({field: k, message: error instanceof Error ? error.message : "The upload failed. Please try again."});
       }
@@ -536,14 +545,15 @@ export default function OwnerDashboard() {
                     <label>
                       {k === "logo"
                         ? "Logo or profile photo"
-                        : "Photos of your work (up to six)"}
+                        : `Photos of your work (${form.gallery.length} of ${galleryLimit})`}
                       <input
                         type="file"
                         accept="image/png,image/jpeg,image/webp"
-                        disabled={k === "gallery" && form.gallery.length >= 6}
+                        multiple={k === "gallery"}
+                        disabled={k === "gallery" && form.gallery.length >= galleryLimit}
                         onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) upload(f, k);
+                          const files = Array.from(e.target.files ?? []);
+                          if (files.length) upload(files, k);
                           e.target.value = "";
                         }}
                       />

@@ -4,7 +4,8 @@ import OperatingHours from "@/components/OperatingHours";
 import ListingCorrection from "@/components/ListingCorrection";
 import DirectorySocialIcon from "@/components/DirectorySocialIcon";
 import {networks} from "@/lib/directory/social";
-import {notFound} from "next/navigation";
+import {notFound, permanentRedirect} from "next/navigation";
+import ListingGallery from "@/components/ListingGallery";
 import Link from "next/link";
 import {publication,PUBLISHED,isGuide,storyHref,type Story,safeUrl} from "@/lib/publication";
 import {getListing, listingPhoto, listingPath, listingSchema} from "@/lib/directory/profile";
@@ -42,8 +43,9 @@ export default async function Page({params}:Props) {
   const demo = isSample(params.slug);
   const b: Awaited<ReturnType<typeof getListing>> = demo ? sample : await getListing(params.slug);
   if (!b) notFound();
+  if (b.slug !== params.slug) permanentRedirect(listingPath(b.slug));
   const photo = demo ? sample.logo : listingPhoto(b);
-  const listingKey = (b.slug === "local-"+b._id ? "local:" : "sanity:") + b._id;
+  const listingKey = (b.source === "local" ? "local:" : "sanity:") + b._id;
   const coverage = demo ? [] : await publication.fetch<Story[]>(
     `*[${PUBLISHED} && $listingKey in relatedDirectoryListings] | order(publishedAt desc){_id,title,"slug":slug.current,format,"categories":categories[]->{title}}`,
     {listingKey}, {next:{revalidate:60}}
@@ -72,7 +74,7 @@ export default async function Page({params}:Props) {
           <strong>{piece.title}</strong>
         </Link></li>)}</ul>
       </section>}
-      {b.gallery?.map((src,index)=><img className="listing-photo" key={src} src={src} alt={demo ? ["Café interior","Freshly poured latte"][index] : b.name+" work photo"} loading="lazy"/>)}
+      {!!b.gallery?.length && <ListingGallery name={b.name} photos={b.gallery} />}
     </section><aside><h2>Listing details</h2>
       {[[ "City or service area",b.neighborhood],["Address",b.address]].map(([label,value])=>value && <p key={label}><strong>{label}</strong><br/>{value}</p>)}
       <OperatingHours week={b.weeklyHours} legacy={b.hours} />
