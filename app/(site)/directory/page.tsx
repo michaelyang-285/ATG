@@ -2,7 +2,7 @@ import BrowsePage, { type Filters } from "@/components/BrowsePage";
 import "./directory.css";
 export const revalidate = 60;
 const title = "Gwinnett County Business & Community Directory";
-const description = "Find coffee shops, mobile mechanics, beauty professionals and community organizations across Gwinnett County. Browse by category, city or service.";
+const description = "Find coffee shops, mobile mechanics, beauty professionals and community organizations across Gwinnett County. Search by name or service and narrow results by city or ZIP code.";
 export function generateMetadata({searchParams}:{searchParams:Filters}) {
   return {title,description,alternates:{canonical:"/directory"},robots:Object.keys(searchParams).length?{index:false,follow:true}:undefined,
     openGraph:{title,description,url:"/directory",images:["/brand/og.png"]}};

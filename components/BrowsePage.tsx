@@ -2,7 +2,6 @@ import IndependentProBadge from "@/components/IndependentProBadge";
 import DirectoryLocation from "./DirectoryLocation";
 import ThingsToDo from "./ThingsToDo";
 import { places, resolveArea, zipAreas } from "@/lib/directory/locations";
-import {categories as directoryCategories} from "@/lib/directory/categories";
 import {directoryPublic, searchDirectory} from "@/lib/directory/public";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import Link from "next/link";
@@ -32,7 +31,7 @@ const DESCRIPTIONS: Record<string, string> = {
   "local-life": "The people, decisions, and everyday changes shaping Gwinnett.",
   guides: "Useful local knowledge, all in one place.",
   directory:
-    "Find local businesses, independent workers, and community organizations around Gwinnett. Owner-submitted listings are not editorial endorsements.",
+    "Find local businesses, independent pros, and community organizations across Gwinnett County.",
   events: "Local plans, with the practical details up front.",
   areas: "Find stories and businesses close to you.",
   search:
@@ -192,22 +191,17 @@ export default async function BrowsePage({
       )}
       {kind === "directory" && (
         <>
-          <aside className="directory-owner-tools"><h2>Hire a local independent pro</h2>
-            <p>Find Gwinnett neighbors you can hire directly for the services you need.</p>
-            <div><Link href={filters.provider==="independent" ? "/directory" : "/directory?provider=independent"}>{filters.provider==="independent" ? "Browse all listings" : "Browse independent providers"}</Link></div></aside>
           <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" role="search" aria-label="Search directory listings" action="/directory">
-            {filters.provider==="independent" && <input type="hidden" name="provider" value="independent"/>}
-            <label>Keyword<input type="search" name="q" defaultValue={query} maxLength={100} placeholder="Business name, product or service"/></label>
-            <label>Category<select name="category" defaultValue={filters.category||""}><option value="">All categories</option>{Object.entries(directoryCategories).map(([group,items])=><optgroup label={group} key={group}>{items.map(v=><option key={v}>{v}</option>)}</optgroup>)}{Array.from(new Set(directoryBusinesses.map(b=>b.category).filter(c=>c&&!Object.values(directoryCategories).flat().includes(c)))).map(c=><option key={c}>{c}</option>)}</select></label>
+            <label>What are you looking for?<input type="search" name="q" defaultValue={query} maxLength={100} placeholder="Mobile barber, math tutor, or coffee shop"/></label>
             <DirectoryLocation key={rawArea} initial={rawArea}/>
-            <button className="button button-orange">Find listings</button></form>
-            <nav className="directory-suggestions" aria-label="Suggested searches">{["Mechanics","Barbers","Pet Grooming"].map(c=><Link key={c} href={"/directory?category="+encodeURIComponent(c)+"&service=Mobile"}>Mobile {c}</Link>)}</nav>
+            <button className="button button-orange">Search directory</button></form>
+            {(filters.provider === "independent" || filters.category || filters.service) && <p className="directory-context">Showing {([filters.provider === "independent" && "independent pros", filters.service, filters.category].filter(Boolean).join(" · "))}. <Link href="/directory">Browse all listings</Link></p>}
           </section>
           {matches && matches.length > 1 && <nav className="filter-links" aria-label="Cities in this ZIP">Narrow by city {matches.map(city => <Link key={city} href={{pathname: "/directory", query: {...countyLink.query, area: city}}}>{city}</Link>)}</nav>}
           {unsupportedLocation ? (
             <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{unsupportedLocation}” to a local city or ZIP. <Link href={{...countyLink, query: {...countyLink.query, q: unsupportedLocation === rawArea ? query : query.replace(/(?:^|\s)(?:in|near|around)\s+(.+)$/i, "").trim()}}}>Search all of Gwinnett</Link></EmptyState>
           ) : (matches || query || filters.category || filters.service || filters.provider==="independent") && !businesses.length ? (
-            <EmptyState title="No listings match this search yet."><Link href="/directory">Clear filters</Link></EmptyState>
+            <EmptyState title="No listings found."><Link href="/directory">Browse all listings</Link></EmptyState>
           ) : !businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
               Independent restaurants, beauty professionals, and local services

@@ -36,7 +36,9 @@
 }
 .atg-directory .business-card-actions { flex-wrap: wrap; justify-content: space-between; margin-top: auto; }
 .atg-directory .business-card-actions .button { margin-left: auto; }
-@media (max-width: 560px) {
+.atg-directory .directory-find { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+.directory-context { margin: 1rem 0 0; }
+@media (max-width: 720px) {
   .atg-directory .directory-find { grid-template-columns: minmax(0, 1fr); }
   .directory-owner-tools { align-items: flex-start; flex-direction: column; }
 }
