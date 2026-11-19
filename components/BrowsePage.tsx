@@ -43,6 +43,7 @@ export type Filters = {
   topic?: string;
   category?: string;
   service?: string;
+  provider?: string;
   area?: string;
 };
 export default async function BrowsePage({
@@ -70,7 +71,7 @@ export default async function BrowsePage({
   const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
   const rawArea = typeof filters.area === "string" ? filters.area : "";
   const matches = kind === "directory" ? resolveArea(rawArea) : null;
-  const countyLink = {pathname: "/directory", query: {q: query || undefined, category: filters.category, service: filters.service}};
+  const countyLink = {pathname: "/directory", query: {provider: filters.provider, q: query || undefined, category: filters.category, service: filters.service}};
   let businesses = directoryBusinesses
     .filter((b) => !filters.category || b.category === filters.category || b.categories?.includes(filters.category))
     .filter(b => !filters.service || b.services?.includes(filters.service))
@@ -102,6 +103,7 @@ export default async function BrowsePage({
     const mobile = /\bmobile\b/i.test(terms);
     if (mobile) terms = terms.replace(/\bmobile\b/gi, " ").trim();
     businesses = await searchDirectory(terms, searchAreas, filters.category || "", mobile ? "Mobile" : filters.service || "", data.businesses);
+    if (filters.provider === "independent") businesses = businesses.filter(b => b.providerType === "independent");
   }
   let events = data.events;
   if (kind === "search") {
@@ -189,7 +191,11 @@ export default async function BrowsePage({
       )}
       {kind === "directory" && (
         <>
+          <aside className="directory-owner-tools"><h2>Hire a local independent pro</h2>
+            <p>Find Gwinnett neighbors you can hire directly for the services you need.</p>
+            <div><Link href={filters.provider==="independent" ? "/directory" : "/directory?provider=independent"}>{filters.provider==="independent" ? "Browse all listings" : "Browse independent providers"}</Link></div></aside>
           <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" role="search" aria-label="Search directory listings" action="/directory">
+            {filters.provider==="independent" && <input type="hidden" name="provider" value="independent"/>}
             <label>Keyword<input type="search" name="q" defaultValue={query} maxLength={100} placeholder="Business name, product or service"/></label>
             <label>Category<select name="category" defaultValue={filters.category||""}><option value="">All categories</option>{Object.entries(directoryCategories).map(([group,items])=><optgroup label={group} key={group}>{items.map(v=><option key={v}>{v}</option>)}</optgroup>)}{Array.from(new Set(directoryBusinesses.map(b=>b.category).filter(c=>c&&!Object.values(directoryCategories).flat().includes(c)))).map(c=><option key={c}>{c}</option>)}</select></label>
             <DirectoryLocation key={rawArea} initial={rawArea}/>
@@ -199,7 +205,7 @@ export default async function BrowsePage({
           {matches && matches.length > 1 && <nav className="filter-links" aria-label="Cities in this ZIP">Narrow by city {matches.map(city => <Link key={city} href={{pathname: "/directory", query: {...countyLink.query, area: city}}}>{city}</Link>)}</nav>}
           {unsupportedLocation ? (
             <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{unsupportedLocation}” to a local city or ZIP. <Link href={{...countyLink, query: {...countyLink.query, q: unsupportedLocation === rawArea ? query : query.replace(/(?:^|\s)(?:in|near|around)\s+(.+)$/i, "").trim()}}}>Search all of Gwinnett</Link></EmptyState>
-          ) : (matches || query || filters.category || filters.service) && !businesses.length ? (
+          ) : (matches || query || filters.category || filters.service || filters.provider==="independent") && !businesses.length ? (
             <EmptyState title="No listings match this search yet."><Link href="/directory">Clear filters</Link></EmptyState>
           ) : !businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
@@ -217,7 +223,7 @@ export default async function BrowsePage({
                 <div className="business-card-heading">
                   {b.logo && <img src={b.logo} alt="" width="56" height="56" style={{objectFit:"contain"}} />}
                   <div>
-                    <p className="story-label">{b.category || "Independent business"}</p>
+                    <p className="story-label">{[b.category, b.providerType==="independent" && "Independent provider"].filter(Boolean).join(" · ") || "Community directory"}</p>
                     <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`}>{b.name}</Link></h2>
                   </div>
                 </div>
@@ -233,7 +239,7 @@ export default async function BrowsePage({
         )}
       {kind === "directory" && (
         <aside className="directory-owner-tools" aria-labelledby="business-owners">
-          <h2 id="business-owners">For business owners</h2>
+          <h2 id="business-owners">For businesses and independent providers</h2>
           <div><Link href="/directory/submit">Add your listing</Link><Link href="/directory/manage?mode=signin">Manage my listings</Link></div>
         </aside>
       )}

@@ -56,6 +56,8 @@ export function listing(input: any, email: string, uid: string) {
   }
   const all = Object.values(categories).flat(),
     category = field("category", true);
+  const providerType = field("providerType");
+  if (providerType && !["independent", "organization"].includes(providerType)) invalid("listing type");
   if (!all.includes(category)) invalid("category");
   const logo = field("logo", false, 1000),
     gallery = input.gallery ?? [];
@@ -82,6 +84,7 @@ export function listing(input: any, email: string, uid: string) {
       hideAddress: input.hideAddress, hidePhone: input.hidePhone,
     },
     draft: {
+      ...(providerType ? {providerType} : {}),
       name: field("name", true),
       summary: summary.trim(),
       category,

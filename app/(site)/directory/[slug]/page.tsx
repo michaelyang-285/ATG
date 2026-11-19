@@ -60,7 +60,7 @@ export default async function Page({params}:Props) {
     <Link className="text-link" href="/directory">← Gwinnett directory</Link>
     <header className="listing-heading">
       {photo && <img src={photo} width="112" height="112" alt=""/>}
-      <div><p className="story-label">{b.category || "Community directory"}</p><h1>{b.name}</h1>
+      <div><p className="story-label">{[b.category, b.providerType==="independent" && "Independent provider"].filter(Boolean).join(" · ") || "Community directory"}</p><h1>{b.name}</h1>
       {b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>{instagramWebsite ? "Go to Instagram" : "Visit website"} <span aria-hidden="true">↗</span></a>}</div>
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>

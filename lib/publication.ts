@@ -26,6 +26,7 @@ export type Story = {
   body?: any[];
 };
 export type Business = {
+  providerType?: "independent" | "organization";
   _id: string;
   name: string;
   slug: string;

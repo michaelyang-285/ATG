@@ -23,6 +23,7 @@ const blank = {
   lastName: "",
   phone: "",
   name: "",
+  providerType: "",
   category: "",
   categories: [] as string[],
   services: [] as string[],
@@ -438,7 +439,11 @@ export default function OwnerDashboard() {
                 {field("phone", "Phone number", true, "tel")}
                 <p>Email · {session.user.email}</p>
                 </details>
-                {field("name", "Business, organization, or working name", true)}
+                <fieldset><legend>Who are you creating this listing for?</legend>
+                  <label><input type="radio" name="providerType" required checked={form.providerType==="independent"} onChange={()=>change("providerType","independent")}/> Myself · Customers hire me directly, even if I use a business name.</label>
+                  <label><input type="radio" name="providerType" required checked={form.providerType==="organization"} onChange={()=>change("providerType","organization")}/> A business, team, or organization · This listing represents the organization.</label>
+                </fieldset>
+                {field("name", "Public listing name", true)}
                 <label htmlFor="business-description">Business description
                   <textarea id="business-description" required value={form.summary}
                     aria-invalid={descriptionOver} aria-describedby="business-description-count"
