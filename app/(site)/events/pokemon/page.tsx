@@ -25,9 +25,9 @@ export default async function PokemonEvents({ searchParams }: { searchParams: { 
         <p>Find a tournament, bring a deck to league play, or take your binder to a trade night or card show.</p>
       </header>
       <nav className="calendar-tabs game-event-filters" aria-label="Filter by event type">
-        <Link href="/events/pokemon" aria-current={!format ? "page" : undefined}>All events</Link>
+        <Link href="/events/pokemon" scroll={false} aria-current={!format ? "page" : undefined}>All events</Link>
         {eventFormats.map(f => (
-          <Link key={f.value} href={"/events/pokemon?type=" + f.value}
+          <Link key={f.value} href={"/events/pokemon?type=" + f.value} scroll={false}
             aria-current={format?.value === f.value ? "page" : undefined}>{f.title}</Link>
         ))}
       </nav>
