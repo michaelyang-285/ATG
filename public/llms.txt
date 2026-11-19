@@ -1,0 +1,28 @@
+# All Things Gwinnett
+
+> All Things Gwinnett is a community publication covering Gwinnett County, Georgia. It helps residents find places to eat, things to do, upcoming events, and local businesses.
+
+For a question about a specific date, start with the events calendar and open the listing for that date. For a business address or service area, use the individual business listing.
+
+## Explore Gwinnett
+
+- [Food & Drink](https://allthingsgwinnett.com/food-drink): Local dining coverage and places to eat around the county.
+- [Things to Do](https://allthingsgwinnett.com/things-to-do): Outing ideas, activities, and upcoming events.
+- [Local Life](https://allthingsgwinnett.com/local-life): Stories about Gwinnett neighborhoods and everyday life.
+- [Guides](https://allthingsgwinnett.com/guides): Practical guides to exploring the county.
+
+## Events and businesses
+
+- [Events calendar](https://allthingsgwinnett.com/events): Browse upcoming Gwinnett-area events and find dates, times, and venues.
+- [Pokémon events](https://allthingsgwinnett.com/events/pokemon): Find local Pokémon tournaments, trade nights, and card shows.
+- [Business directory](https://allthingsgwinnett.com/directory): Find local businesses and open their profiles for details.
+
+## About the publication
+
+- [About All Things Gwinnett](https://allthingsgwinnett.com/about): The publication’s local focus and coverage.
+- [Contribute](https://allthingsgwinnett.com/contribute): How to pitch a local story or contribute to the publication.
+- [Contact](https://allthingsgwinnett.com/contact): Get in touch with the team.
+
+## Optional
+
+- [XML sitemap](https://allthingsgwinnett.com/sitemap.xml): A broader index of public URLs, including individual stories, event listings, author profiles, and businesses.
