@@ -1,3 +1,4 @@
+import IndependentProBadge from "@/components/IndependentProBadge";
 import DirectoryLocation from "./DirectoryLocation";
 import ThingsToDo from "./ThingsToDo";
 import { places, resolveArea, zipAreas } from "@/lib/directory/locations";
@@ -223,7 +224,7 @@ export default async function BrowsePage({
                 <div className="business-card-heading">
                   {b.logo && <img src={b.logo} alt="" width="56" height="56" style={{objectFit:"contain"}} />}
                   <div>
-                    <p className="story-label">{[b.category, b.providerType==="independent" && "Independent provider"].filter(Boolean).join(" · ") || "Community directory"}</p>
+                    <p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}
                     <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`}>{b.name}</Link></h2>
                   </div>
                 </div>
