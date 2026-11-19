@@ -1,16 +1,10 @@
 import { createHash } from "node:crypto";
 import { owner, human, respond, Failure, db } from "@/lib/directory/server";
-import { publication, safeUrl } from "@/lib/publication";
+import { safeUrl } from "@/lib/publication";
 import { easternInstant, validDay, shift } from "@/lib/event-time";
 import { cities } from "@/lib/gwinnett";
-function eventStore() {
-  const token = process.env.SANITY_WRITE_TOKEN?.trim();
-  if (!token) {
-    console.error("Event storage token is missing");
-    throw new Error("Event storage unavailable");
-  }
-  return publication.withConfig({ token, useCdn: false, perspective: "raw" });
-}
+import { eventStore } from "@/lib/community-event-store";
+import { notifySubmission } from "@/lib/submission-alerts";
 
 export const dynamic = "force-dynamic";
 
@@ -104,31 +98,42 @@ export function POST(req: Request) {
       id.slice(0, 8);
     const digest = createHash("sha256").update(user.id + ":" + id).digest("hex");
     const eventId = "community-event-" + digest;
-    await eventStore().transaction().createIfNotExists({
-      _id: "ownership." + digest,
-      _type: "communityEventOwner",
-      ownerId: user.id,
-      eventId,
-    }).createIfNotExists({
-      _id: "drafts." + eventId,
-      _type: "event",
-      title,
-      slug: { _type: "slug", current: slug },
-      summary,
-      venue,
-      street,
-      city,
-      neighborhood: city,
-      organizer,
-      startsAt,
-      ...(endsAt ? { endsAt } : {}),
-      ...(until ? { weeklyUntil: until } : {}),
-      cost,
-      ...(price !== undefined ? { price } : {}),
-      priceLabel:
-        cost === "free" ? "Free" : price === undefined ? "Paid" : "$" + price,
-      ...(url ? { url } : {}),
-    }).commit();
+    const store = eventStore();
+    const ownerId = "ownership." + digest;
+    const alertId = "drafts.review-alert-" + digest;
+    try {
+      await store.transaction().create({
+        _id: ownerId,
+        _type: "communityEventOwner",
+        ownerId: user.id,
+        eventId,
+      }).createIfNotExists({
+        _id: "drafts." + eventId,
+        _type: "event",
+        title,
+        slug: { _type: "slug", current: slug },
+        summary,
+        venue,
+        street,
+        city,
+        neighborhood: city,
+        organizer,
+        startsAt,
+        ...(endsAt ? { endsAt } : {}),
+        ...(until ? { weeklyUntil: until } : {}),
+        cost,
+        ...(price !== undefined ? { price } : {}),
+        priceLabel:
+          cost === "free" ? "Free" : price === undefined ? "Paid" : "$" + price,
+        ...(url ? { url } : {}),
+      }).create({
+        _id: alertId, _type: "communitySubmissionAlert", title,
+      }).commit();
+    } catch (error) {
+      // A replay must never recreate a reviewed draft or a delivered alert.
+      if ((error as { statusCode?: number }).statusCode !== 409 || !await store.getDocument(ownerId)) throw error;
+    }
+    await notifySubmission("event", alertId);
     return { ok: true };
   });
 }

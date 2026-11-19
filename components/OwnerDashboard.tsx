@@ -6,7 +6,7 @@ import { galleryLimit, sourceImageLimit } from "@/lib/directory/gallery";
 import { prepareDirectoryImage } from "@/lib/directory/prepare-image";
 import { directoryThumbnail } from "@/lib/directory/thumbnail";
 import OperatingHoursFields from "./OperatingHoursFields";
-import OperatingHours from "./OperatingHours";
+import ListingPreview from "./ListingPreview";
 import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
 import MySubmissions from "./MySubmissions";
 import SignupCard,{Completion} from "./SignupCard";
@@ -43,7 +43,7 @@ const blank = {
   logo: "",
   gallery: [] as string[],
 };
-type Draft = typeof blank;
+export type Draft = typeof blank;
 type Row = {
   id: string;
   revision: number;
@@ -54,7 +54,6 @@ type Row = {
   contact: Partial<Draft>;
   draft: Partial<Draft>;
 };
-type Removal = {id: string; name: string; deletion_due_at: string};
 const dueDate = (value: string) => new Date(value).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York"}) + " ET";
 function restoreDraft(saved: Partial<Draft>): Draft {
   const weeklyHours = isWeek(saved.weeklyHours) ? saved.weeklyHours : saved.hours ? null : defaultWeek();
@@ -78,8 +77,7 @@ export default function OwnerDashboard() {
   const [session, setSession] = useState<Session | null>(null),
     [email, setEmail] = useState(""),
     [rows, setRows] = useState<Row[]>([]),
-    [deletions, setDeletions] = useState<Removal[]>([]),
-    [queue, setQueue] = useState<Row[]>([]);
+    [canOpenQueue, setCanOpenQueue] = useState(false);
   const [form, setForm] = useState<Draft | null>(null),
     [checkout, setCheckout] = useState<{id: string; url?: string} | null>(null),
     [uploadIssue, setUploadIssue] = useState<{field: "logo" | "gallery"; message: string} | null>(null),
@@ -91,8 +89,7 @@ export default function OwnerDashboard() {
     [loaded,setLoaded]=useState(false),
     [account,setAccount]=useState({firstName:"",lastName:"",phone:"",name:""}),
     [msg, setMsg] = useState(""),
-    [busy, setBusy] = useState(false),
-    [notes, setNotes] = useState<Record<string, string>>({});
+    [busy, setBusy] = useState(false);
   useEffect(() => {
     setSignin(new URLSearchParams(location.search).get("mode")==="signin");
     if (new URLSearchParams(window.location.search).get("mode") === "signin") setSignin(true);
@@ -127,26 +124,23 @@ export default function OwnerDashboard() {
   const [eventsRefreshKey, setEventsRefreshKey] = useState(0);
   async function refresh() {
     const data = await api("owner");
-    setRows(data.rows); setDeletions(data.deletions || []);
+    setRows(data.rows); setCanOpenQueue(data.canOpenQueue);
     setProgress(data.progress);
-    setQueue(data.moderator ? await api("review") : []);
   }
   useEffect(() => {
     let active = true;
     if (!session) {
       setLoaded(false);setProgress([]);setRows([]);
-      setQueue([]);setDeletions([]);
+      setCanOpenQueue(false);
       setForm(null);setCheckout(null);setUploadIssue(null);
       return;
     }
     api("owner")
-      .then(async (data) => {
+      .then((data) => {
         if (!active) return;
-        setRows(data.rows); setDeletions(data.deletions || []);setProgress(data.progress);setLoaded(true);
-        if (data.moderator) {
-          const q = await api("review");
-          if (active) setQueue(q);
-        }
+        setRows(data.rows); setCanOpenQueue(data.canOpenQueue);setProgress(data.progress);setLoaded(true);
+        if (new URLSearchParams(location.search).get("next") === "approvals")
+          location.replace("/admin/approvals");
       })
       .catch((e) => {
         if (active) setMsg(e.message);
@@ -323,6 +317,7 @@ export default function OwnerDashboard() {
         </section>
       ) : !form ? (
         <>
+          {canOpenQueue && <p><a className="text-link" href="/admin/approvals">Open approval queue</a></p>}
           <section className="owner-submissions-section" aria-labelledby="directory-submissions">
           <div className="owner-section-heading">
             <h2 id="directory-submissions">Directory listings</h2>
@@ -371,57 +366,6 @@ export default function OwnerDashboard() {
           ))}
           </section>
           <MySubmissions key={session.user.id} session={session} refreshKey={eventsRefreshKey} />
-          {deletions.length > 0 && <section>
-            <h2>Profile deletion requests</h2>
-            {deletions.map(item => <article key={item.id}><h3>{item.name}</h3>
-              <p>Automatic deletion by {dueDate(item.deletion_due_at)}.</p>
-              <button disabled={busy} onClick={() => {
-                if (window.confirm("Permanently delete " + item.name + " now?")) {
-                  run(async () => { await api("deletion", {id:item.id, action:"approve"}); await refresh(); });
-                }
-              }}>Approve deletion now</button>
-            </article>)}
-          </section>}
-          {queue.length > 0 && (
-            <section>
-              <h2>Review submissions</h2>
-              {queue.map((r) => (
-                <article key={r.id}>
-                  <ListingPreview data={r.draft} />
-                  <label>
-                    Feedback for owner
-                    <textarea
-                      value={notes[r.id] || ""}
-                      onChange={(e) =>
-                        setNotes({ ...notes, [r.id]: e.target.value })
-                      }
-                    />
-                  </label>
-                  <div className="submission-actions">
-                  {["published", "changes", "declined"].map((s, i) => (
-                    <button
-                      key={s}
-                      disabled={busy}
-                      onClick={() =>
-                        run(async () => {
-                          await api("review", {
-                            id: r.id,
-                            revision: r.revision,
-                            status: s,
-                            note: notes[r.id] || "",
-                          });
-                          await refresh();
-                        })
-                      }
-                    >
-                      {["Approve", "Request changes", "Decline"][i]}
-                    </button>
-                  ))}
-                  </div>
-                </article>
-              ))}
-            </section>
-          )}
         </>
       ) : (
         <form className="listing-wizard" onSubmit={submit}><Completion completed={step+1}/><h2>{sections[step]}</h2>
@@ -599,46 +543,4 @@ function OwnerListingHeading({data, href, status}: {data: Partial<Draft>; href?:
       {status && <p>{status}</p>}
     </div>
   </header>;
-}
-
-function ListingPreview({ data: d }: { data: Partial<Draft> }) {
-  return (
-    <article>
-      {d.logo ? (
-        <img src={d.logo} alt="" width={80} height={80} />
-      ) : (
-        <strong>
-          {d.name
-            ?.split(/\s+/)
-            .slice(0, 2)
-            .map((v) => v[0])
-            .join("")}
-        </strong>
-      )}
-      <h3>{d.name}</h3>
-      <p>
-        {[d.category, ...(d.categories || []), ...(d.services || [])]
-          .filter(Boolean)
-          .join(" · ")}
-      </p>
-      <p>{d.summary}</p>
-      {[
-        d.neighborhood,
-        d.hideAddress ? "" : (d.streetAddress ? [d.streetAddress, d.city, "GA " + d.zip].join(", ") : d.address),
-        d.hidePhone ? "" : d.businessPhone || d.publicPhone,
-        d.url,
-        d.booking,
-        ...networks.map(n=>d[n.key]),
-        d.social,
-      ]
-        .filter(Boolean)
-        .map((v, i) => (
-          <p key={i}>{v}</p>
-        ))}
-      <OperatingHours week={d.weeklyHours} legacy={d.hours} />
-      {d.gallery?.map((src) => (
-        <img key={src} src={directoryThumbnail(src)} alt="Work sample" width={100} />
-      ))}
-    </article>
-  );
 }

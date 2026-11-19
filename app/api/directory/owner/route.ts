@@ -15,12 +15,7 @@ export function GET(req: Request) {
     if (error) throw error;
     const progress=await db().from("directory_progress").select("listing_id,fields,step").eq("owner_id",user.id).order("updated_at",{ascending:false});
     if(progress.error)throw progress.error;
-    const removalQueue = canReviewDeletions(user)
-      ? await db().from("directory_entries").select("id,name:draft->>name,deletion_due_at")
-          .not("deletion_due_at", "is", null).order("deletion_due_at")
-      : {data: [], error: null};
-    if (removalQueue.error) throw removalQueue.error;
-    return {deletions: removalQueue.data, progress:progress.data,
+    return {canOpenQueue: canReviewDeletions(user), progress:progress.data,
       rows: data.map(({published_name, profile_slug, ...row}) => ({
         ...row,
         profilePath: published_name && profile_slug && !row.deletion_due_at ? listingPath(profile_slug) : null,
