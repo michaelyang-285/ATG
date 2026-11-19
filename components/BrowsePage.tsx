@@ -1,5 +1,4 @@
 import IndependentProBadge from "@/components/IndependentProBadge";
-import DirectoryLocation from "./DirectoryLocation";
 import ThingsToDo from "./ThingsToDo";
 import { places, resolveArea, zipAreas } from "@/lib/directory/locations";
 import {directoryPublic, searchDirectory} from "@/lib/directory/public";
@@ -69,31 +68,23 @@ export default async function BrowsePage({
     return <ThingsToDo stories={stories} filtered={Boolean(filters.format || filters.topic || filters.area)} />;
   }
   const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
-  const rawArea = typeof filters.area === "string" ? filters.area : "";
-  const matches = kind === "directory" ? resolveArea(rawArea) : null;
+  const rawArea = kind !== "directory" && typeof filters.area === "string" ? filters.area : "";
   const countyLink = {pathname: "/directory", query: {provider: filters.provider, q: query || undefined, category: filters.category, service: filters.service}};
   let businesses = directoryBusinesses
     .filter((b) => !filters.category || b.category === filters.category || b.categories?.includes(filters.category))
     .filter(b => !filters.service || b.services?.includes(filters.service))
-    .filter((b) => {
-      if (kind !== "directory") return !rawArea || b.neighborhood?.split(",").some(city => city.trim().toLowerCase() === rawArea.toLowerCase());
-      if (!matches) return true;
-      if (!matches.length) return false;
-      const areas = String(b.neighborhood || "").split(",").map(city => city.trim().toLowerCase());
-      return areas.some(city => ["gwinnett county", "all of gwinnett", "gwinnett"].includes(city)) ||
-        matches.some(city => areas.includes(city.toLowerCase()));
-    });
-  let unsupportedLocation = matches?.length === 0 ? rawArea : "";
+    .filter(b => !rawArea || b.neighborhood?.split(",").some(city => city.trim().toLowerCase() === rawArea.toLowerCase()));
+  let unsupportedLocation = "";
   if (kind === "directory") {
     let terms = query;
-    let searchAreas = matches;
+    let searchAreas: string[] | null = null;
     const location = terms.match(/(?:^|\s)(?:in|near|around)\s+(.+)$/i);
     if (location) {
       const inferred = resolveArea(location[1]);
       if (inferred?.length === 0) unsupportedLocation = location[1];
-      searchAreas = matches && inferred ? matches.filter(city => inferred.includes(city)) : matches || inferred;
+      searchAreas = inferred;
       terms = terms.slice(0, location.index).trim();
-    } else if (!matches) {
+    } else {
       const suffix = [...places, ...Object.keys(zipAreas)].find(place => terms.toLowerCase().endsWith(" " + place.toLowerCase()) || terms.toLowerCase() === place.toLowerCase());
       if (suffix) {
         searchAreas = resolveArea(suffix);
@@ -193,14 +184,12 @@ export default async function BrowsePage({
         <>
           <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" role="search" aria-label="Search directory listings" action="/directory">
             <label>What are you looking for?<input type="search" name="q" defaultValue={query} maxLength={100} placeholder="Mobile barber, math tutor, or coffee shop"/></label>
-            <DirectoryLocation key={rawArea} initial={rawArea}/>
             <button className="button button-orange">Search directory</button></form>
             {(filters.provider === "independent" || filters.category || filters.service) && <p className="directory-context">Showing {([filters.provider === "independent" && "independent pros", filters.service, filters.category].filter(Boolean).join(" · "))}. <Link href="/directory">Browse all listings</Link></p>}
           </section>
-          {matches && matches.length > 1 && <nav className="filter-links" aria-label="Cities in this ZIP">Narrow by city {matches.map(city => <Link key={city} href={{pathname: "/directory", query: {...countyLink.query, area: city}}}>{city}</Link>)}</nav>}
           {unsupportedLocation ? (
-            <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{unsupportedLocation}” to a local city or ZIP. <Link href={{...countyLink, query: {...countyLink.query, q: unsupportedLocation === rawArea ? query : query.replace(/(?:^|\s)(?:in|near|around)\s+(.+)$/i, "").trim()}}}>Search all of Gwinnett</Link></EmptyState>
-          ) : (matches || query || filters.category || filters.service || filters.provider==="independent") && !businesses.length ? (
+            <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{unsupportedLocation}” to a local city or ZIP. <Link href={{...countyLink, query: {...countyLink.query, q: query.replace(/(?:^|\s)(?:in|near|around)\s+(.+)$/i, "").trim()}}}>Search all of Gwinnett</Link></EmptyState>
+          ) : (query || filters.category || filters.service || filters.provider==="independent") && !businesses.length ? (
             <EmptyState title="No listings found."><Link href="/directory">Browse all listings</Link></EmptyState>
           ) : !businesses.length && (
             <EmptyState title="Our local directory is taking shape.">
@@ -223,11 +212,10 @@ export default async function BrowsePage({
                   </div>
                 </div>
                 {b.summary && <p className="business-excerpt">{b.summary}</p>}
-                <div className="business-card-actions">
-                  {b.neighborhood && <p className="quiet">{b.neighborhood}</p>}
-                  {kind === "directory" && <Link className="button button-orange" href={`/directory/${encodeURIComponent(b.slug)}`}
-                    aria-label={`View profile for ${b.name}`}>View profile</Link>}
-                </div>
+                {kind === "directory" && (
+                  <Link className="business-card-cta button button-orange" href={`/directory/${encodeURIComponent(b.slug)}`}
+                    aria-label={`View profile for ${b.name}`}>View profile</Link>
+                )}
               </article>
             ))}
           </section>
