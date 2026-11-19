@@ -46,7 +46,10 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
   useEffect(() => {
     const client = browserClient();
     if (!client) { setSignedIn(false); return; }
-    const { data } = client.auth.onAuthStateChange((_, session) => setSignedIn(Boolean(session)));
+    const { data } = client.auth.onAuthStateChange((event, session) => {
+      setSignedIn(Boolean(session));
+      if (event === "PASSWORD_RECOVERY" && location.pathname !== "/reset-password") location.replace("/reset-password");
+    });
     return () => data.subscription.unsubscribe();
   }, []);
   const pathname = usePathname();

@@ -106,12 +106,13 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
         }}
         setMsg={setMessage}
         status={<p role="status">{message}</p>}
-        sendEmail={async () => {
+        register={async password => {
           const res = await fetch("/api/directory/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               email,
+              password,
               eventSignup: true,
               generalAccount,
               ...(signin

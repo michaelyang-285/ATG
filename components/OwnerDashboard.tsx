@@ -277,7 +277,7 @@ export default function OwnerDashboard() {
   if (!session)
     return (
       <SignupCard {...{client,signin,setSignin,sent,setSent,email,setEmail,googleEnabled,busy,account,setAccount,status,setMsg,run}}
-        sendEmail={()=>api("login",{email,...(signin?{}:{account})})}/>
+        register={password=>api("login",{email,account,password})}/>
     );
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (

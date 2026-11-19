@@ -1,7 +1,7 @@
 "use client";
 import BusinessLocationFields from "./BusinessLocationFields";
 import { eligibleLocation, areaError } from "@/lib/directory/business-location";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 export type SignupDetails = {
   city?: string;
@@ -28,7 +28,7 @@ type Props = {
   status: ReactNode;
   setMsg: (v: string) => void;
   run: (fn: () => Promise<void>) => Promise<void>;
-  sendEmail: () => Promise<void>;
+  register: (password: string) => Promise<void>;
 };
 export function Completion({
   completed,
@@ -71,8 +71,9 @@ export default function SignupCard({
   status,
   setMsg,
   run,
-  sendEmail,
+  register,
 }: Props) {
+  const [password, setPassword] = useState("");
   function checkLocation() {
     if (!event && !signin && !eligibleLocation(account.city, account.zip)) throw Error(areaError);
   }
@@ -213,8 +214,14 @@ export default function SignupCard({
                 e.preventDefault();
                 run(async () => {
                   checkLocation();
-                  await sendEmail();
-                  setSent(true);
+                  if (signin) {
+                    const { error } = await client.auth.signInWithPassword({email: email.trim(), password});
+                    if (error) throw Error("Couldn’t sign in. Check your email and password, or use password recovery.");
+                  } else {
+                    await register(password);
+                    setSent(true);
+                  }
+                  setPassword("");
                 });
               }}
             >
@@ -261,25 +268,28 @@ export default function SignupCard({
                       />
                     </label>
                   ))}
+                <label className="wide">Password<input type="password" autoComplete={signin ? "current-password" : "new-password"} required minLength={signin ? undefined : 8} value={password} onChange={e=>setPassword(e.target.value)} /></label>
               </div>
               {!signin && (
                 <p className="quiet">
-                  {generalAccount ? "We’ll email you a secure link to confirm your account." : event
+                  {generalAccount ? "Confirm your email once, then sign in with your password." : event
                     ? "Your email stays private. You’ll choose a public organizer name on the next step."
                     : "Your name, phone, and email stay private. You’ll choose public contact details later."}
                 </p>
               )}
               <button className="primary-action" disabled={busy}>
                 {busy
-                  ? "Sending…"
+                  ? "Please wait…"
                   : signin
-                    ? "Email me a sign-in link"
+                    ? "Sign in"
                     : "Create account"}
               </button>
             </form>
+            {signin && <p><a className="text-link" href="/forgot-password">Forgot password or need to set one?</a></p>}
             <button
               className="text-action"
               onClick={() => {
+                setPassword("");
                 setSignin(!signin);
                 setMsg("");
               }}
