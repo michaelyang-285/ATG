@@ -23,6 +23,7 @@ export default function Contribute() {
     <header><h1>Help me tell the story of Gwinnett.</h1>
       <p>When I asked who wanted to write for ATG, a coworking space in Lawrenceville pointed me toward the history of its building. A homeschooling parent offered to share places other families miss. Those are the stories I want to do justice to.</p>
       <p>I’ve spent over 14 years in enterprise SEO. I want to bring that experience home so that when someone searches Google or asks ChatGPT about Gwinnett, they can find the people who know it firsthand. People like you.</p>
+      <p>We’re still early, and ATG will keep changing as we learn. If there’s a story we’re missing or something you think we should do differently, tell me. I’m always open to changing my mind.</p>
       <p><strong>Michael Yang</strong> · Founder, All Things Gwinnett</p>
       <a className="button button-orange" href="#interest">I’m interested</a>
     </header>
