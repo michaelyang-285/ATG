@@ -1,3 +1,4 @@
+import { hoursError, validTime, type DayHours } from "./hours";
 import { descriptionLimit, descriptionLength } from "./description";
 import { eligibleLocation, areaError } from "./business-location";
 import {networks} from "./social";
@@ -34,7 +35,8 @@ export function listing(input: any, email: string, uid: string) {
   if (publicEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(publicEmail))
     invalid("public email");
   const city = field("city", true, 80), zip = field("zip", true, 10);
-  const streetAddress = field("streetAddress", true);
+  const streetAddress = field("streetAddress");
+  if (!streetAddress) throw new Failure(400, "Enter your business street address.");
   if (!eligibleLocation(city, zip)) throw new Failure(400, areaError);
   if (typeof input.hideAddress !== "boolean" || typeof input.hidePhone !== "boolean")
     throw new Failure(400, "Choose your address and phone visibility.");
@@ -44,6 +46,11 @@ export function listing(input: any, email: string, uid: string) {
   if (typeof summary !== "string" || !summary.trim()) invalid("business description");
   if (descriptionLength(summary) > descriptionLimit)
     throw new Failure(400, "Shorten your business description to 1,000 characters or fewer.");
+  const week = input.weeklyHours;
+  if (week != null) {
+    const error = hoursError(week);
+    if (error) throw new Failure(400, error);
+  }
   const all = Object.values(categories).flat(),
     category = field("category", true);
   if (!all.includes(category)) invalid("category");
@@ -93,7 +100,11 @@ export function listing(input: any, email: string, uid: string) {
         }
         return [key,value];
       })),
-      hours: field("hours"),
+      ...(week == null ? { hours: field("hours") } : {
+        weeklyHours: week.map(({day, open, opens, closes}: DayHours) => ({
+          day, open, opens: validTime(opens) ? opens : "09:00", closes: validTime(closes) ? closes : "17:00",
+        })),
+      }),
       logo,
       gallery,
     },

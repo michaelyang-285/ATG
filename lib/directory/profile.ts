@@ -1,3 +1,4 @@
+import type { DayHours } from "./hours";
 import {networks,type SocialFields} from "./social";
 import {cache} from "react";
 import {publication, type Business, imageUrl, safeUrl} from "@/lib/publication";
@@ -5,7 +6,7 @@ import {directoryPublic} from "./public";
 import {categories} from "./categories";
 
 type Listing = Business & SocialFields & {
-  hours?: string; publicPhone?: string; publicEmail?: string;
+  weeklyHours?: DayHours[]; hours?: string; publicPhone?: string; publicEmail?: string;
   booking?: string; social?: string; gallery?: string[];
 };
 export const getListing = cache(async (slug: string): Promise<Listing | null> => {

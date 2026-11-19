@@ -2,6 +2,9 @@
 import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 import BusinessLocationFields from "./BusinessLocationFields";
 import { descriptionLength, descriptionLimit } from "@/lib/directory/description";
+import OperatingHoursFields from "./OperatingHoursFields";
+import OperatingHours from "./OperatingHours";
+import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
 import MySubmissions from "./MySubmissions";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
@@ -32,6 +35,7 @@ const blank = {
   social: "",
   booking: "",
   hours: "",
+  weeklyHours: defaultWeek() as DayHours[] | null,
   logo: "",
   gallery: [] as string[],
 };
@@ -48,7 +52,8 @@ type Row = {
 type Removal = {id: string; name: string; deletion_due_at: string};
 const dueDate = (value: string) => new Date(value).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York"}) + " ET";
 function restoreDraft(saved: Partial<Draft>): Draft {
-  return {...blank, ...saved, streetAddress: saved.streetAddress ?? saved.address ?? "",
+  const weeklyHours = isWeek(saved.weeklyHours) ? saved.weeklyHours : saved.hours ? null : defaultWeek();
+  return {...blank, ...saved, weeklyHours, streetAddress: saved.streetAddress ?? saved.address ?? "",
     businessPhone: saved.businessPhone || saved.publicPhone || saved.phone || "",
     hideAddress: saved.hideAddress ?? !saved.address, hidePhone: saved.hidePhone ?? !saved.publicPhone};
 }
@@ -228,6 +233,10 @@ export default function OwnerDashboard() {
       if ((step === 1 || step === 4) && (!form.streetAddress.trim() || !eligibleLocation(form.city, form.zip))) {
         setStep(1);
         throw Error(!form.streetAddress.trim() ? "Enter your business street address." : areaError);
+      }
+      if ((step === 1 || step === 4) && form.weeklyHours !== null) {
+        const error = hoursError(form.weeklyHours);
+        if (error) { setStep(1); throw Error(error); }
       }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
@@ -455,11 +464,12 @@ export default function OwnerDashboard() {
                   ))}
                 </fieldset>
                 <ServiceAreas value={form.neighborhood} onChange={v=>change("neighborhood",v)}/>
-                {field("streetAddress", "Business street address", true)}
+                {field("streetAddress", "Business street address (required)", true)}
                 <BusinessLocationFields city={form.city} zip={form.zip} onChange={change} />
                 <label><input type="checkbox" checked={form.hideAddress}
                   onChange={e => change("hideAddress", e.target.checked)} />Hide address on profile</label>
-                {field("hours", "Hours or appointment availability")}
+                <OperatingHoursFields week={form.weeklyHours} legacy={form.hours}
+                  onChange={week => change("weeklyHours", week)} />
                 </>}{step===2&&<>
                 <label><input type="checkbox" checked={form.hidePhone}
                   onChange={e => setForm(current => current && ({...current, hidePhone:e.target.checked,
@@ -567,7 +577,6 @@ function ListingPreview({ data: d }: { data: Partial<Draft> }) {
       {[
         d.neighborhood,
         d.hideAddress ? "" : (d.streetAddress ? [d.streetAddress, d.city, "GA " + d.zip].join(", ") : d.address),
-        d.hours,
         d.hidePhone ? "" : d.businessPhone || d.publicPhone,
         d.publicEmail,
         d.url,
@@ -579,6 +588,7 @@ function ListingPreview({ data: d }: { data: Partial<Draft> }) {
         .map((v, i) => (
           <p key={i}>{v}</p>
         ))}
+      <OperatingHours week={d.weeklyHours} legacy={d.hours} />
       {d.gallery?.map((src) => (
         <img key={src} src={src} alt="Work sample" width={100} />
       ))}

@@ -76,6 +76,7 @@ export const categories = {
 export const services = [
   "Mobile",
   "Storefront",
+  "Remote / online",
   "Pickup",
   "Delivery",
   "Appointment only",
