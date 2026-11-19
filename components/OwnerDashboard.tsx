@@ -149,6 +149,52 @@ export default function OwnerDashboard() {
       active = false;
     };
   }, [session?.user.id]);
+  useEffect(() => {
+    const accessToken = session?.access_token;
+    if (!accessToken || new URLSearchParams(window.location.search).get("payment") !== "returned")
+      return;
+
+    let listingId: string | null;
+    try {
+      listingId = sessionStorage.getItem("atg-directory-checkout");
+    } catch {
+      return;
+    }
+    if (!listingId) return;
+
+    const controller = new AbortController();
+    fetch("/api/directory/checkout?" + new URLSearchParams({ id: listingId }), {
+      headers: { Authorization: "Bearer " + accessToken },
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async response => {
+        if (!response.ok || !(await response.json()).completed || controller.signal.aborted) return;
+        const { gtag } = window as Window & {
+          gtag?: (command: "event", name: string, params: { value: number; currency: string }) => void;
+        };
+        if (typeof gtag !== "function" || sessionStorage.getItem("atg-directory-checkout") !== listingId)
+          return;
+
+        const trackedKey = "atg-directory-signup:" + listingId;
+        try {
+          if (localStorage.getItem(trackedKey)) {
+            sessionStorage.removeItem("atg-directory-checkout");
+            return;
+          }
+          localStorage.setItem(trackedKey, "1");
+        } catch {
+          // Session storage still prevents a repeat in this tab.
+        }
+        sessionStorage.removeItem("atg-directory-checkout");
+        gtag("event", "directory_signup", { value: 3, currency: "USD" });
+      })
+      .catch(() => {
+        // Analytics must not interrupt the listing dashboard.
+      });
+    return () => controller.abort();
+  }, [session?.access_token]);
+
   async function run(fn: () => Promise<void>) {
     setBusy(true);
     setMsg("");
@@ -239,6 +285,11 @@ export default function OwnerDashboard() {
     const {url} = await api("checkout", {id});
     if (!url) throw Error("Stripe Checkout couldn’t open. Please try again.");
     setCheckout({id, url});
+    try {
+      sessionStorage.setItem("atg-directory-checkout", id);
+    } catch {
+      // Checkout works even when browser storage is unavailable.
+    }
     window.location.assign(url);
   }
 
