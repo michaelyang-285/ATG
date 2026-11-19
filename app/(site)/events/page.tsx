@@ -1,15 +1,15 @@
+import { eventPageMetadata } from "@/lib/event-metadata";
 import { calendarNotices } from "@/lib/gcps-calendar";
 import Link from "next/link";
 import { calendar, occurrencePath } from "@/lib/events";
 import { localClock, shift, validDay, zone } from "@/lib/event-time";
 import { facebookGroup } from "@/lib/gwinnett";
 import "@/components/community.css";
-export const metadata = {
-  title: "Gwinnett County Events Calendar",
-  description:
-    "Explore local Gwinnett events by week, month, or year and submit an event for review.",
-  alternates: { canonical: "/events" },
-};
+export const metadata = eventPageMetadata(
+  "Gwinnett County Events Calendar",
+  "Explore local Gwinnett events by week, month, or year and submit an event for review.",
+  "/events",
+);
 function label(day: string, options: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat("en-US", {
     ...options,

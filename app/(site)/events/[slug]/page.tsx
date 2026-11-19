@@ -8,6 +8,7 @@ import {
   type EventRecord,
 } from "@/lib/events";
 import { publication, safeUrl, imageUrl } from "@/lib/publication";
+import { eventPageMetadata, eventPublisher } from "@/lib/event-metadata";
 import { zone } from "@/lib/event-time";
 const load = cache(async (slug: string, day?: string) => {
   const e = await publication.fetch<EventRecord | null>(
@@ -24,19 +25,14 @@ const load = cache(async (slug: string, day?: string) => {
 type Props = { params: { slug: string }; searchParams: { date?: string } };
 export async function generateMetadata({ params, searchParams }: Props) {
   const e = await load(params.slug, searchParams.date);
-  return e
-    ? {
-        title: e.title,
-        description: e.summary,
-        alternates: { canonical: occurrencePath(e) },
-      }
-    : {};
+  return e ? eventPageMetadata(e.title, e.summary, occurrencePath(e)) : {};
 }
 export default async function Page({ params, searchParams }: Props) {
   const e = await load(params.slug, searchParams.date);
   if (!e) notFound();
   const url = safeUrl(e.url),
-    photo = imageUrl(e.image),
+    pageUrl = eventPublisher.url + occurrencePath(e),
+    atgOrganizesEvent = /^(all things gwinnett|atg)$/i.test(e.organizer?.trim() || ""),
     price = e.cost === "free" ? 0 : e.price;
   const schema = {
     "@context": "https://schema.org",
@@ -45,8 +41,13 @@ export default async function Page({ params, searchParams }: Props) {
     startDate: e.startsAt,
     endDate: e.endsAt,
     description: e.summary,
-    image: photo || undefined,
-    url: "https://allthingsgwinnett.com" + occurrencePath(e),
+    image: atgOrganizesEvent ? eventPublisher.logo.url : imageUrl(e.image) || undefined,
+    url: pageUrl,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": pageUrl,
+      publisher: eventPublisher,
+    },
     location: e.venue
       ? {
           "@type": "Place",
@@ -88,7 +89,6 @@ export default async function Page({ params, searchParams }: Props) {
         />
         <Link href="/events">← Events calendar</Link>
         <h1>{e.title}</h1>
-        {photo && <img src={photo} alt="" />}
         <p>
           <time dateTime={e.startsAt}>{when(e.startsAt)}</time>
           {e.endsAt && <> to {when(e.endsAt)}</>} (Eastern)
