@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { galleryLimit } from "@/lib/directory/gallery";
+import { directoryThumbnail } from "@/lib/directory/thumbnail";
 
 export default function ListingGallery({ name, photos }: { name: string; photos: string[] }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -23,7 +24,7 @@ export default function ListingGallery({ name, photos }: { name: string; photos:
     <div className="listing-thumbnails">
       {images.map((src, index) => <button key={index} type="button" onClick={() => show(index)}
         aria-label={`Enlarge photo ${index + 1} of ${images.length} from ${name}`} aria-haspopup="dialog">
-        <img src={src} alt="" width={144} height={108} loading="lazy" />
+        <img src={directoryThumbnail(src)} alt="" width={144} height={108} loading="lazy" />
       </button>)}
     </div>
     <dialog ref={dialog} aria-label={name + " photo viewer"} className="listing-lightbox"

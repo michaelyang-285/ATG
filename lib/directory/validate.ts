@@ -69,7 +69,7 @@ export function listing(input: any, email: string, uid: string) {
     if (
       typeof v !== "string" ||
       !v.startsWith(prefix) ||
-      !/^[-a-f0-9]+\.(png|jpg|webp)$/.test(v.slice(prefix.length))
+      !/^[-a-f0-9]+\.(?:gallery\.)?(png|jpg|webp)$/.test(v.slice(prefix.length))
     )
       invalid("photo");
   }
