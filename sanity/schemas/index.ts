@@ -98,6 +98,19 @@ export const schemaTypes = [
         rows: 3,
       }),
       defineField({
+        name: "seo",
+        title: "Search and social previews",
+        type: "object",
+        options: { collapsible: true, collapsed: true },
+        fields: [
+          text("title", "Search title"),
+          defineField({ name: "description", title: "Meta description", type: "text", rows: 2 }),
+          text("ogTitle", "Social title"),
+          defineField({ name: "ogDescription", title: "Social description", type: "text", rows: 2 }),
+          image("ogImage", "Social share image (1200 × 630)"),
+        ],
+      }),
+      defineField({
         name: "section",
         title: "Homepage section",
         type: "string",

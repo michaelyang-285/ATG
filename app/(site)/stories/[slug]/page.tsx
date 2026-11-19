@@ -21,7 +21,7 @@ import { cache } from "react";
 export const revalidate = 60;
 const getStory = cache((slug: string) =>
   publication.fetch<Story | null>(
-    `*[${PUBLISHED} && slug.current==$slug][0]{${STORY_FIELDS},body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
+    `*[${PUBLISHED} && slug.current==$slug][0]{${STORY_FIELDS},seo,body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
     { slug },
     { next: { revalidate: 60 } },
   ),
@@ -32,21 +32,35 @@ export async function generateMetadata({
   params: { slug: string };
 }): Promise<Metadata> {
   const s = await getStory(params.slug);
-  return s
-    ? {
-        title: s.title,
-        description: s.excerpt,
-        alternates: { canonical: `/stories/${encodeURIComponent(s.slug)}` },
-        openGraph: {
-          type: "article",
-          title: s.title,
-          description: s.excerpt,
-          url: `/stories/${encodeURIComponent(s.slug)}`,
-          publishedTime: s.publishedAt,
-          images: imageUrl(s.image) ? [{ url: imageUrl(s.image)!, alt: s.image?.alt }] : undefined,
-        },
-      }
-    : { title: "Story not found" };
+  if (!s) return { title: "Story not found" };
+  const seo = s.seo;
+  const description = seo?.description || s.excerpt;
+  const socialTitle = seo?.ogTitle || seo?.title || s.title;
+  const socialDescription = seo?.ogDescription || description;
+  const socialImage = imageUrl(seo?.ogImage, 1200, 630, "jpg");
+  const image = socialImage || imageUrl(s.image);
+  const images = image ? [{
+    url: image,
+    alt: socialImage ? seo?.ogImage?.alt : s.image?.alt,
+    width: 1200,
+    height: socialImage ? 630 : 675,
+  }] : undefined;
+  const path = `/stories/${encodeURIComponent(s.slug)}`;
+  return {
+    title: seo?.title ? { absolute: seo.title } : s.title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "article",
+      siteName: "All Things Gwinnett",
+      title: socialTitle,
+      description: socialDescription,
+      url: path,
+      publishedTime: s.publishedAt,
+      images,
+    },
+    ...(seo && { twitter: { card: "summary_large_image", title: socialTitle, description: socialDescription, images } }),
+  };
 }
 export default async function Page({ params }: { params: { slug: string } }) {
   const story = await getStory(params.slug);
