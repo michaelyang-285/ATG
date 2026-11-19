@@ -44,7 +44,7 @@
 .listing-heading{display:flex;align-items:center;gap:1.5rem;padding:2rem 0;margin:1rem 0 2rem;border-block:1px solid #c9c1b5;border-top:6px solid #ff4d22}
 .listing-heading img{object-fit:contain;background:white;border-radius:12px}
 .listing-heading h1{margin:.1em 0;font-size:clamp(2.3rem,6vw,5rem)}
-.listing-columns{display:grid;grid-template-columns:2fr 1fr;gap:clamp(1rem,4vw,4rem);align-items:start}
+.listing-columns{display:grid;grid-template-columns:minmax(0,2fr) minmax(17rem,1fr);gap:clamp(1rem,4vw,4rem);align-items:start}
 .atg-profile{overflow-wrap:anywhere}.listing-columns aside p{margin:1rem 0}
 .listing-summary{white-space:pre-line;font-size:1.15rem;line-height:1.65}
 .listing-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}.listing-tags span{background:#faf6ef;padding:.3rem .75rem;border-radius:2rem}
@@ -64,6 +64,9 @@ html:has(.listing-lightbox[open]) { overflow: hidden; }
 
 .listing-heading .button{margin-top:1rem}
 .listing-columns aside section{border-top:1px solid #d6cdbf;margin-top:1.25rem;padding-top:1rem}
+.listing-contact { display: grid; justify-items: start; gap: .5rem; }
+.listing-phone { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; text-decoration: underline; text-underline-offset: .2em; }
+.listing-phone svg { flex: none; }
 .profile-links{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem}
 .profile-links a{display:inline-flex;align-items:center;gap:.45rem;border:1px solid #c9c1b5;border-radius:.55rem;padding:.5rem .75rem;background:white;color:#171717;text-decoration:none;min-height:44px}
 .profile-links a:hover,.profile-links a:focus-visible{border-color:#171717;text-decoration:underline}
