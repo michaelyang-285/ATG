@@ -2,6 +2,8 @@ import { eventPageMetadata } from "@/lib/event-metadata";
 import { calendarNotices } from "@/lib/gcps-calendar";
 import Link from "next/link";
 import CalendarGrid from "@/components/CalendarGrid";
+import OngoingEvents from "@/components/OngoingEvents";
+import { arrangeCalendar } from "@/lib/calendar-runs";
 import { calendar, occurrencePath } from "@/lib/events";
 import { localClock, shift, validDay, zone } from "@/lib/event-time";
 import { facebookGroup } from "@/lib/gwinnett";
@@ -50,7 +52,9 @@ export default async function Page({
     prev = shift(from, -1);
     next = shift(to, 1);
   }
-  const items = await calendar(from, to);
+  // Include nearby dates so the first or last weekend of a run is recognized in week view.
+  const occurrences = await calendar(shift(from, -28), shift(to, 28));
+  const { daily: items, ongoing } = arrangeCalendar(occurrences, from, to);
   const observances = calendarNotices(from, to);
   const period =
     view === "year"
@@ -89,11 +93,13 @@ export default async function Page({
         <Link href={`?view=${view}&date=${prev}`}>← Previous {view}</Link>
         <Link href={`?view=${view}`}>Today</Link>
         <Link href={`?view=${view}&date=${next}`}>Next {view} →</Link>
+        {ongoing.length > 0 && <a className="ongoing-jump" href="#ongoing-events">Ongoing events ({ongoing.length})</a>}
       </nav>
       {view !== "year" && (
         <CalendarGrid from={from} to={to} period={period} limit={view === "month" ? 2 : 3}
           events={items} notices={observances} />
       )}
+      {ongoing.length > 0 && <OngoingEvents runs={ongoing} view={view} />}
       {items.length || observances.length ? (
         [
           ...items.map((e) => ({
@@ -149,7 +155,7 @@ export default async function Page({
           .sort((a, b) => a.day.localeCompare(b.day))
           .map((row) => row.element)
       ) : (
-        <p>No published events for this {view} yet.</p>
+        !ongoing.length && <p>No published events for this {view} yet.</p>
       )}
       <p className="event-day">
         <a className="text-link" href={facebookGroup}>
