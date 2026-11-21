@@ -1,4 +1,5 @@
 import IndependentProBadge from "@/components/IndependentProBadge";
+import LocalLife from "./LocalLife";
 import ThingsToDo from "./ThingsToDo";
 import { places, resolveArea, zipAreas } from "@/lib/directory/locations";
 import {directoryPublic, searchDirectory} from "@/lib/directory/public";
@@ -64,6 +65,9 @@ export default async function BrowsePage({
   if (filters.topic) stories = stories.filter((s) => s.topic === filters.topic);
   if (filters.area)
     stories = stories.filter((s) => s.location === filters.area);
+  if (kind === "local-life") {
+    return <LocalLife stories={stories} filtered={Boolean(filters.format || filters.topic || filters.area)} />;
+  }
   if (kind === "things-to-do") {
     return <ThingsToDo stories={stories} filtered={Boolean(filters.format || filters.topic || filters.area)} />;
   }
