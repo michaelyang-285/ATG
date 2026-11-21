@@ -1,3 +1,4 @@
+import groupAudience from "@/lib/facebook-group.json";
 import Link from "next/link";
 import { DirectionIcon } from "./DirectionIcon";
 import { StoryImage, StoryPreview } from "./Publication";
@@ -131,7 +132,7 @@ export default async function ThingsToDo({ stories, filtered }: { stories: Story
 
       <aside className="things-community" aria-labelledby="things-community-title">
         <h2 id="things-community-title">Ask your Gwinnett neighbors</h2>
-        <p>Need a rainy-day outing for a four-year-old or a date night near Buford? Ask the <strong>39,000+ members</strong> of the All Things Gwinnett Facebook group. Mention your city and who’s coming along.</p>
+        <p>Need a rainy-day outing for a four-year-old or a date night near Buford? Ask the <strong>{groupAudience.memberCountDisplay} members</strong> of the All Things Gwinnett Facebook group. Mention your city and who’s coming along.</p>
         <a className="button button-ink" href={facebookGroup}>Join the Facebook group</a>
       </aside>
     </main>

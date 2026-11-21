@@ -1,3 +1,4 @@
+import groupAudience from "@/lib/facebook-group.json";
 import Link from 'next/link'
 import { slugHref } from '@/lib/slugHref'
 
@@ -67,7 +68,7 @@ export function PromoBar() {
       {/* Contained */}
       <div className="max-w-[1200px] mx-auto px-6 py-6 flex items-center justify-between gap-6">
         <p className="font-space text-[16px] font-bold text-white leading-snug">
-          7,200+ Gwinnett locals in the Facebook group.{' '}
+          {groupAudience.memberCountDisplay} members in the Facebook group.{' '}
           <span className="underline underline-offset-[3px]">The website just launched.</span>{' '}
           Get in early.
         </p>

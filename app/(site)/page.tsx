@@ -1,3 +1,4 @@
+import groupAudience from "@/lib/facebook-group.json";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import "./home.css";
 import { facebookGroup } from "@/lib/gwinnett";
@@ -33,7 +34,7 @@ export default async function HomePage() {
         <div className="home-actions"><Link className="button button-orange" href="/events">Explore events</Link>
         <Link className="text-link" href="/directory">Find a local business <DirectionIcon /></Link></div></div>
         <aside className="home-community"><h2>Ask your Gwinnett neighbors</h2>
-        <p>Join <strong>39k+ members</strong> in the All Things Gwinnett Facebook group. Ask who cuts great locs, where to grab lunch in Duluth, or what’s open nearby.</p>
+        <p>Join <strong>{groupAudience.memberCountDisplay} members</strong> in the All Things Gwinnett Facebook group. Ask who cuts great locs, where to grab lunch in Duluth, or what’s open nearby.</p>
         <a className="text-link" href={facebookGroup}>Join the Facebook group <DirectionIcon /></a></aside>
       </section>
       <Newsletter url={settings.newsletterUrl} />

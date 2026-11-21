@@ -1,3 +1,4 @@
+import groupAudience from "@/lib/facebook-group.json";
 import Link from "next/link";
 import { facebookGroup } from "@/lib/gwinnett";
 import "./advertise.css";
@@ -21,7 +22,7 @@ export default function AdvertisePage() {
     <main id="main" className="site-width page-content ad-page">
       <header className="ad-hero">
         <h1>{title}</h1>
-        <p>Introduce your business to the <strong>39,000-member All Things Gwinnett Facebook group.</strong> Neighbors come here to ask for recommendations, discover local businesses, and keep up with what’s happening around the county.</p>
+        <p>Introduce your business to <strong>{groupAudience.memberCountDisplay} members of the All Things Gwinnett Facebook group.</strong> Neighbors come here to ask for recommendations, discover local businesses, and keep up with what’s happening around the county.</p>
         <a className="button button-orange" href="#advertising">Ask about advertising</a>
       </header>
       <section>
