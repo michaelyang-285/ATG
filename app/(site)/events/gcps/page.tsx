@@ -72,20 +72,18 @@ export default function SchoolCalendar() {
   const saturday = shift(today, 6 - new Date(today).getUTCDay());
   const upcoming = dates.filter(event => event.end >= today);
   const afterWeek = upcoming.filter(event => event.day > saturday);
-  const month = today.slice(0, 7);
+  const firstMonth = shift(saturday, 1).slice(0, 7);
   const months: string[] = [];
-  const cursor = new Date(today.slice(0, 7) + "-01T00:00:00Z");
-  cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  const cursor = new Date(firstMonth + "-01T00:00:00Z");
   while (cursor.toISOString().slice(0, 7) <= "2027-06") {
     months.push(cursor.toISOString().slice(0, 7));
     cursor.setUTCMonth(cursor.getUTCMonth() + 1);
   }
   const groups = [
     { title: "This Week", dates: upcoming.filter(event => event.day <= saturday) },
-    { title: "Later This Month", dates: afterWeek.filter(event => event.day.startsWith(month)) },
-    { title: "Looking Ahead", dates: afterWeek.filter(event => !event.day.startsWith(month)) },
+    { title: "Looking Ahead", dates: afterWeek },
     { title: "Past school dates", dates: dates.filter(event => event.end < today).sort((a, b) => a.day.localeCompare(b.day)) },
-  ].filter(group => group.title === "This Week" || (group.title === "Looking Ahead" && months.length > 0) || group.dates.length);
+  ];
   return (
     <main id="main" className="site-width page-content atg-desk gcps-calendar">
       <header>
@@ -108,8 +106,8 @@ export default function SchoolCalendar() {
       </section>
       {groups.map(group => (
         <section key={group.title} style={{ display: "block" }}>
-          <h2>{group.title}</h2>
-          {group.title === "Looking Ahead" ? months.map(key => {
+          <h2 className="school-period-heading">{group.title}</h2>
+          {group.title === "Looking Ahead" ? (months.length ? months.map(key => {
             const entries = group.dates.filter(event => event.day.startsWith(key));
             const heading = new Date(key + "-01T00:00:00Z").toLocaleDateString("en-US", {
               month: "long", year: "numeric", timeZone: "UTC",
@@ -120,7 +118,7 @@ export default function SchoolCalendar() {
                 {entries.length ? <DateList dates={entries} /> : <p>Nothing happening with GCPS this month.</p>}
               </div>
             );
-          }) : group.dates.length ? <DateList dates={group.dates} /> : <p>Nothing this week.</p>}
+          }) : <p>No upcoming school dates.</p>) : group.dates.length ? <DateList dates={group.dates} /> : <p>{group.title === "This Week" ? "Nothing this week." : "No past school dates."}</p>}
         </section>
       ))}
       <section style={{ display: "block" }} aria-labelledby="calendar-faq">

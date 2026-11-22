@@ -1,4 +1,4 @@
-:is(.library-day h3, .gcps-calendar .school-date-heading) {
+:is(.library-day h3, .gcps-calendar .school-period-heading) {
   background: #254b38;
   color: white;
   border-radius: .4rem;
@@ -10,6 +10,8 @@
 }
 
 .gcps-calendar .school-date-list { list-style: none; padding: 0; margin: 0; }
-.gcps-calendar .school-date-list li { display: block; padding: 0; }
+.gcps-calendar .school-date-list li { display: block; padding: .8rem 0; border-bottom: 1px solid #e3e7e3; }
 .gcps-calendar .school-date-name { display: block; margin: .65rem 0 .1rem; font-size: 1.12rem; }
 .gcps-calendar .school-date-list li > span { display: block; }
+
+.gcps-calendar .school-date-heading { font-weight: 700; }
