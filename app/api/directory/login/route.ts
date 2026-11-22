@@ -7,6 +7,8 @@ export function POST(req: Request) {
     const { email, password, account, eventSignup, generalAccount } = await req.json();
     if (!account || typeof password !== "string" || password.length < 8) throw new Failure(400, "Use a password with at least 8 characters.");
     if (account) {
+      if (eventSignup !== true && typeof account.name === "string" && account.name.length > 100)
+        throw new Failure(400, "Shorten your business name to 100 characters or fewer.");
       for (const k of eventSignup === true
         ? ["firstName", "lastName"]
         : ["firstName", "lastName", "phone", "name"])
