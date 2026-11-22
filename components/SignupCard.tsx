@@ -254,12 +254,12 @@ export default function SignupCard({
                         k === "firstName" || k === "lastName" ? "" : "wide"
                       }
                     >
-                      {label}
+                      {label}{k === "name" && " (100 characters max)"}
                       <input
                         required
                         autoComplete={auto}
                         type={type}
-                        maxLength={k === "email" ? 254 : 240}
+                        maxLength={k === "name" ? 100 : k === "email" ? 254 : 240}
                         value={k === "email" ? email : account[k]}
                         onChange={(e) =>
                           k === "email"
@@ -267,6 +267,7 @@ export default function SignupCard({
                             : setAccount({ ...account, [k]: e.target.value })
                         }
                       />
+                      {k === "name" && <small>{account.name.length} / 100 characters</small>}
                     </label>
                   ))}
                 <label className="wide">Password<input type="password" autoComplete={signin ? "current-password" : "new-password"} required minLength={signin ? undefined : 8} value={password} onChange={e=>setPassword(e.target.value)} /></label>
