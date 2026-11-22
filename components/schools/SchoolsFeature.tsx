@@ -1,3 +1,4 @@
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { PortableText, toPlainText } from "@portabletext/react";
 import type { Story } from "@/lib/publication";
 import { formatDate, imageUrl, safeUrl } from "@/lib/publication";
@@ -12,9 +13,19 @@ export default function SchoolsFeature({story}: {story: Story}) {
   const blocks = story.body || [];
   const hero = imageUrl(story.image);
   const canonical = "https://allthingsgwinnett.com/stories/" + story.slug;
-  const questions = blocks.flatMap((block, index) => block.style === "h3" && blocks[index+1] ? [{
-    "@type": "Question", name: toPlainText(block), acceptedAnswer: {"@type":"Answer", text: toPlainText(blocks[index+1])}
-  }] : []);
+  const start = blocks.findIndex(b => layout[b._key]?.id === "faq");
+  const next = blocks.findIndex((b, i) => i > start && b.style === "h2");
+  const end = next < 0 ? blocks.length : next;
+  const entries: { key: string; question: string; answers: typeof blocks }[] = [];
+  if (start >= 0) {
+    for (const block of blocks.slice(start + 1, end)) {
+      if (block.style === "h3") entries.push({ key: block._key, question: toPlainText(block), answers: [] });
+      else if (entries.length) entries[entries.length - 1].answers.push(block);
+    }
+  }
+  const questions = entries.map(({question, answers}) => ({
+    "@type": "Question", name: question, acceptedAnswer: { "@type": "Answer", text: toPlainText(answers) },
+  }));
   const graph = {"@context":"https://schema.org","@graph":[
     {"@type":"Article","@id":canonical+"#article",headline:story.title,description:story.seo?.description || story.excerpt,
       author:{"@type":"Person",name:story.author?.name},publisher:{"@type":"Organization",name:"All Things Gwinnett"},datePublished:story.publishedAt,
@@ -40,7 +51,15 @@ export default function SchoolsFeature({story}: {story: Story}) {
       {summaryEnd >= 0 && <aside className="story-summary" aria-label="Article summary">
         {blocks.slice(0, summaryEnd).map(renderBlock)}
       </aside>}
-      {blocks.slice(Math.max(0, summaryEnd)).map(renderBlock)}
+      {blocks.slice(Math.max(0, summaryEnd)).map((block, offset) => {
+        const index = offset + Math.max(0, summaryEnd);
+        if (entries.length && index === start) return <div key={block._key}>
+          {renderBlock(block)}
+          <FaqAccordion items={entries.map(({key, question, answers}) => ({key, question, answer: answers.map(renderBlock)}))} />
+        </div>;
+        if (entries.length && index > start && index < end) return null;
+        return renderBlock(block);
+      })}
     </article></main><ChartControls />
   </div>;
 }

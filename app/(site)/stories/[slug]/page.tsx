@@ -1,3 +1,4 @@
+import { StoryFaq } from "@/components/StoryFaq";
 import SchoolsFeature from "@/components/schools/SchoolsFeature";
 import Link from "next/link";
 import { GameEventTable } from "@/components/GameEventTable";
@@ -116,6 +117,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 },
               },
               types: {
+                faq: StoryFaq,
                 upcomingGameEvents: ({ value }) => hasCalendar ? (
                   <section>
                     <h2>{value.heading || "Upcoming events"}</h2>

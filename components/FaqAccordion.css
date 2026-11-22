@@ -1,0 +1,11 @@
+.atg-faq { max-width: 48rem; margin-top: 1rem; }
+.atg-faq details { border-top: 1px solid #d5d2cb; }
+.atg-faq details:last-child { border-bottom: 1px solid #d5d2cb; }
+.atg-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem .4rem; cursor: pointer; list-style: none; font: 600 1.075rem/1.45 system-ui, sans-serif; text-transform: none; letter-spacing: normal; }
+.atg-faq summary::-webkit-details-marker { display: none; }
+.atg-faq summary:hover span { text-decoration: underline; text-underline-offset: .2em; }
+.atg-faq summary:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+.atg-faq svg { flex-shrink: 0; }
+.atg-faq details[open] svg { transform: rotate(180deg); }
+.atg-faq .atg-faq-answer { margin: 0 1rem 1.25rem .8rem; padding: .15rem 0 .15rem 1rem; border-left: 2px solid #cf7950; }
+.atg-faq .atg-faq-answer p { margin: 0; max-width: 60ch; font: 1.05rem/1.65 Georgia, serif; }

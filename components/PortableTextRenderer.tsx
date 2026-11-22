@@ -1,3 +1,4 @@
+import { StoryFaq } from "@/components/StoryFaq";
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import Link from 'next/link'
 import StoryTag from './StoryTag'
@@ -162,32 +163,7 @@ const components: PortableTextComponents = {
         </section>
       )
     },
-    faq: ({ value }: any) => {
-      if (!Array.isArray(value?.items) || value.items.length === 0) return null
-      return (
-        <section className="my-12">
-          <h2 className="font-archivo text-2xl uppercase tracking-tight text-ink mb-5">
-            {value?.heading || 'Frequently asked'}
-          </h2>
-          <div className="border-2 border-ink bg-paper shadow-brutalist-sm divide-y-2 divide-ink">
-            {value.items.map((item: any) => (
-              <details key={item?._key || item?.question} className="group">
-                <summary className="flex items-center justify-between gap-4 list-none px-5 py-4 cursor-pointer font-archivo text-[15px] uppercase tracking-wide text-ink hover:bg-card [&::-webkit-details-marker]:hidden">
-                  <span>{item?.question}</span>
-                  <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper text-xl leading-none">
-                    <span className="group-open:hidden">+</span>
-                    <span className="hidden group-open:inline">−</span>
-                  </span>
-                </summary>
-                <div className="ml-8 mr-5 mb-5 border-l-4 border-ink bg-card px-5 py-4 font-georgia text-[16px] leading-[1.7] text-ink">
-                  <PortableText value={item?.answer || []} />
-                </div>
-              </details>
-            ))}
-          </div>
-        </section>
-      )
-    },
+    faq: StoryFaq,
     editorsNote: ({ value }: any) => (
       <aside className="my-8 border-2 border-ink bg-ink text-paper shadow-brutalist-sm p-5">
         <p className="font-inter text-[9px] font-bold uppercase tracking-[1.2px] text-yellow mb-2">
