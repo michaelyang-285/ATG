@@ -55,7 +55,7 @@ function DatedList({events,from}:{events:AgendaEvent[];from:string}) {
 export default async function Page({searchParams:q}:{searchParams:{city?:string;date?:string;audience?:string}}){
   if (q.audience === "All ages") q = {...q, audience: ""};
   const today=localClock(Date.now()).slice(0,10);
-  const date=q.date && validDay(q.date) && q.date>="1900-01-01" && q.date<="2100-12-31" ? q.date : "";
+  const date=q.date && validDay(q.date) && q.date>=today && q.date<="2100-12-31" ? q.date : "";
   const from=date||today, to=date||shift(today,365);
   const saturday=shift(today,6-new Date(today).getUTCDay()), nextEnd=shift(saturday,7);
   const all=await calendar(shift(from,-28),date?shift(date,28):to);
