@@ -1,0 +1,5 @@
+.section{width:min(100% - 2rem,68rem);margin:2.5rem auto}
+.section h2{font-size:clamp(1.5rem,3vw,2rem);margin:0 0 1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr));gap:1rem}
+.grid article{padding:1.1rem;background:#f2f6f1;border:1px solid #c7d6ca;border-radius:.65rem}
+.grid h3{font-size:1.15rem;margin:0}.grid p{margin:.8rem 0 0}.grid small{display:block;color:#345443;margin-bottom:.25rem}.grid a{text-decoration:underline;text-underline-offset:.18em}

@@ -1,3 +1,4 @@
+import CalendarHighlights from "@/components/CalendarHighlights";
 import groupAudience from "@/lib/facebook-group.json";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import "./home.css";
@@ -108,6 +109,7 @@ export default async function HomePage() {
           )}
         </aside>
       </div>
+      <CalendarHighlights />
       <section className="guides-section">
         <div className="section-heading">
           <h2>More useful guides</h2>

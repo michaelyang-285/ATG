@@ -1,3 +1,4 @@
+import CalendarHighlights from "@/components/CalendarHighlights";
 import "./things-to-do.css";
 import BrowsePage, { type Filters } from "@/components/BrowsePage";
 export const revalidate = 60;
@@ -7,5 +8,5 @@ export const metadata = {
   alternates: { canonical: "/things-to-do" },
 };
 export default function Page({ searchParams }: { searchParams: Filters }) {
-  return <BrowsePage kind="things-to-do" filters={searchParams} />;
+  return <><BrowsePage kind="things-to-do" filters={searchParams} /><CalendarHighlights /></>;
 }

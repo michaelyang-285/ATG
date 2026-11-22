@@ -1,0 +1,29 @@
+import Link from "next/link";
+import { calendarNotices } from "@/lib/gcps-calendar";
+import { libraryFeed, libraryPath } from "@/lib/library-events";
+import { upcomingGameEvents, occurrencePath } from "@/lib/events";
+import { localClock, shift } from "@/lib/event-time";
+import styles from "./CalendarHighlights.module.css";
+
+const dateLabel = (day:string) => new Intl.DateTimeFormat("en-US",{month:"short",day:"numeric",timeZone:"UTC"}).format(new Date(day));
+
+export default async function CalendarHighlights() {
+  const now=Date.now(), local=localClock(now), today=local.slice(0,10);
+  const [library,games]=await Promise.all([
+    libraryFeed().catch(()=>null), upcomingGameEvents(["pokemon"],now).catch(()=>[])
+  ]);
+  const school=calendarNotices(today,shift(today,365)).find(e=>e.school && e.end>=today);
+  const program=library?.events.find(e=>e.start>=local);
+  const game=games[0];
+  const cards=[
+    {label:"GCPS school calendar",url:"/events/gcps",event:school && {title:school.title,when:dateLabel(school.day)+(school.end!==school.day?" to "+dateLabel(school.end):""),url:"/events/gcps"}},
+    {label:"Gwinnett library events",url:libraryPath,event:program && {title:program.title,when:dateLabel(program.day),url:libraryPath+"/"+program.id}},
+    {label:"Pokémon events",url:"/events/pokemon",event:game && {title:game.title,when:dateLabel(game.day),url:occurrencePath(game)}}
+  ];
+  return <section className={styles.section}><h2>Coming up in Gwinnett</h2>
+    <div className={styles.grid}>{cards.map(card=><article key={card.url}>
+      <h3><Link href={card.url}>{card.label}</Link></h3>
+      {card.event && <p><small>{card.event.when}</small><Link href={card.event.url}>{card.event.title}</Link></p>}
+    </article>)}</div>
+  </section>;
+}
