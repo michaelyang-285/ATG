@@ -196,6 +196,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 link: ({ children, value }) => {
                   const anchor = (value?.href || "").replace(canonical, "");
                   if (/^#source-\d+$/.test(anchor)) return <sup><a href={anchor}>{children}</a></sup>;
+                  if (/^#[\w-]+$/.test(anchor)) return <a href={anchor}>{children}</a>;
                   const href = value?.internalSlug
                     ? `/stories/${encodeURIComponent(value.internalSlug)}`
                     : safeUrl(value?.href);
