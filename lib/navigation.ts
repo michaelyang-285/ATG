@@ -15,6 +15,11 @@ export function navigation(
       children: [],
     },
     {
+      label: "Local life",
+      href: "/local-life",
+      children: [],
+    },
+    {
       label: "Events",
       href: "/events",
       children: [
@@ -22,11 +27,6 @@ export function navigation(
         { label: "Library Events", href: "/events/gwinnett-libraries" },
         { label: "Submit an event", href: "/events/submit" },
       ],
-    },
-    {
-      label: "Local life",
-      href: "/local-life",
-      children: [],
     },
     {
       label: "Directory",
