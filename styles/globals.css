@@ -1050,3 +1050,27 @@ img {
   line-height: 1.4;
 }
 .directory-owner .submission-status { margin-top: 1rem; color: var(--muted); }
+
+/* Public-site dropdown standard, shared by calendars, forms and story filters. */
+body select:not([multiple]):not([size]) {
+  appearance: none;
+  box-sizing: border-box;
+  min-height: 44px;
+  max-width: 100%;
+  padding: .6rem 2.75rem .6rem .85rem;
+  border: 1px solid #92a99d;
+  border-radius: 8px;
+  background: #f7faf7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='m3 6 5 5 5-5' fill='none' stroke='%23265c49' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 1rem center;
+  color: #20362c;
+  font-family: "DM Sans", sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.35;
+}
+body select:not([multiple]):not([size]):focus-visible {
+  outline: 2px solid #265c49;
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  body select:not([multiple]):not([size]) { appearance: auto; background-image: none; }
+}
