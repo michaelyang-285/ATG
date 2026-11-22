@@ -323,6 +323,10 @@ export default function OwnerDashboard() {
         setStep(0);
         throw Error(additionalCategoryError);
       }
+      if ((step === 0 || step === 4) && form.name.length > 100) {
+        setStep(0);
+        throw Error("Shorten your business name to 100 characters or fewer.");
+      }
       if (descriptionBlocked) {
         setStep(0);
         throw Error("Shorten your business description to 1,000 characters or fewer.");
@@ -473,7 +477,10 @@ export default function OwnerDashboard() {
                     ))}
                   </div>
                 </fieldset>
-                {field("name", "Public listing name", true)}
+                <label>Public listing name (100 characters max)
+                  <input required maxLength={100} value={form.name} onChange={e => change("name", e.target.value)} />
+                  <small>{form.name.length} / 100 characters</small>
+                </label>
                 <label htmlFor="business-description">Business description
                   <textarea id="business-description" required value={form.summary}
                     aria-invalid={descriptionOver} aria-describedby="business-description-count"
