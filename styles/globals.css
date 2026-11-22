@@ -509,6 +509,7 @@ img {
   margin-bottom: 24px;
 }
 .article-body h2 {
+  text-wrap: wrap;
   margin-block: 40px 20px;
 }
 .article-body h3 {
