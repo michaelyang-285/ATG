@@ -10,6 +10,15 @@ async function deliver(kind: Kind, alert: Alert) {
   if (!key) throw Error("Submission email delivery is unavailable");
   const label = kind === "event" ? "event" : "directory profile";
   const title = alert.title.replace(/[\r\n]+/g, " ").trim();
+  const contactLines: string[] = [];
+  if (kind === "profile") {
+    const { data, error } = await db().from("directory_entries")
+      .select("contact").eq("id", alert.id).maybeSingle();
+    if (error) throw error;
+    const contact = data?.contact;
+    const name = [contact?.firstName, contact?.lastName].filter(Boolean).join(" ").trim();
+    contactLines.push("Submitted by: " + (name || "Unavailable"), "Email: " + (contact?.email || "Unavailable"), "");
+  }
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -21,7 +30,7 @@ async function deliver(kind: Kind, alert: Alert) {
       from: "All Things Gwinnett <notifications@allthingsgwinnett.com>",
       to: ["michaelyang@285marketing.com"],
       subject: "New " + label + " for review: " + title,
-      text: [title, "", "A new " + label + " is ready for your review.", "", "Open the approval queue:", queueUrl].join("\n"),
+      text: [title, "", "A new " + label + " is ready for your review.", "", ...contactLines, "Open the approval queue:", queueUrl].join("\n"),
     }),
     cache: "no-store",
     signal: AbortSignal.timeout(8000),
