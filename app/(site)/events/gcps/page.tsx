@@ -121,22 +121,32 @@ export default function SchoolCalendar() {
       ))}
       <section style={{ display: "block" }} aria-labelledby="calendar-faq">
         <h2 id="calendar-faq">GCPS calendar FAQ</h2>
-          <div className="border-2 border-ink bg-paper shadow-brutalist-sm divide-y-2 divide-ink">
-            {faq.map(([question, answer]) => (
-              <details key={question} className="group">
-                <summary className="flex items-center justify-between gap-4 list-none px-5 py-4 cursor-pointer font-archivo text-[15px] uppercase tracking-wide text-ink hover:bg-card [&::-webkit-details-marker]:hidden">
-                  <span>{question}</span>
-                  <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper text-xl leading-none">
-                    <span className="group-open:hidden">+</span>
-                    <span className="hidden group-open:inline">−</span>
-                  </span>
-                </summary>
-                <div className="ml-8 mr-5 mb-5 border-l-4 border-ink bg-card px-5 py-4 font-georgia text-[16px] leading-[1.7] text-ink">
-                  <p>{answer}</p>
-                </div>
-              </details>
-            ))}
-          </div>
+        <div className="gcps-questions">
+          {faq.map(([question, answer]) => (
+            <details key={question}>
+              <summary>
+                <span>{question}</span>
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path d="m4 7 6 6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </summary>
+              <div className="gcps-answer"><p>{answer}</p></div>
+            </details>
+          ))}
+        </div>
+        <style>{`
+          .gcps-questions { max-width: 48rem; margin-top: 1rem; }
+          .gcps-questions details { border-top: 1px solid #d5d2cb; }
+          .gcps-questions details:last-child { border-bottom: 1px solid #d5d2cb; }
+          .gcps-questions summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.1rem .4rem; cursor: pointer; list-style: none; font: 600 1.075rem/1.45 system-ui, sans-serif; text-transform: none; letter-spacing: normal; }
+          .gcps-questions summary::-webkit-details-marker { display: none; }
+          .gcps-questions summary:hover span { text-decoration: underline; text-underline-offset: .2em; }
+          .gcps-questions summary:focus-visible { outline: 2px solid currentColor; outline-offset: -2px; }
+          .gcps-questions svg { flex-shrink: 0; }
+          .gcps-questions details[open] svg { transform: rotate(180deg); }
+          .gcps-questions .gcps-answer { margin: 0 1rem 1.25rem .8rem; padding: .15rem 0 .15rem 1rem; border-left: 2px solid #cf7950; }
+          .gcps-questions .gcps-answer p { margin: 0; max-width: 60ch; font: 1.05rem/1.65 Georgia, serif; }
+        `}</style>
       </section>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org", "@type": "FAQPage",
