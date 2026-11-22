@@ -74,6 +74,26 @@ export function POST(req: Request) {
         400,
         "Weekly series must end within one year and include at least two dates.",
       );
+    const sessions: { _key:string; _type:string; startsAt:string; endsAt?:string }[] = [];
+    if (body.schedule === "selected") {
+      if (until || !Array.isArray(body.selectedDates) || !body.selectedDates.length)
+        throw new Failure(400, "Add another date or choose One date.");
+      const days = new Set([day]);
+      for (const row of body.selectedDates) {
+        const start = typeof row?.start === "string" && easternInstant(row.start);
+        const end = row?.end ? easternInstant(row.end) : null;
+        if (!start || Date.parse(start) < Date.now() || (row.end && (!end || end <= start)))
+          throw new Failure(400, "Check the start and end of each selected date.");
+        const date = row.start.slice(0, 10);
+        if (days.has(date) || date < day) throw new Failure(400, "Enter the earliest date first and each additional day only once.");
+        days.add(date);
+        sessions.push({_type:"eventSession", _key:date, startsAt:start, ...(end ? {endsAt:end} : {})});
+      }
+      sessions.sort((a,b) => a.startsAt.localeCompare(b.startsAt));
+    }
+    const registrationRequired = body.registrationRequired;
+    const ticketUrl = registrationRequired ? safeUrl(field("ticketUrl", 1000)) : null;
+    if (registrationRequired && !ticketUrl) throw new Failure(400, "Enter a valid registration link.");
     const url = body.url ? safeUrl(field("url", 1000)) : null,
       cost = field("cost");
     if (
@@ -83,9 +103,12 @@ export function POST(req: Request) {
     )
       throw new Failure(400, "Check city, cost, and website.");
     const price =
-      cost === "paid" && body.price !== "" ? Number(body.price) : undefined;
+      cost === "paid" && body.price != null && body.price !== "" ? Number(body.price) : undefined;
     if (price !== undefined && (!Number.isFinite(price) || price <= 0))
       throw new Failure(400, "Enter a positive ticket price.");
+    const unit = cost === "paid" && body.priceUnit ? field("priceUnit") : "";
+    if (unit && !["person","vehicle"].includes(unit)) throw new Failure(400, "Choose a valid pricing unit.");
+    const pricingDetails = cost === "paid" && body.pricingDetails?.trim() ? field("pricingDetails",600) : "";
     const id = field("requestId");
     if (!/^[a-f0-9-]{36}$/.test(id))
       throw new Failure(400, "Invalid submission.");
@@ -121,10 +144,14 @@ export function POST(req: Request) {
         startsAt,
         ...(endsAt ? { endsAt } : {}),
         ...(until ? { weeklyUntil: until } : {}),
+        ...(sessions.length ? {additionalSessions:sessions} : {}),
+        ...(typeof registrationRequired === "boolean" ? {registrationRequired} : {}),
+        ...(ticketUrl ? {ticketUrl} : {}),
+        ...(pricingDetails ? {pricingDetails} : {}),
         cost,
         ...(price !== undefined ? { price } : {}),
         priceLabel:
-          cost === "free" ? "Free" : price === undefined ? "Paid" : "$" + price,
+          cost === "free" ? "Free" : price === undefined ? "Paid" : unit ? `From ${price} per ${unit}` : "$" + price,
         ...(url ? { url } : {}),
       }).create({
         _id: alertId, _type: "communitySubmissionAlert", title,

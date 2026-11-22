@@ -9,6 +9,7 @@ const normalize = (value?: string) => (value || "").trim().replace(/\s+/g, " ").
 
 function identity(e: Occurrence) {
   // Separate listings can share a title. Only combine them when their source and venue agree.
+  if (e.additionalSessions?.length) return e._id;
   if (!e.title || !(e.venue || e.street) || !(e.url || e.organizer)) return e._id;
   return JSON.stringify([e.title, e.venue, e.street, e.city || e.neighborhood, e.organizer, e.url].map(normalize));
 }
@@ -33,6 +34,12 @@ export function arrangeCalendar(occurrences: Occurrence[], from: string, to: str
   const ongoing: CalendarRun[] = [];
   const grouped = new Set<Occurrence>();
   bySeries.forEach((dates, key) => {
+    if (dates[0].additionalSessions?.length) {
+      const visible = dates.filter(inView);
+      if (visible.length) ongoing.push({key, dates:visible});
+      visible.forEach(e => grouped.add(e));
+      return;
+    }
     let run: Occurrence[] = [];
     let lastDay = "";
     const finishRun = () => {

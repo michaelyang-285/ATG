@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
+import { shift, validDay } from "@/lib/event-time";
 import SignupCard from "./SignupCard";
 import { cities } from "@/lib/gwinnett";
 import { browserClient } from "@/lib/browser-client";
@@ -11,7 +12,11 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
     [ready, setReady] = useState(false),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false),
-    [weekly, setWeekly] = useState(false),
+    [schedule, setSchedule] = useState("once"),
+    [start, setStart] = useState(""),
+    [end, setEnd] = useState(""),
+    [dates, setDates] = useState<{id:string; start:string; end:string}[]>([]),
+    [register, setRegister] = useState(false),
     [cost, setCost] = useState("free"),
     [done, setDone] = useState(false),
     [requestId] = useState(() => globalThis.crypto.randomUUID());
@@ -71,7 +76,10 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
           requestId,
           action: "event",
           cost,
-          until: weekly ? data.until : "",
+          until: schedule === "weekly" ? data.until : "",
+          schedule,
+          registrationRequired: register,
+          selectedDates: schedule === "selected" ? dates : [],
         }),
       });
       const out = await res.json();
@@ -210,24 +218,33 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
                 ))}
               </select>
             </label>
-            {input("start", "Starts (Eastern time)", "datetime-local")}
-            {input(
-              "end",
-              "Ends (optional, Eastern time)",
-              "datetime-local",
-              false,
-            )}
-            <label>
-              Repeats
-              <select
-                value={weekly ? "weekly" : "once"}
-                onChange={(e) => setWeekly(e.target.value === "weekly")}
-              >
-                <option value="once">Once</option>
-                <option value="weekly">Weekly</option>
+            <h2>Schedule</h2>
+            <label>When does this event happen?
+              <select value={schedule} onChange={e => setSchedule(e.target.value)}>
+                <option value="once">One date</option>
+                <option value="weekly">Repeats weekly</option>
+                <option value="selected">Selected dates</option>
               </select>
             </label>
-            {weekly && input("until", "Repeat through", "date")}
+            <label>Starts (Eastern time)<input required type="datetime-local" name="start" value={start} onChange={e => setStart(e.target.value)} /></label>
+            <label>Ends (optional, Eastern time)<input type="datetime-local" name="end" value={end} onChange={e => setEnd(e.target.value)} /></label>
+            {schedule === "weekly" && input("until", "Repeat through", "date")}
+            {schedule === "selected" && <>
+              <p>Add each day the event is open. Each new date copies the previous hours.</p>
+              {dates.map((row, i) => <fieldset key={row.id}>
+                <legend>Date {i + 2}</legend>
+                {(["start", "end"] as const).map(key => <label key={key}>{key === "start" ? "Starts" : "Ends (optional)"} (Eastern time)
+                  <input type="datetime-local" required={key === "start"} value={row[key]}
+                    onChange={e => setDates(dates.map(r => r.id === row.id ? {...r, [key]: e.target.value} : r))} />
+                </label>)}
+                <button type="button" onClick={() => setDates(dates.filter(r => r.id !== row.id))}>Remove date</button>
+              </fieldset>)}
+              <button type="button" onClick={() => {
+                const previous = dates[dates.length - 1] || {start, end};
+                const next = (value: string) => validDay(value.slice(0,10)) ? shift(value.slice(0,10), 1) + value.slice(10) : "";
+                setDates([...dates, {id: crypto.randomUUID(), start: next(previous.start), end: next(previous.end)}]);
+              }}>Add another date</button>
+            </>}
             <label>
               Admission
               <select value={cost} onChange={(e) => setCost(e.target.value)}>
@@ -235,13 +252,20 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
                 <option value="paid">Paid</option>
               </select>
             </label>
-            {cost === "paid" && (
+            {cost === "paid" && <>
               <label>
-                Ticket price in USD (optional)
+                Starting price in USD (optional)
                 <input name="price" type="number" min=".01" step=".01" />
               </label>
-            )}
-            {input("url", "Event or ticket website (optional)", "url", false)}
+              <label>Price is per<select name="priceUnit"><option value="person">Person</option><option value="vehicle">Vehicle</option></select></label>
+              <label>Pricing details (optional)<textarea name="pricingDetails" maxLength={600} placeholder="Include age-based prices, parking, or fees." /></label>
+            </>}
+            <h2>Registration and links</h2>
+            <label>Do attendees need to register?
+              <select value={register ? "yes" : "no"} onChange={e => setRegister(e.target.value === "yes")}><option value="no">No</option><option value="yes">Yes</option></select>
+            </label>
+            {register && input("ticketUrl", "Registration or ticket link", "url")}
+            {input("url", "Official event page (optional)", "url", false)}
             <button className="button button-orange">Submit for review</button>
       </fieldset>
       <p role="status">{message}</p>

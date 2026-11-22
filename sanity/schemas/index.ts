@@ -275,6 +275,12 @@ export const schemaTypes = [
       text("postalCode", "ZIP code"),
       defineField({name: "ticketUrl", type: "url", title: "Direct ticket or registration page", description: "Use a link where attendees can actually book this event."}),
       text("organizer", "Public organizer name"),
+      defineField({name:"additionalSessions",title:"Additional selected dates",type:"array",of:[{name:"eventSession",type:"object",fields:[
+        {name:"startsAt",title:"Starts",type:"datetime",validation:rule=>rule.required()},
+        {name:"endsAt",title:"Ends",type:"datetime"}
+      ]}]}),
+      defineField({name:"pricingDetails",title:"Pricing details",type:"text"}),
+      defineField({name:"registrationRequired",title:"Registration required",type:"boolean"}),
       defineField({name:"weeklyUntil",title:"Repeat weekly through",type:"date"}),
       defineField({name:"cost",title:"Admission",type:"string",options:{list:["free","paid"]}}),
       defineField({name:"price",title:"Ticket price (USD)",type:"number"}),

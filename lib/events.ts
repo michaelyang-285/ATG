@@ -12,16 +12,22 @@ export type EventRecord = LocalEvent & {
   cost?: string;
   price?: number;
   organizer?: string;
+  additionalSessions?: {startsAt:string; endsAt?:string}[];
+  pricingDetails?: string;
+  registrationRequired?: boolean;
   weeklyUntil?: string;
   image?: any;
 };
 export const eventFields =
-  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,ticketUrl,street,city,postalCode,cost,price,organizer,weeklyUntil,image,eventFormats,gameTopics,cancelled,outsideGwinnett';
+  '_id,title,"slug":coalesce(slug.current,_id),startsAt,endsAt,venue,neighborhood,summary,priceLabel,url,ticketUrl,street,city,postalCode,cost,price,organizer,weeklyUntil,additionalSessions,pricingDetails,registrationRequired,image,eventFormats,gameTopics,cancelled,outsideGwinnett';
 export function eventDates(e: EventRecord) {
   if (!e.startsAt || !Number.isFinite(Date.parse(e.startsAt))) return [];
   const start = localClock(e.startsAt),
     day = start.slice(0, 10);
   const dates = [{ ...e, day }];
+  for (const session of e.additionalSessions || []) {
+    dates.push({...e, startsAt:session.startsAt, endsAt:session.endsAt, day:localClock(session.startsAt).slice(0,10)});
+  }
   const duration = e.endsAt ? Date.parse(e.endsAt) - Date.parse(e.startsAt) : 0;
   for (let i = 1; i <= 53 && e.weeklyUntil; i++) {
     const next = shift(day, i * 7);
@@ -44,7 +50,7 @@ export function occurrencePath(e: { slug: string; day: string }) {
 }
 export async function calendar(from: string, to: string) {
   const events = await publication.fetch<EventRecord[]>(
-    '*[_type=="event" && cancelled != true && defined(startsAt) && startsAt < $end && (coalesce(endsAt,startsAt) >= $start || weeklyUntil >= $first)]{' +
+    '*[_type=="event" && cancelled != true && defined(startsAt) && startsAt < $end && (coalesce(endsAt,startsAt) >= $start || weeklyUntil >= $first || count(additionalSessions[coalesce(endsAt,startsAt) >= $start]) > 0)]{' +
       eventFields +
       "}",
     {
@@ -63,7 +69,7 @@ export async function upcomingGameEvents(topics: string[], now = Date.now()) {
   if (!topics.length) return [];
   const today = localClock(now).slice(0, 10);
   const events = await publication.fetch<EventRecord[]>(
-    '*[_type=="event" && defined(startsAt) && cancelled != true && outsideGwinnett != true && count(gameTopics[@ in $topics]) > 0 && (coalesce(endsAt,startsAt) >= $since || weeklyUntil >= $today)]{' + eventFields + '}',
+    '*[_type=="event" && defined(startsAt) && cancelled != true && outsideGwinnett != true && count(gameTopics[@ in $topics]) > 0 && (coalesce(endsAt,startsAt) >= $since || weeklyUntil >= $today || count(additionalSessions[coalesce(endsAt,startsAt) >= $since]) > 0)]{' + eventFields + '}',
     { topics, today, since: shift(today, -1) + "T00:00:00Z" },
     { next: { revalidate: 60 } },
   );

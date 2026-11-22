@@ -146,14 +146,15 @@ export default async function Page({ params, searchParams }: Props) {
           </div>}
           {admission && <div>
             <dt>Admission</dt>
-            <dd>{admission}</dd>
+            <dd>{admission}{e.pricingDetails && <span>{e.pricingDetails}</span>}</dd>
           </div>}
+          {typeof e.registrationRequired === "boolean" && <div><dt>Registration</dt><dd>{e.registrationRequired ? "Registration required" : "No registration required"}</dd></div>}
         </dl>
         {e.summary && <p className={styles.description}>{e.summary}</p>}
         {e.organizer && <p className={styles.organizer}>Organized by <strong>{e.organizer}</strong></p>}
         {(ticketUrl || url) && <div className={styles.actions}>
-          {ticketUrl && <a className="button button-orange" href={ticketUrl}>Tickets and registration</a>}
-          {url && url !== ticketUrl && <a className={ticketUrl ? styles.back : "button button-orange"} href={url}>Visit event website</a>}
+          {ticketUrl && <a className="button button-orange" href={ticketUrl} target="_blank" rel="noopener noreferrer">Tickets and registration</a>}
+          {url && url !== ticketUrl && <a className={ticketUrl ? styles.back : "button button-orange"} href={url} target="_blank" rel="noopener noreferrer">Visit event website</a>}
         </div>}
       </article>
     </main>
