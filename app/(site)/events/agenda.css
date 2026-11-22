@@ -9,6 +9,28 @@
 
 .agenda-day > ul { padding-inline-start: clamp(.75rem, 2vw, 1.25rem); }
 
-.county-agenda .agenda-calendar-ctas { margin-top:2rem; padding-top:1.25rem; border-top:1px solid #ccd6cf; }
-.county-agenda .agenda-calendar-ctas a { text-decoration:none; background:#254b38; color:white; }
-@media(max-width:600px){.agenda-calendar-ctas a{width:100%;}}
+
+.county-agenda .agenda-calendar-ctas {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); align-items:stretch;
+  gap:.85rem; margin-top:2rem; padding-top:1.5rem; border-top:1px solid #ccd6cf;
+}
+.county-agenda .calendar-destination {
+  --accent:#854328; --tint:#fff4ea;
+  display:grid; grid-template-columns:1fr auto; grid-template-rows:auto 1fr;
+  gap:1rem; padding:1.2rem; border:1px solid color-mix(in srgb,var(--accent) 32%,white);
+  border-radius:.75rem; color:#192923; background:var(--tint); text-decoration:none;
+}
+.calendar-destination.calendar { --accent:#365474; --tint:#eff5fa; }
+.calendar-destination.books { --accent:#275642; --tint:#eff6ef; }
+.destination-icon { color:var(--accent); }
+.destination-copy { grid-column:1/-1; display:grid; align-content:start; gap:.3rem; }
+.destination-copy strong { font-size:1.25rem; line-height:1.2; }
+.destination-copy > span { font-size:.95rem; line-height:1.45; }
+.destination-arrow { grid-column:2; grid-row:1; color:var(--accent); font-size:1.45rem; line-height:1; }
+.calendar-destination:is(:hover,:focus-visible) strong { text-decoration:underline; text-underline-offset:.16em; }
+.calendar-destination:focus-visible { outline:3px solid var(--accent); outline-offset:3px; }
+@media(max-width:720px){
+  .county-agenda .agenda-calendar-ctas { grid-template-columns:1fr; }
+  .county-agenda .calendar-destination { grid-template-columns:auto 1fr auto; grid-template-rows:auto; align-items:center; }
+  .destination-copy,.destination-arrow { grid-column:auto; grid-row:auto; }
+}

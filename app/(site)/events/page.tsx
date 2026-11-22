@@ -85,9 +85,17 @@ export default async function Page({searchParams:q}:{searchParams:{city?:string;
     {!date&&<section><h2>Looking Ahead</h2>{months.size?Array.from(months,([month,events])=><details className="agenda-month" key={month}><summary>{label(month+"-01",{month:"long",year:"numeric"})} ({events.length})</summary><DatedList events={events} from={from}/></details>):<p>No later events listed.</p>}</section>}
     <p><a className="text-link" href={facebookGroup} target="_blank" rel="noopener noreferrer">Ask neighbors about upcoming events in the ATG Facebook group ↗</a></p>
     <nav aria-label="Explore more event calendars" className="agenda-calendar-ctas">
-      <Link className="button" href="/events/pokemon">Browse Pokémon events</Link>
-      <Link className="button" href="/events/gcps">View the GCPS school calendar</Link>
-      <Link className="button" href="/events/gwinnett-libraries">Find library events</Link>
+      {[
+        {href:"/events/pokemon",title:"Pokémon events",description:"Trade nights, tournaments and local league play.",icon:"cards"},
+        {href:"/events/gcps",title:"GCPS school calendar",description:"School breaks, digital learning days and early dismissals.",icon:"calendar"},
+        {href:"/events/gwinnett-libraries",title:"Gwinnett library events",description:"Find storytimes and workshops at your branch.",icon:"books"},
+      ].map(({href,title,description,icon})=><Link key={href} href={href} className={"calendar-destination "+icon}>
+        <span className="destination-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          {icon==="cards"?<><path d="m7 4-4 1 3 15 3-1"/><rect x="9" y="3" width="12" height="17" rx="2"/><path d="m15 8 2.5 3.5-2.5 3.5-2.5-3.5z"/></>:icon==="calendar"?<><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18m-13 5 2 2 5-5"/></>:<><path d="M12 6C9 4 5 4 2 5v14c4-1 7-1 10 1 3-2 6-2 10-1V5c-3-1-7-1-10 1Zm0 0v14"/></>}
+        </svg></span>
+        <span className="destination-copy"><strong>{title}</strong><span>{description}</span></span>
+        <span className="destination-arrow" aria-hidden="true">→</span>
+      </Link>)}
     </nav>
   </main>;
 }
