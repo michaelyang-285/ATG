@@ -1,4 +1,4 @@
-type Series = { label: string; values: number[] };
+type Series = { color?: string; label: string; values: number[] };
 export type ChartData = { title: string; unit: string; labels: string[]; series: Series[] };
 
 export function StoryDataChart({ chart, caption }: { chart: ChartData; caption?: string }) {
@@ -20,10 +20,10 @@ export function StoryDataChart({ chart, caption }: { chart: ChartData; caption?:
       .atg-chart-mark:focus-visible {outline:2px solid black;outline-offset:2px}
     `}</style>
     <h3>{chart.title}</h3>
-    {chart.series.length > 1 && <p>{chart.series.map((s,i)=><span key={s.label} style={{marginRight:14}}><b style={{color:i?"#126758":"#aa562b"}}>■</b> {s.label}</span>)}</p>}
+    {chart.series.length > 1 && <p>{chart.series.map((s,i)=><span key={s.label} style={{marginRight:14}}><b style={{color:s.color || (i?"#126758":"#aa562b")}}>■</b> {s.label}</span>)}</p>}
     {chart.labels.map((label,j)=><div className="atg-chart-row" key={label}><span>{label}</span><div>
       {chart.series.map((s,i)=>{const n=s.values[j];const detail=s.label+" · "+format(n);return <div key={s.label} className="atg-chart-track" style={{"--origin":position(0)+"%"} as React.CSSProperties}>
-        <button type="button" className="atg-chart-mark" aria-label={label+", "+detail} style={{left:position(Math.min(0,n))+"%",width:Math.abs(position(n)-position(0))+"%",background:(chart.series.length>1?i===0:n<0)?"#aa562b":"#126758"}}><span className="atg-chart-tip">{detail}</span></button>
+        <button type="button" className="atg-chart-mark" aria-label={label+", "+detail} style={{left:position(Math.min(0,n))+"%",width:Math.abs(position(n)-position(0))+"%",background:s.color || ((chart.series.length>1?i===0:n<0)?"#aa562b":"#126758")}}><span className="atg-chart-tip">{detail}</span></button>
       </div>})}</div></div>)}
     {caption && <figcaption>{caption}</figcaption>}
   </figure>
@@ -86,11 +86,17 @@ export const chartFigures: Record<string, ChartData> = {
       "Black",
       "Hispanic or Latino",
       "Asian / Pacific Islander",
-      "Other / mixed"
+      "Other race categories"
     ],
     "series": [
       {
+        "label": "1990",
+        "color": "#385b93",
+        "values": [89.4, 5.1, 2.4, 2.9, 0.2]
+      },
+      {
         "label": "2010",
+        "color": "#aa562b",
         "values": [
           44,
           22.9,
