@@ -1,7 +1,7 @@
 import LibraryFilters from "./LibraryFilters";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
-import { libraryAgenda, libraryPath, libraryCalendar, dayLabel, jsonLd } from "@/lib/library-events";
+import { libraryAgenda, libraryPath, libraryCalendar, jsonLd } from "@/lib/library-events";
 import { eventPageMetadata } from "@/lib/event-metadata";
 import "./library.css";
 
@@ -13,6 +13,9 @@ const faq = [
   {question:"How do I register for a library event?",answer:"Open the event, then follow the official library listing for registration requirements and availability."},
   {question:"Where can I check for schedule changes?",answer:"Check the official library listing before heading out. It has the latest schedule and registration status."}
 ];
+const agendaDate = new Intl.DateTimeFormat("en-US", {
+  weekday: "long", month: "long", day: "numeric", timeZone: "UTC",
+});
 const base="https://allthingsgwinnett.com";
 export default async function Page({searchParams:q}:{searchParams:{branch?:string;audience?:string}}) {
   const data: Awaited<ReturnType<typeof libraryAgenda>> | null = await libraryAgenda().catch(()=>null);
@@ -40,10 +43,10 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
         if (group) group.push(event); else days.set(event.day,[event]);
       }
       const list = Array.from(days,([day,sessions])=><div key={day} className="library-day">
-        <h3><time dateTime={day}>{dayLabel(day)}</time></h3>
+        <h3><time dateTime={day}>{agendaDate.format(new Date(day + "T12:00:00Z"))}</time></h3>
         <ul>{sessions.map(e=><li key={e.id}><strong className="library-location">{e.branch||"Check library for location"}</strong>
           <Link href={libraryPath+"/"+e.id}>{e.title}</Link>
-          <span>{e.time}</span>{e.ages.length>0&&<small>{e.ages.join(" · ")}</small>}</li>)}</ul>
+          <time className="library-session-time" dateTime={e.start}>{e.time}</time>{e.ages.length>0&&<small>{e.ages.join(" · ")}</small>}</li>)}</ul>
       </div>);
       return <section key={title} className="library-period"><h2>{title}</h2>
         {!events.length?<p>{empty}</p>:index===2?<details><summary>Show {events.length} more {events.length===1?"event":"events"}</summary>{list}</details>:list}

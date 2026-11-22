@@ -14,7 +14,17 @@
 
 .library-period { border-top: 1px solid #c7d1ca; margin-block: 2rem; }
 .library-period h2 { font-size: clamp(1.65rem,4vw,2.25rem); }
-.library-day h3 { font-size: 1rem; color: #284c3c; margin-block: 1.25rem .35rem; }
+.library-day h3 {
+  background: #254b38;
+  color: white;
+  border-radius: .4rem;
+  padding: .65rem 1rem;
+  margin: 1.75rem 0 .25rem;
+  font-size: clamp(1.25rem, 2.5vw, 1.6rem);
+  line-height: 1.25;
+  font-weight: 700;
+}
+.library-session-time { font-weight: 700; font-variant-numeric: tabular-nums; }
 .library-day ul { list-style: none; padding: 0; margin: 0; }
 .library-day li { display: grid; grid-template-columns: minmax(0,1fr); gap: .2rem; border-top: 1px solid #e3e7e3; padding: .65rem 0; }
 .library-day li a { font-weight: 500; justify-self: start; }
