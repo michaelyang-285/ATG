@@ -15,7 +15,7 @@ export default function LibraryFilters({path,branches,branch,audience}:Props) {
     startTransition(()=>router.replace(query.size ? path+"?"+query : path,{scroll:false}));
   }}>
     <label>Branch<select name="branch" defaultValue={branch}><option value="">All branches</option>{branches.map(b=><option key={b}>{b}</option>)}</select></label>
-    <label>Audience<select name="audience" defaultValue={audience}><option value="">Everyone</option>{["Kids","Teens","Adults","All ages"].map(a=><option key={a}>{a}</option>)}</select></label>
+    <label>Audience<select name="audience" defaultValue={audience}><option value="">All ages</option>{["Kids","Teens","Adults"].map(a=><option key={a}>{a}</option>)}</select></label>
     <noscript><button type="submit">Apply filters</button></noscript>
     {(branch||audience)&&<Link href={path} scroll={false}>Clear filters</Link>}
     <span role="status" className={pending?undefined:"sr-only"}>{pending?"Updating listings…":""}</span>

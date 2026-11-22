@@ -18,6 +18,7 @@ const agendaDate = new Intl.DateTimeFormat("en-US", {
 });
 const base="https://allthingsgwinnett.com";
 export default async function Page({searchParams:q}:{searchParams:{branch?:string;audience?:string}}) {
+  if (q.audience === "All ages") q = {...q, audience: ""};
   const data: Awaited<ReturnType<typeof libraryAgenda>> | null = await libraryAgenda().catch(()=>null);
   const branches=Array.from(new Set<string>((data?.rows||[]).map(e=>e.branch).filter(Boolean).concat(q.branch?[q.branch]:[]))).sort();
   const rows=(data?.rows||[]).filter(e=>(!q.branch||e.branch===q.branch)&&(!q.audience||e.tags.includes(q.audience)));
