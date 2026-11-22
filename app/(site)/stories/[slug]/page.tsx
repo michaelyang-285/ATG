@@ -1,3 +1,4 @@
+import { StoryDataChart } from "@/components/StoryDataChart";
 import { StoryFaq } from "@/components/StoryFaq";
 import SchoolsFeature from "@/components/schools/SchoolsFeature";
 import Link from "next/link";
@@ -108,12 +109,16 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <PortableText
             value={story.body || []}
             components={{
+              block: {
+                normal: ({children,value}) => <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
+              },
               marks: {
                 link: ({ children, value }) => {
+                  if (/^#source-\d+$/.test(value?.href || "")) return <sup><a href={value.href}>{children}</a></sup>;
                   const href = value?.internalSlug
                     ? `/stories/${encodeURIComponent(value.internalSlug)}`
                     : safeUrl(value?.href);
-                  return href ? <a href={href}>{children}</a> : <>{children}</>;
+                  return href ? <a href={href} target={/^https?:/.test(href) ? "_blank" : undefined} rel="noopener noreferrer">{children}</a> : <>{children}</>;
                 },
               },
               types: {
@@ -126,7 +131,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </section>
                 ) : null,
                 image: ({ value }) =>
-                  value.imageUrl ? (
+                  value.chart ? <StoryDataChart chart={value.chart} caption={value.caption} /> : value.imageUrl ? (
                     <figure>
                       <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
                       {value.caption && (
