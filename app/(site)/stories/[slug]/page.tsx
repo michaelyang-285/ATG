@@ -141,8 +141,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 divider: () => <hr />,
                 callout: ({ value }) => <StoryCallout value={value} />,
                 tldr: ({ value }) => (
-                  <aside>
-                    <h2>{value.heading || "At a glance"}</h2>
+                  <aside className="story-summary" aria-label="Article summary">
+                    <h2>{value.heading || "TL;DR"}</h2>
                     <ul>
                       {value.points?.map((p: string) => (
                         <li key={p}>{p}</li>

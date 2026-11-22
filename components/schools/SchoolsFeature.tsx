@@ -37,7 +37,7 @@ export default function SchoolsFeature({story}: {story: Story}) {
     <header><a href="/local-life">Local Life</a><h1>{story.title}</h1><div className="meta">Education · By {story.author?.name} · {story.publishedAt && formatDate(story.publishedAt)}</div>
     {hero && <img className="hero" src={hero} alt={story.image?.alt || ""} />}</header>
     <main id="main"><article>
-      {summaryEnd >= 0 && <aside className="school-summary" aria-label="Article summary">
+      {summaryEnd >= 0 && <aside className="story-summary" aria-label="Article summary">
         {blocks.slice(0, summaryEnd).map(renderBlock)}
       </aside>}
       {blocks.slice(Math.max(0, summaryEnd)).map(renderBlock)}

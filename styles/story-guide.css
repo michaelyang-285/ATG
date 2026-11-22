@@ -61,3 +61,19 @@
   .story-table thead th, .story-table tbody th, .story-table td { padding: .55rem .35rem; overflow-wrap: anywhere; }
   .story-table th[scope="row"] { min-width: 4rem; }
 }
+
+/* Shared Sanity story formatting: prose spacing and the opening TL;DR. */
+.article-body > p + p { margin-block-start: 1em; }
+:is(.article-body, .gcps-feature) .story-summary {
+  margin-block: 1.5rem 2rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid #d5d3cc;
+  border-inline-start: 5px solid var(--orange, #ff5027);
+  border-radius: 8px;
+  background: #f5f5f2;
+}
+:is(.article-body, .gcps-feature) .story-summary h2 { margin: 0; font: 700 1.35rem/1.2 Arial, sans-serif; }
+:is(.article-body, .gcps-feature) .story-summary p { margin: .75em 0 0; }
+
+.article-body .story-summary ul { margin: .75em 0 0; padding-inline-start: 1.3em; list-style: disc; }
+.article-body .story-summary li + li { margin-block-start: .35em; }
