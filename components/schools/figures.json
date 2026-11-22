@@ -1,0 +1,117 @@
+{
+  "gcps7": {
+    "markup": "<ul><li><a href=\"#history\">Gwinnett in the 2000s<span aria-hidden=\"true\">↓</span></a></li><li><a href=\"#achievement\">Reading and math<span aria-hidden=\"true\">↓</span></a></li><li><a href=\"#households\">Income and migration<span aria-hidden=\"true\">↓</span></a></li><li><a href=\"#grad\">Graduation and SAT scores<span aria-hidden=\"true\">↓</span></a></li><li><a href=\"#gap\">The high school comparison<span aria-hidden=\"true\">↓</span></a></li><li><a href=\"#verdict\">What I take from this<span aria-hidden=\"true\">↓</span></a></li><li><a href=\"#faq\">Frequently asked questions<span aria-hidden=\"true\">↓</span></a></li><li><a href=\"#methods\">Methods and sources<span aria-hidden=\"true\">↓</span></a></li></ul>"
+  },
+  "gcps8": {
+    "id": "history"
+  },
+  "gcps11": {
+    "figure": "data-enrollment",
+    "markup": "<small>District enrollment, fiscal years 2004–2010</small><div class=\"control\"></div><div class=\"plot\"></div><details open=\"\"><summary>Explore the data table</summary><div class=\"scroll\"><table><caption>How fast did GCPS grow? · District enrollment, fiscal years 2004–2010</caption><thead><tr><th scope=\"col\">Year</th><th scope=\"col\">Students</th><th scope=\"col\" data-table-only=\"\">YoY growth</th></tr></thead><tbody><tr><th scope=\"row\">2004</th><td data-value=\"129014\">129,014</td><td data-value=\"-Infinity\">Baseline</td></tr><tr><th scope=\"row\">2005</th><td data-value=\"135392\">135,392</td><td data-value=\"4.943649526407986\">+4.94%</td></tr><tr><th scope=\"row\">2006</th><td data-value=\"144598\">144,598</td><td data-value=\"6.799515480973765\">+6.80%</td></tr><tr><th scope=\"row\">2007</th><td data-value=\"152043\">152,043</td><td data-value=\"5.148757244221912\">+5.15%</td></tr><tr><th scope=\"row\">2008</th><td data-value=\"155618\">155,618</td><td data-value=\"2.351308511407957\">+2.35%</td></tr><tr><th scope=\"row\">2009</th><td data-value=\"157219\">157,219</td><td data-value=\"1.0288012954799575\">+1.03%</td></tr><tr><th scope=\"row\">2010</th><td data-value=\"159296\">159,296</td><td data-value=\"1.3210871459556415\">+1.32%</td></tr></tbody></table></div></details><div class=\"credit\">Source: <a href=\"#source-1\" aria-label=\"Source 1: Gwinnett County Board of Education, FY2013 financial report, operating statistics, p. 125\">Gwinnett County Board of Education</a></div>"
+  },
+  "gcps12": {
+    "id": "achievement"
+  },
+  "gcps15": {
+    "figure": "data-math",
+    "markup": "<small>Grade-level equivalents relative to the 2019 national average</small><div class=\"control\"></div><div class=\"plot\"></div><details open=\"\"><summary>Explore the data table</summary><div class=\"scroll\"><table><caption>Math achievement in grades 3–8 · Grade-level equivalents relative to the 2019 national average</caption><thead><tr><th scope=\"col\">Year</th><th scope=\"col\">GCPS</th><th scope=\"col\">Georgia</th><th scope=\"col\">Peer average</th></tr></thead><tbody><tr><th scope=\"row\">2019</th><td>0.69</td><td>−0.18</td><td>0.38</td></tr><tr><th scope=\"row\">2022</th><td>0.12</td><td>−0.62</td><td>0.05</td></tr><tr><th scope=\"row\">2024</th><td>0.09</td><td>−0.67</td><td>0.14</td></tr></tbody></table></div></details><div class=\"credit\">Source: <a href=\"#source-3\" aria-label=\"Source 3: Education Recovery Scorecard, Gwinnett district report, pp. 1–3\">Education Recovery Scorecard</a></div>"
+  },
+  "gcps17": {
+    "figure": "data-reading",
+    "markup": "<small>Grade-level equivalents relative to the 2019 national average</small><div class=\"control\"></div><div class=\"plot\"></div><details open=\"\"><summary>Explore the data table</summary><div class=\"scroll\"><table><caption>Reading achievement in grades 3–8 · Grade-level equivalents relative to the 2019 national average</caption><thead><tr><th scope=\"col\">Year</th><th scope=\"col\">GCPS</th><th scope=\"col\">Georgia</th><th scope=\"col\">Peer average</th></tr></thead><tbody><tr><th scope=\"row\">2019</th><td>0.73</td><td>−0.06</td><td>0.70</td></tr><tr><th scope=\"row\">2022</th><td>0.61</td><td>−0.25</td><td>0.68</td></tr><tr><th scope=\"row\">2024</th><td>0.20</td><td>−0.36</td><td>0.69</td></tr></tbody></table></div></details><div class=\"credit\">Source: <a href=\"#source-3\" aria-label=\"Source 3: Education Recovery Scorecard, Gwinnett district report, pp. 1–3\">Education Recovery Scorecard</a></div>"
+  },
+  "gcps19": {
+    "id": "households"
+  },
+  "gcps22": {
+    "figure": "household-map",
+    "markup": "<p>Compare two periods. Choose an income or child-poverty measure, then hover, tap or select a tract for details.</p><div class=\"map-controls\"><label>Measure<select><option value=\"0\">Median household income</option><option value=\"1\" selected=\"\">Children living in poverty</option></select></label><label>Earlier period<select></select></label><label>Later period<select></select></label><label>2022–23 school zone<select><option value=\"\">No outline</option></select></label></div><div class=\"map-key\"></div><div class=\"map-panels\"></div><label class=\"tract-pick\">Explore a census tract <select></select></label><output aria-live=\"polite\"></output><small>Income uses 2024 dollars. Child poverty is the share of children under 18 for whom poverty status was determined. School outlines are for orientation. Changes are shown only for sufficiently comparable tracts.</small><noscript>&lt;p>Enable JavaScript to explore the tract maps. Countywide child poverty was 6.3% in Census 2000 and an estimated 14.7% in 2020–24.&lt;/p></noscript><div class=\"credit\">Sources: Gwinnett County, U.S. Census Bureau, BLS and school-zone GIS <sup class=\"refs\"><a href=\"#source-10\" aria-label=\"Source 10\">[10]</a><a href=\"#source-12\" aria-label=\"Source 12\">[12]</a><a href=\"#source-13\" aria-label=\"Source 13\">[13]</a><a href=\"#source-14\" aria-label=\"Source 14\">[14]</a><a href=\"#source-15\" aria-label=\"Source 15\">[15]</a><a href=\"#source-16\" aria-label=\"Source 16\">[16]</a></sup></div>"
+  },
+  "gcps26": {
+    "id": "grad"
+  },
+  "gcps28": {
+    "figure": "data-historical-graduation",
+    "markup": "<small>District graduation rate (%)</small><div class=\"control\"></div><div class=\"plot\"></div><details open=\"\"><summary>Explore the data table</summary><div class=\"scroll\"><table><caption>Graduation under Georgia’s earlier calculation · District graduation rate (%)</caption><thead><tr><th scope=\"col\">Year</th><th scope=\"col\">Rate</th></tr></thead><tbody><tr><th scope=\"row\">2004</th><td>71.9</td></tr><tr><th scope=\"row\">2005</th><td>74.8</td></tr><tr><th scope=\"row\">2006</th><td>73.8</td></tr><tr><th scope=\"row\">2007</th><td>77.3</td></tr><tr><th scope=\"row\">2008</th><td>79.1</td></tr><tr><th scope=\"row\">2009</th><td>82.0</td></tr><tr><th scope=\"row\">2010</th><td>84.7</td></tr></tbody></table></div></details><div class=\"credit\">Source: <a href=\"#source-1\" aria-label=\"Source 1: Gwinnett County Board of Education, FY2013 financial report, operating statistics, p. 125\">Gwinnett County Board of Education</a></div>"
+  },
+  "gcps30": {
+    "figure": "data-four-year-graduation",
+    "markup": "<small>District graduation rate (%)</small><div class=\"control\"></div><div class=\"plot\"></div><details open=\"\"><summary>Explore the data table</summary><div class=\"scroll\"><table><caption>Four-year graduation under the cohort calculation · District graduation rate (%)</caption><thead><tr><th scope=\"col\">Class</th><th scope=\"col\">Rate</th></tr></thead><tbody><tr><th scope=\"row\">2016</th><td>79.6</td></tr><tr><th scope=\"row\">2017</th><td>80.9</td></tr><tr><th scope=\"row\">2018</th><td>81.7</td></tr><tr><th scope=\"row\">2019</th><td>80.9</td></tr><tr><th scope=\"row\">2020</th><td>83.2</td></tr><tr><th scope=\"row\">2021</th><td>82.5</td></tr><tr><th scope=\"row\">2022</th><td>83.2</td></tr><tr><th scope=\"row\">2023</th><td>81.9</td></tr><tr><th scope=\"row\">2024</th><td>84.1</td></tr><tr><th scope=\"row\">2025</th><td>85.4</td></tr><tr><th scope=\"row\">2026</th><td>88.3</td></tr></tbody></table></div></details><div class=\"credit\">Source: <a href=\"#source-4\" aria-label=\"Source 4: GCPS, graduation rates by school and district, classes of 2016–2025\">Gwinnett County Public Schools</a> · <a href=\"#source-5\" aria-label=\"Source 5: GCPS, Class of 2026 graduation release, October 5, 2026\">Gwinnett County Public Schools</a></div>"
+  },
+  "gcps32": {
+    "id": "gap"
+  },
+  "gcps34": {
+    "figure": "data-graduation-gap",
+    "markup": "<small>Four-year graduation rates among neighborhood high schools with results in both 2016 and 2025. Each group keeps the same five schools throughout, weighted equally.</small><dl style=\"font:15px/1.5 Arial,sans-serif\"><dt><strong>Highest five in 2016</strong></dt><dd style=\"margin:0 0 .6em\">North Gwinnett, Brookwood, Grayson, Parkview and Mill Creek.</dd><dt><strong>Lowest five in 2016</strong></dt><dd style=\"margin:0\">Berkmar, Shiloh, Discovery, Norcross and Meadowcreek.</dd></dl><div class=\"control\"></div><div class=\"plot\"></div><details open=\"\"><summary>Explore the data table</summary><div class=\"scroll\"><table><caption>Graduation rates by starting group and class year (%)</caption><thead><tr><th scope=\"col\">Year</th><th scope=\"col\">Highest five in 2016</th><th scope=\"col\">Lowest five in 2016</th><th scope=\"col\">GCPS</th></tr></thead><tbody><tr><th scope=\"row\">2016</th><td>93.16</td><td>70.96</td><td>79.6</td></tr><tr><th scope=\"row\">2017</th><td>93.80</td><td>74.18</td><td>80.9</td></tr><tr><th scope=\"row\">2018</th><td>93.48</td><td>76.68</td><td>81.7</td></tr><tr><th scope=\"row\">2019</th><td>92.48</td><td>75.96</td><td>80.9</td></tr><tr><th scope=\"row\">2020</th><td>93.48</td><td>78.62</td><td>83.2</td></tr><tr><th scope=\"row\">2021</th><td>92.20</td><td>77.64</td><td>82.5</td></tr><tr><th scope=\"row\">2022</th><td>92.14</td><td>80.68</td><td>83.2</td></tr><tr><th scope=\"row\">2023</th><td>93.44</td><td>78.98</td><td>81.9</td></tr><tr><th scope=\"row\">2024</th><td>93.68</td><td>80.86</td><td>84.1</td></tr><tr><th scope=\"row\">2025</th><td>93.74</td><td>84.50</td><td>85.4</td></tr></tbody></table></div></details><div class=\"credit\">Source: <a href=\"#source-4\">GCPS school graduation rates</a>. Group averages calculated by All Things Gwinnett.</div>"
+  },
+  "gcps38": {
+    "id": "verdict"
+  },
+  "gcps43": {
+    "id": "faq"
+  },
+  "gcps59": {
+    "id": "methods"
+  },
+  "gcps63": {
+    "id": "sources"
+  },
+  "gcps64": {
+    "id": "source-1"
+  },
+  "gcps65": {
+    "id": "source-2"
+  },
+  "gcps66": {
+    "id": "source-3"
+  },
+  "gcps67": {
+    "id": "source-4"
+  },
+  "gcps68": {
+    "id": "source-5"
+  },
+  "gcps69": {
+    "id": "source-6"
+  },
+  "gcps70": {
+    "id": "source-7"
+  },
+  "gcps71": {
+    "id": "source-8"
+  },
+  "gcps72": {
+    "id": "source-9"
+  },
+  "gcps73": {
+    "id": "source-10"
+  },
+  "gcps74": {
+    "id": "source-11"
+  },
+  "gcps75": {
+    "id": "source-12"
+  },
+  "gcps76": {
+    "id": "source-13"
+  },
+  "gcps77": {
+    "id": "source-14"
+  },
+  "gcps78": {
+    "id": "source-15"
+  },
+  "gcps79": {
+    "id": "source-16"
+  },
+  "gcps80": {
+    "id": "source-17"
+  },
+  "gcps81": {
+    "id": "source-18"
+  },
+  "gcps82": {
+    "id": "source-19"
+  }
+}

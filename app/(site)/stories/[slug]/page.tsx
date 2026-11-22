@@ -1,3 +1,4 @@
+import SchoolsFeature from "@/components/schools/SchoolsFeature";
 import Link from "next/link";
 import { GameEventTable } from "@/components/GameEventTable";
 import { upcomingGameEvents } from "@/lib/events";
@@ -65,6 +66,7 @@ export async function generateMetadata({
 export default async function Page({ params }: { params: { slug: string } }) {
   const story = await getStory(params.slug);
   if (!story) notFound();
+  if (story._id === "gcps-schools-since-2004") return <SchoolsFeature story={story} />;
   const topics = story.gameTopics || [];
   const hasCalendar = topics.length > 0 && story.body?.some(block => block._type === "upcomingGameEvents");
   const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];

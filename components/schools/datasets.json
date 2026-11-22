@@ -1,0 +1,122 @@
+[
+  {
+    "@type": "Dataset",
+    "@id": "#data-enrollment",
+    "name": "How fast did GCPS grow?",
+    "description": "How fast did GCPS grow?. District enrollment, fiscal years 2004–2010. Reported years: 2004, 2005, 2006, 2007, 2008, 2009, 2010.",
+    "temporalCoverage": "2004/2010",
+    "spatialCoverage": "Gwinnett County Public Schools, Georgia, United States",
+    "variableMeasured": "District enrollment, fiscal years 2004–2010",
+    "citation": [
+      "https://ted.cviog.uga.edu/financial-documents/sites/default/files/budgetdoc/financial-report/school-district-gwinnett-county-school-district-gwinnett-county-fy2013-financial-report.pdf"
+    ],
+    "isBasedOn": [
+      "https://ted.cviog.uga.edu/financial-documents/sites/default/files/budgetdoc/financial-report/school-district-gwinnett-county-school-district-gwinnett-county-fy2013-financial-report.pdf"
+    ],
+    "isPartOf": {
+      "@id": "#article"
+    }
+  },
+  {
+    "@type": "Dataset",
+    "@id": "#data-math",
+    "name": "Math achievement in grades 3–8",
+    "description": "Math achievement in grades 3–8. Grade-level equivalents relative to the 2019 national average. Reported years: 2019, 2022, 2024.",
+    "temporalCoverage": "2019/2024",
+    "spatialCoverage": "Gwinnett County Public Schools, Georgia, United States",
+    "variableMeasured": "Grade-level equivalents relative to the 2019 national average",
+    "citation": [
+      "https://educationrecoveryscorecard.org/wp-content/uploads/2025/02/report_GA_1302550_gwinnett-county.pdf"
+    ],
+    "isBasedOn": [
+      "https://educationrecoveryscorecard.org/wp-content/uploads/2025/02/report_GA_1302550_gwinnett-county.pdf"
+    ],
+    "isPartOf": {
+      "@id": "#article"
+    }
+  },
+  {
+    "@type": "Dataset",
+    "@id": "#data-reading",
+    "name": "Reading achievement in grades 3–8",
+    "description": "Reading achievement in grades 3–8. Grade-level equivalents relative to the 2019 national average. Reported years: 2019, 2022, 2024.",
+    "temporalCoverage": "2019/2024",
+    "spatialCoverage": "Gwinnett County Public Schools, Georgia, United States",
+    "variableMeasured": "Grade-level equivalents relative to the 2019 national average",
+    "citation": [
+      "https://educationrecoveryscorecard.org/wp-content/uploads/2025/02/report_GA_1302550_gwinnett-county.pdf"
+    ],
+    "isBasedOn": [
+      "https://educationrecoveryscorecard.org/wp-content/uploads/2025/02/report_GA_1302550_gwinnett-county.pdf"
+    ],
+    "isPartOf": {
+      "@id": "#article"
+    }
+  },
+  {
+    "@type": "Dataset",
+    "@id": "#data-historical-graduation",
+    "name": "Graduation under Georgia’s earlier calculation",
+    "description": "Graduation under Georgia’s earlier calculation. District graduation rate (%). Reported years: 2004, 2005, 2006, 2007, 2008, 2009, 2010.",
+    "temporalCoverage": "2004/2010",
+    "spatialCoverage": "Gwinnett County Public Schools, Georgia, United States",
+    "variableMeasured": "District graduation rate (%)",
+    "citation": [
+      "https://ted.cviog.uga.edu/financial-documents/sites/default/files/budgetdoc/financial-report/school-district-gwinnett-county-school-district-gwinnett-county-fy2013-financial-report.pdf"
+    ],
+    "isBasedOn": [
+      "https://ted.cviog.uga.edu/financial-documents/sites/default/files/budgetdoc/financial-report/school-district-gwinnett-county-school-district-gwinnett-county-fy2013-financial-report.pdf"
+    ],
+    "isPartOf": {
+      "@id": "#article"
+    }
+  },
+  {
+    "@type": "Dataset",
+    "@id": "#data-four-year-graduation",
+    "name": "Four-year graduation under the cohort calculation",
+    "description": "Four-year graduation under the cohort calculation. District graduation rate (%). Reported years: 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026.",
+    "temporalCoverage": "2016/2026",
+    "spatialCoverage": "Gwinnett County Public Schools, Georgia, United States",
+    "variableMeasured": "District graduation rate (%)",
+    "citation": [
+      "https://www.gcpsk12.org/news-details/~board/news-releases/post/gcps-graduation-rate-reaches-highest-point-in-a-decade-for-second-year-in-a-row",
+      "https://www.gcpsk12.org/get-connected/district-news-and-communication/all-news/gcps-full-news-article/~board/news-releases/post/graduation-rates-are-on-the-rise-across-gcps"
+    ],
+    "isBasedOn": [
+      "https://www.gcpsk12.org/news-details/~board/news-releases/post/gcps-graduation-rate-reaches-highest-point-in-a-decade-for-second-year-in-a-row",
+      "https://www.gcpsk12.org/get-connected/district-news-and-communication/all-news/gcps-full-news-article/~board/news-releases/post/graduation-rates-are-on-the-rise-across-gcps"
+    ],
+    "isPartOf": {
+      "@id": "#article"
+    }
+  },
+  {
+    "@type": "Dataset",
+    "@id": "#data-graduation-gap",
+    "name": "Gwinnett high school graduation rates by 2016 starting group",
+    "description": "Annual unweighted means for two fixed groups of five neighborhood high schools with official district graduation rates.",
+    "temporalCoverage": "2016/2025",
+    "variableMeasured": "Four-year graduation rate (%)",
+    "isBasedOn": "https://www.gcpsk12.org/news-details/~board/news-releases/post/gcps-graduation-rate-reaches-highest-point-in-a-decade-for-second-year-in-a-row",
+    "isPartOf": {
+      "@id": "#article"
+    }
+  },
+  {
+    "@type": "Dataset",
+    "@id": "#household-map",
+    "name": "Gwinnett census tract income and child poverty",
+    "description": "Four period maps of median household income in constant 2024 dollars and the share of children below the federal poverty threshold.",
+    "temporalCoverage": "1999/2024",
+    "isBasedOn": [
+      "https://www.gwinnettcounty.com/static/departments/planning/Census/census_2000_selected_income_and_poverty_status_characteristics.pdf",
+      "https://www2.census.gov/programs-surveys/acs/summary_file/",
+      "https://api.censusreporter.org/1.0/data/show/acs2024_5yr?table_ids=B19013,B17001,B07010&geo_ids=05000US13135",
+      "https://www2.census.gov/geo/tiger/",
+      "https://data.bls.gov/timeseries/CUUR0000SA0",
+      "https://services3.arcgis.com/jEYjQXUX2JTVoctH/ArcGIS/rest/services/High_School_Zone_22_23/FeatureServer/21"
+    ],
+    "spatialCoverage": "Gwinnett County, Georgia"
+  }
+]
