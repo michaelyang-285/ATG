@@ -1,4 +1,4 @@
-import { StoryDataChart } from "@/components/StoryDataChart";
+import { chartFigures, StoryDataChart } from "@/components/StoryDataChart";
 import { StoryFaq } from "@/components/StoryFaq";
 import SchoolsFeature from "@/components/schools/SchoolsFeature";
 import Link from "next/link";
@@ -131,7 +131,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </section>
                 ) : null,
                 image: ({ value }) =>
-                  value.chart ? <StoryDataChart chart={value.chart} caption={value.caption} /> : value.imageUrl ? (
+                  chartFigures[value.asset?._ref] ? <StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /> : value.imageUrl ? (
                     <figure>
                       <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
                       {value.caption && (
