@@ -172,10 +172,14 @@ const components: PortableTextComponents = {
           <div className="border-2 border-ink bg-paper shadow-brutalist-sm divide-y-2 divide-ink">
             {value.items.map((item: any) => (
               <details key={item?._key || item?.question} className="group">
-                <summary className="list-none px-5 py-4 cursor-pointer font-archivo text-[15px] uppercase tracking-wide text-ink hover:bg-card [&::-webkit-details-marker]:hidden">
-                  {item?.question}
+                <summary className="flex items-center justify-between gap-4 list-none px-5 py-4 cursor-pointer font-archivo text-[15px] uppercase tracking-wide text-ink hover:bg-card [&::-webkit-details-marker]:hidden">
+                  <span>{item?.question}</span>
+                  <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 border-ink bg-paper text-xl leading-none">
+                    <span className="group-open:hidden">+</span>
+                    <span className="hidden group-open:inline">−</span>
+                  </span>
                 </summary>
-                <div className="px-5 pb-5 font-georgia text-[16px] leading-[1.7] text-ink/85 border-t-2 border-ink/10 pt-4">
+                <div className="ml-8 mr-5 mb-5 border-l-4 border-ink bg-card px-5 py-4 font-georgia text-[16px] leading-[1.7] text-ink">
                   <PortableText value={item?.answer || []} />
                 </div>
               </details>
