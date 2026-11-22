@@ -1,16 +1,16 @@
 import { eventPageMetadata } from "@/lib/event-metadata";
-import { calendarNotices } from "@/lib/gcps-calendar";
 import Link from "next/link";
-import CalendarGrid from "@/components/CalendarGrid";
 import OngoingEvents from "@/components/OngoingEvents";
 import { arrangeCalendar } from "@/lib/calendar-runs";
-import { calendar, occurrencePath } from "@/lib/events";
+import { calendar, occurrencePath, type EventOccurrence } from "@/lib/events";
 import { localClock, shift, validDay, zone } from "@/lib/event-time";
 import { facebookGroup } from "@/lib/gwinnett";
 import "@/components/community.css";
+import EventFilters from "./EventFilters";
+import "./agenda.css";
 export const metadata = eventPageMetadata(
   "Gwinnett County Events Calendar",
-  "Explore local Gwinnett events by week, month, or year and submit an event for review.",
+  "Find upcoming and ongoing Gwinnett County events by city, date and audience, or submit a community event.",
   "/events",
 );
 function label(day: string, options: Intl.DateTimeFormatOptions) {
@@ -19,166 +19,61 @@ function label(day: string, options: Intl.DateTimeFormatOptions) {
     timeZone: "UTC",
   }).format(new Date(day));
 }
-export default async function Page({
-  searchParams: q,
-}: {
-  searchParams: { view?: string; date?: string; section?: string };
-}) {
-  const view = ["year", "month"].includes(q.view || "") ? q.view : "week";
-  const showOngoing = q.section === "ongoing";
-  const sectionQuery = showOngoing ? "&section=ongoing" : "";
-  const day =
-    q.date &&
-    validDay(q.date) &&
-    +q.date.slice(0, 4) >= 1900 &&
-    +q.date.slice(0, 4) <= 2100
-      ? q.date
-      : localClock(Date.now()).slice(0, 10);
-  let from = day,
-    to = day,
-    prev = day,
-    next = day;
-  if (view === "week") {
-    from = shift(day, -new Date(day).getUTCDay());
-    to = shift(from, 6);
-    prev = shift(from, -7);
-    next = shift(from, 7);
-  } else if (view === "month") {
-    from = day.slice(0, 7) + "-01";
-    prev = shift(from, -1);
-    next = shift(from, 32).slice(0, 7) + "-01";
-    to = shift(next, -1);
-  } else {
-    from = day.slice(0, 4) + "-01-01";
-    to = day.slice(0, 4) + "-12-31";
-    prev = shift(from, -1);
-    next = shift(to, 1);
+const clock = new Intl.DateTimeFormat("en-US",{timeZone:zone,hour:"numeric",minute:"2-digit"});
+const cityOf = (e:EventOccurrence)=>(e.city || e.neighborhood || "").trim();
+
+function matchesAudience(e:EventOccurrence, audience:string) {
+  if (!audience) return true;
+  const description = [e.title,e.summary,...(e.eventFormats||[])].join(" ");
+  const all = /\ball[- ]ages\b|\ball ages welcome\b/i.test(description);
+  if (audience==="Kids") return all || /\b(kids?|children|families|family-friendly|preschoolers?|toddlers?)\b/i.test(description);
+  if (audience==="Teens") return all || /\b(teens?|teenagers?|high school students)\b/i.test(description);
+  if (audience==="Adults") return all || /\b(adults?|18\+|21\+)/i.test(description);
+  return audience==="All ages" && all;
+}
+
+function DatedList({events,from}:{events:EventOccurrence[];from:string}) {
+  const days=new Map<string,EventOccurrence[]>();
+  for(const e of events){
+    const day=e.day<from?from:e.day;
+    const rows=days.get(day);
+    if(rows) rows.push(e); else days.set(day,[e]);
   }
-  // Include nearby dates so the first or last weekend of a run is recognized in week view.
-  const occurrences = await calendar(shift(from, -28), shift(to, 28));
-  const { daily: items, ongoing } = arrangeCalendar(occurrences, from, to);
-  const observances = calendarNotices(from, to);
-  const period =
-    view === "year"
-      ? from.slice(0, 4)
-      : view === "month"
-        ? label(from, { month: "long", year: "numeric" })
-        : label(from, { month: "short", day: "numeric" }) +
-          " – " +
-          label(to, { month: "short", day: "numeric", year: "numeric" });
-  return (
-    <main id="main" className="site-width page-content atg-desk">
-      <header>
-        <h1>Gwinnett events</h1>
-        <p>
-          Make a plan close to home. Browse community events or share one you’re
-          organizing.
-        </p>
-        <Link className="button button-orange" href="/events/submit">
-          Submit an event
-        </Link>
-        <p><Link className="text-link" href="/events/pokemon">Pokémon events</Link> · <Link className="text-link" href="/events/gwinnett-libraries">Library Events</Link> · <Link className="text-link" href="/events/gcps">View the GCPS school calendar →</Link></p>
-      </header>
-      <nav aria-label="Calendar view" className="event-controls">
-        {["week", "month", "year"].map((v, i) => (
-          <Link
-            key={v}
-            aria-current={view === v ? "page" : undefined}
-            href={`/events?view=${v}&date=${day}${sectionQuery}`}
-          >
-            {["Week", "Month", "Year list"][i]}
-          </Link>
-        ))}
-      </nav>
-      <h2>{period}</h2>
-      <nav className="event-controls" aria-label="Calendar period">
-        <Link href={`?view=${view}&date=${prev}${sectionQuery}`}>← Previous {view}</Link>
-        <Link href={`?view=${view}${sectionQuery}`}>Today</Link>
-        <Link href={`?view=${view}&date=${next}${sectionQuery}`}>Next {view} →</Link>
-      </nav>
-      <nav className="calendar-tabs" aria-label="Event lists">
-        <Link id="dated-events-tab" href={`/events?view=${view}&date=${day}`}
-          aria-current={!showOngoing ? "page" : undefined} scroll={false}>
-          Events by date
-        </Link>
-        <Link id="ongoing-events-tab" href={`/events?view=${view}&date=${day}&section=ongoing`}
-          aria-current={showOngoing ? "page" : undefined} scroll={false}>
-          Ongoing events ({ongoing.length})
-        </Link>
-      </nav>
-      {showOngoing ? (
-        <section className="calendar-event-list" id="ongoing-events" aria-labelledby="ongoing-events-tab">
-          {ongoing.length ? <OngoingEvents runs={ongoing} view={view} /> : <p>No ongoing events for this {view}.</p>}
-        </section>
-      ) : (
-        <section className="calendar-event-list" id="dated-events" aria-labelledby="dated-events-tab">
-          {view !== "year" && (
-            <CalendarGrid from={from} to={to} period={period} limit={view === "month" ? 2 : 3}
-              events={items} notices={observances} />
-          )}
-          {items.length || observances.length ? (
-            [
-              ...items.map((e) => ({
-                day: e.day,
-                element: (
-                  <article className="event-day calendar-list-row" key={e._id + e.day}>
-                    <time className="calendar-list-date" dateTime={e.startsAt}>
-                      {new Date(e.startsAt).toLocaleString("en-US", {
-                        timeZone: zone,
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                      })}
-                    </time>
-                    <h3 className="calendar-list-title">
-                      <Link href={occurrencePath(e)}>{e.title}</Link>
-                    </h3>
-                    <p className="calendar-list-meta">
-                      {[e.venue, e.city || e.neighborhood, e.priceLabel]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  </article>
-                ),
-              })),
-              ...observances.map((h, index) => ({
-                day: h.day,
-                element: (
-                  <article className="event-day calendar-list-row" id={"calendar-notice-" + index} key={h.day + h.title}>
-                    <p className="calendar-list-date">
-                      <time dateTime={h.day}>{label(h.day, { weekday: "short", month: "short", day: "numeric" })}</time>
-                      {h.end !== h.day && (
-                        <> – <time dateTime={h.end}>{label(h.end, { weekday: "short", month: "short", day: "numeric" })}</time></>
-                      )}
-                    </p>
-                    <h3 className="calendar-list-title">{h.title}</h3>
-                    <p className="calendar-list-meta">
-                      {h.kind === "GCPS schools closed for students" ? "GCPS students have no school" : h.kind}
-                    </p>
-                    {h.overlaps?.map((o) => (
-                      <p className="calendar-list-meta" key={o.day + o.title}>
-                        {o.title} is {o.kind === "U.S. federal holiday" ? "a U.S. federal holiday " : ""}
-                        on {label(o.day, { weekday: "long", month: "short", day: "numeric" })}.
-                      </p>
-                    ))}
-                  </article>
-                ),
-              })),
-            ]
-              .sort((a, b) => a.day.localeCompare(b.day))
-              .map((row) => row.element)
-          ) : (
-            <p>No dated events for this {view}.</p>
-          )}
-        </section>
-      )}
-      <p className="event-day">
-        <a className="text-link" href={facebookGroup}>
-          Ask neighbors about upcoming events in the ATG Facebook group ↗
-        </a>
-      </p>
-    </main>
-  );
+  return <>{Array.from(days,([day,rows])=><div className="agenda-day" key={day}>
+    <h3><time dateTime={day}>{label(day,{weekday:"long",month:"long",day:"numeric"})}</time></h3>
+    <ul>{rows.map(e=><li key={e._id+e.day}>
+      <strong>{[cityOf(e),e.venue].filter(Boolean).join(" · ")}</strong>
+      <Link href={occurrencePath(e)} prefetch={false}>{e.title}</Link>
+      <span>{e.day<day?"Started "+label(e.day,{month:"short",day:"numeric"})+" · ":""}{clock.format(new Date(e.startsAt))}{e.endsAt && localClock(e.endsAt).slice(0,10)!==e.day && " through "+label(localClock(e.endsAt).slice(0,10),{month:"short",day:"numeric"})}{e.priceLabel && " · "+e.priceLabel}</span>
+    </li>)}</ul></div>)}</>;
+}
+
+export default async function Page({searchParams:q}:{searchParams:{city?:string;date?:string;audience?:string}}){
+  const today=localClock(Date.now()).slice(0,10);
+  const date=q.date && validDay(q.date) && q.date>="1900-01-01" && q.date<="2100-12-31" ? q.date : "";
+  const from=date||today, to=date||shift(today,365);
+  const saturday=shift(today,6-new Date(today).getUTCDay()), nextEnd=shift(saturday,7);
+  const all=await calendar(shift(from,-28),date?shift(date,28):to);
+  const {daily,ongoing}=arrangeCalendar(all,from,to);
+  const cities=Array.from(new Set(all.map(cityOf).concat(q.city||"").filter(Boolean))).sort();
+  const match=(e:EventOccurrence)=>(!q.city||cityOf(e)===q.city)&&matchesAudience(e,q.audience||"");
+  const dated=daily.filter(match);
+  const runs=ongoing.map(run=>({...run,dates:run.dates.filter(match)})).filter(run=>run.dates.length);
+  const periods=date?[{title:"Events on "+label(date,{month:"long",day:"numeric",year:"numeric"}),rows:dated}]:[
+    {title:"This Week",rows:dated.filter(e=>e.day<=saturday)},
+    {title:"Next Week",rows:dated.filter(e=>e.day>saturday&&e.day<=nextEnd)}];
+  const months=new Map<string,EventOccurrence[]>();
+  if(!date) for(const e of dated.filter(e=>e.day>nextEnd)){
+    const key=e.day.slice(0,7),rows=months.get(key);
+    if(rows) rows.push(e); else months.set(key,[e]);
+  }
+  return <main id="main" className="site-width page-content county-agenda">
+    <header><h1>Gwinnett events</h1><p>Find something to do close to home.</p><Link className="button button-orange" href="/events/submit">Submit an event</Link></header>
+    <EventFilters key={JSON.stringify([q.city,date,q.audience])} cities={cities} city={q.city||""} date={date} audience={q.audience||""}/>
+    <nav aria-label="More calendars"><strong>More calendars</strong><Link href="/events/gwinnett-libraries">Library Events</Link><Link href="/events/gcps">GCPS School Calendar</Link><Link href="/events/pokemon">Pokémon Events</Link></nav>
+    {periods.map(p=><section key={p.title}><h2>{p.title}</h2>{p.rows.length?<DatedList events={p.rows} from={from}/>:<p>No matching dated events.</p>}</section>)}
+    <section id="ongoing-events"><h2>Ongoing Events</h2>{runs.length?<OngoingEvents runs={runs} view={date?"day":"period"}/>:<p>No matching ongoing events.</p>}</section>
+    {!date&&<section><h2>Looking Ahead</h2>{months.size?Array.from(months,([month,events])=><details className="agenda-month" key={month}><summary>{label(month+"-01",{month:"long",year:"numeric"})} ({events.length})</summary><DatedList events={events} from={from}/></details>):<p>No later events listed.</p>}</section>}
+    <p><a className="text-link" href={facebookGroup} target="_blank" rel="noopener noreferrer">Ask neighbors about upcoming events in the ATG Facebook group ↗</a></p>
+  </main>;
 }
