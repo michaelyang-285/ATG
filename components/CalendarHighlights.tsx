@@ -20,7 +20,7 @@ export default async function CalendarHighlights() {
     {label:"Gwinnett library events",url:libraryPath,event:program && {title:program.title,when:dateLabel(program.day),url:libraryPath+"/"+program.id}},
     {label:"Pokémon events",url:"/events/pokemon",event:game && {title:game.title,when:dateLabel(game.day),url:occurrencePath(game)}}
   ];
-  return <section className={styles.section}><h2>Coming up in Gwinnett</h2>
+  return <section className={styles.section}><h2>School, library &amp; Pokémon calendars</h2>
     <div className={styles.grid}>{cards.map(card=><article key={card.url}>
       <h3><Link href={card.url}>{card.label}</Link></h3>
       {card.event && <p><small>{card.event.when}</small><Link href={card.event.url}>{card.event.title}</Link></p>}
