@@ -209,7 +209,13 @@ export default async function BrowsePage({
             {businesses.map((b) => (
               <article key={b._id}>
                 <div className="business-card-heading">
-                  {b.logo && <img src={b.logo} alt="" width="56" height="56" style={{objectFit:"contain"}} />}
+                  <img
+                    src={b.logo || "/brand/atg-avatar.png"}
+                    alt=""
+                    width="56"
+                    height="56"
+                    style={{objectFit:"contain", ...(b.logo ? {} : {filter:"grayscale(1)", opacity:0.5})}}
+                  />
                   <div>
                     <p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}
                     <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`}>{b.name}</Link></h2>
