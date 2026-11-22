@@ -32,6 +32,41 @@ function matchesAudience(e:EventOccurrence, audience:string) {
 }
 
 type AgendaEvent = EventOccurrence & { sessions?: EventOccurrence[]; multiple?: boolean };
+function EventRow({e,day,showDate=false}:{e:AgendaEvent;day:string;showDate?:boolean}) {
+  return <li>
+      {showDate && <time dateTime={day}>{label(day,{month:"short",day:"numeric",year:"numeric"})} · </time>}
+      <strong>{[cityOf(e),e.venue].filter(Boolean).join(" · ")}</strong>
+      <div><Link href={occurrencePath(e)} prefetch={false}>{e.title}</Link>
+        {e.multiple ? <small className="agenda-flair">Multiple dates</small> : e.endsAt && localClock(e.endsAt).slice(0,10)>e.day ? <small className="agenda-flair">Multi-day</small> : null}</div>
+      <span>{e.day<day?"Started "+label(e.day,{month:"short",day:"numeric"})+" · ":""}{clock.format(new Date(e.startsAt))}{e.endsAt && localClock(e.endsAt).slice(0,10)!==e.day && " through "+label(localClock(e.endsAt).slice(0,10),{month:"short",day:"numeric"})}{e.priceLabel && " · "+e.priceLabel}</span>
+      {e.sessions && e.sessions.length>1 && <details className="agenda-sessions"><summary>View dates ({e.sessions.length})</summary>
+        {e.sessions.map(session=><p key={session._id+session.startsAt}><Link href={occurrencePath(session)} prefetch={false}>{label(session.day,{weekday:"short",month:"short",day:"numeric"})} · {clock.format(new Date(session.startsAt))}</Link></p>)}
+      </details>}
+    </li>;
+}
+
+function normalizeSearch(value:string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+}
+
+function searchEvents(events:AgendaEvent[], query:string) {
+  const terms=normalizeSearch(query).split(/\s+/);
+  const groups=new Map<string,{event:AgendaEvent;score:number}>();
+  for (const e of events) {
+    const title=normalizeSearch(e.title || "");
+    const venue=normalizeSearch(e.venue || "");
+    const text=normalizeSearch([e.title,e.venue,cityOf(e),e.summary,e.organizer,...(e.gameTopics||[]),...(e.eventFormats||[])].join(" "));
+    if (!terms.every(term=>text.includes(term))) continue;
+    const score=terms.reduce((sum,term)=>sum+(title.includes(term)?3:venue.includes(term)?1:0),0);
+    const group=groups.get(e._id);
+    if (group) {
+      group.event.sessions=[...(group.event.sessions || [{...group.event}]),...(e.sessions || [e])];
+      group.event.multiple=true;
+    } else groups.set(e._id,{event:{...e},score});
+  }
+  return [...groups.values()].sort((a,b)=>b.score-a.score || a.event.startsAt.localeCompare(b.event.startsAt)).map(row=>row.event);
+}
+
 function DatedList({events,from}:{events:AgendaEvent[];from:string}) {
   const days=new Map<string,AgendaEvent[]>();
   for(const e of events){
@@ -41,19 +76,12 @@ function DatedList({events,from}:{events:AgendaEvent[];from:string}) {
   }
   return <>{Array.from(days,([day,rows])=><div className="agenda-day" key={day}>
     <h3><time dateTime={day}>{label(day,{weekday:"long",month:"long",day:"numeric"})}</time></h3>
-    <ul>{rows.map(e=><li key={e._id+e.day}>
-      <strong>{[cityOf(e),e.venue].filter(Boolean).join(" · ")}</strong>
-      <div><Link href={occurrencePath(e)} prefetch={false}>{e.title}</Link>
-        {e.multiple ? <small className="agenda-flair">Multiple dates</small> : e.endsAt && localClock(e.endsAt).slice(0,10)>e.day ? <small className="agenda-flair">Multi-day</small> : null}</div>
-      <span>{e.day<day?"Started "+label(e.day,{month:"short",day:"numeric"})+" · ":""}{clock.format(new Date(e.startsAt))}{e.endsAt && localClock(e.endsAt).slice(0,10)!==e.day && " through "+label(localClock(e.endsAt).slice(0,10),{month:"short",day:"numeric"})}{e.priceLabel && " · "+e.priceLabel}</span>
-      {e.sessions && e.sessions.length>1 && <details className="agenda-sessions"><summary>View dates ({e.sessions.length})</summary>
-        {e.sessions.map(session=><p key={session._id+session.startsAt}><Link href={occurrencePath(session)} prefetch={false}>{label(session.day,{weekday:"short",month:"short",day:"numeric"})} · {clock.format(new Date(session.startsAt))}</Link></p>)}
-      </details>}
-    </li>)}</ul></div>)}</>;
+    <ul>{rows.map(e=><EventRow key={e._id+e.day} e={e} day={day}/>)}</ul></div>)}</>;
 }
 
-export default async function Page({searchParams:q}:{searchParams:{city?:string;date?:string;audience?:string}}){
+export default async function Page({searchParams:q}:{searchParams:{q?:string;city?:string;date?:string;audience?:string}}){
   if (q.audience === "All ages") q = {...q, audience: ""};
+  const query=typeof q.q==="string" ? q.q.trim().slice(0,120) : "";
   const today=localClock(Date.now()).slice(0,10);
   const date=q.date && validDay(q.date) && q.date>=today && q.date<="2100-12-31" ? q.date : "";
   const from=date||today, to=date||shift(today,365);
@@ -77,12 +105,14 @@ export default async function Page({searchParams:q}:{searchParams:{city?:string;
     const key=e.day.slice(0,7),rows=months.get(key);
     if(rows) rows.push(e); else months.set(key,[e]);
   }
+  const results=query ? searchEvents(dated,query) : [];
   return <main id="main" className="site-width page-content county-agenda">
     <header><h1>Gwinnett events</h1><p>Find something to do close to home.</p><Link className="button button-orange" href="/events/submit">Submit an event</Link></header>
-    <EventFilters key={JSON.stringify([q.city,date,q.audience])} cities={cities} city={q.city||""} date={date} audience={q.audience||""}/>
+    <EventFilters key={JSON.stringify([q.city,date,q.audience,query])} query={query} cities={cities} city={q.city||""} date={date} audience={q.audience||""}/>
     <nav aria-label="More calendars"><strong>More calendars</strong><Link href="/events/gwinnett-libraries">Library Events</Link><Link href="/events/gcps">GCPS School Calendar</Link><Link href="/events/pokemon">Pokémon Events</Link></nav>
-    {periods.map(p=><section key={p.title}><h2>{p.title}</h2>{p.rows.length?<DatedList events={p.rows} from={from}/>:<p>No matching events.</p>}</section>)}
-    {!date&&<section><h2>Looking Ahead</h2>{months.size?Array.from(months,([month,events])=><details className="agenda-month" key={month}><summary>{label(month+"-01",{month:"long",year:"numeric"})} ({events.length})</summary><DatedList events={events} from={from}/></details>):<p>No later events listed.</p>}</section>}
+    {query && <section className="agenda-day"><h2>Search results for “{query}”</h2>{results.length ? <ul>{results.map(e=><EventRow key={e._id} e={e} day={e.day} showDate/>)}</ul> : <p>No matching events. Try a different keyword or clear the filters.</p>}</section>}
+    {!query && periods.map(p=><section key={p.title}><h2>{p.title}</h2>{p.rows.length?<DatedList events={p.rows} from={from}/>:<p>No matching events.</p>}</section>)}
+    {!query&&!date&&<section><h2>Looking Ahead</h2>{months.size?Array.from(months,([month,events])=><details className="agenda-month" key={month}><summary>{label(month+"-01",{month:"long",year:"numeric"})} ({events.length})</summary><DatedList events={events} from={from}/></details>):<p>No later events listed.</p>}</section>}
     <p><a className="text-link" href={facebookGroup} target="_blank" rel="noopener noreferrer">Ask neighbors about upcoming events in the ATG Facebook group ↗</a></p>
     <nav aria-label="Explore more event calendars" className="agenda-calendar-ctas">
       {[
