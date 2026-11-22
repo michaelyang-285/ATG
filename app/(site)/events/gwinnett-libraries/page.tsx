@@ -15,8 +15,8 @@ const faq = [
 const base="https://allthingsgwinnett.com";
 export default async function Page({searchParams:q}:{searchParams:{branch?:string;audience?:string;week?:string}}) {
   const week=Math.min(52,Math.max(0,parseInt(q.week||"0",10)||0));
-  const data=await libraryWeek(week).catch(()=>null);
-  const branches=Array.from(new Set((data?.rows||[]).map(e=>e.branch).filter(Boolean).concat(q.branch?[q.branch]:[]))).sort();
+  const data: Awaited<ReturnType<typeof libraryWeek>> | null = await libraryWeek(week).catch(()=>null);
+  const branches=Array.from(new Set<string>((data?.rows||[]).map(e=>e.branch).filter(Boolean).concat(q.branch?[q.branch]:[]))).sort();
   const rows=(data?.rows||[]).filter(e=>(!q.branch||e.branch===q.branch)&&(!q.audience||e.tags.includes(q.audience)));
   const groups=new Map<string,typeof rows>();
   for(const row of rows){
