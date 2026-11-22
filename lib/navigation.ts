@@ -22,10 +22,10 @@ export function navigation(
     {
       label: "Events",
       href: "/events",
+      // Keep specialty calendars on the Events Calendar page.
       children: [
-        { label: "Events calendar", href: "/events" },
-        { label: "Library Events", href: "/events/gwinnett-libraries" },
-        { label: "Submit an event", href: "/events/submit" },
+        { label: "Events Calendar", href: "/events" },
+        { label: "Submit an Event", href: "/events/submit" },
       ],
     },
     {
