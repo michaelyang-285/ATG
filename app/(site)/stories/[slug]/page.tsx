@@ -73,9 +73,31 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const hasCalendar = topics.length > 0 && story.body?.some(block => block._type === "upcomingGameEvents");
   const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];
   const canonical = "https://allthingsgwinnett.com/stories/" + encodeURIComponent(story.slug);
+  const datasets = (story.body || []).filter(block => block.dataset?.description && (
+    block._type === "callout" || (block._type === "image" && chartFigures[block.asset?._ref])
+  )).map(block => {
+    const url = canonical + "#" + encodeURIComponent(block._key);
+    const citations = (block.dataset.sources as string[]).map(key =>
+      story.body?.find(source => source._key === key)?.markDefs?.[0]?.href
+    ).filter(Boolean);
+    return {
+      "@type": "Dataset",
+      "@id": url,
+      url,
+      name: block.heading || chartFigures[block.asset._ref].title,
+      description: block.dataset.description,
+      temporalCoverage: block.dataset.period,
+      spatialCoverage: { "@type": "Place", name: story.location },
+      variableMeasured: block.dataset.variables,
+      citation: citations,
+      isPartOf: { "@id": canonical },
+    };
+  });
   const structured = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
+    "@id": canonical,
+    ...(datasets.length > 0 && { hasPart: datasets }),
     headline: story.title,
     description: story.excerpt,
     mainEntityOfPage: canonical,
@@ -132,7 +154,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </section>
                 ) : null,
                 image: ({ value }) =>
-                  chartFigures[value.asset?._ref] ? <StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /> : value.imageUrl ? (
+                  chartFigures[value.asset?._ref] ? <div id={value.dataset ? value._key : undefined}><StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /></div> : value.imageUrl ? (
                     <figure>
                       <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
                       {value.caption && (
@@ -147,7 +169,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </blockquote>
                 ),
                 divider: () => <hr />,
-                callout: ({ value }) => <StoryCallout value={value} />,
+                callout: ({ value }) => value.dataset ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
                 tldr: ({ value }) => (
                   <aside className="story-summary" aria-label="Article summary">
                     <h2>{value.heading || "TL;DR"}</h2>
