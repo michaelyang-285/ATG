@@ -121,9 +121,18 @@ export default function SchoolCalendar() {
       ))}
       <section style={{ display: "block" }} aria-labelledby="calendar-faq">
         <h2 id="calendar-faq">GCPS calendar FAQ</h2>
-        {faq.map(([question, answer]) => (
-          <div key={question} style={{ marginTop: "1rem" }}><h3>{question}</h3><p>{answer}</p></div>
-        ))}
+          <div className="border-2 border-ink bg-paper shadow-brutalist-sm divide-y-2 divide-ink">
+            {faq.map(([question, answer]) => (
+              <details key={question} className="group">
+                <summary className="list-none px-5 py-4 cursor-pointer font-archivo text-[15px] uppercase tracking-wide text-ink hover:bg-card [&::-webkit-details-marker]:hidden">
+                  {question}
+                </summary>
+                <div className="px-5 pb-5 font-georgia text-[16px] leading-[1.7] text-ink/85 border-t-2 border-ink/10 pt-4">
+                  <p>{answer}</p>
+                </div>
+              </details>
+            ))}
+          </div>
       </section>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org", "@type": "FAQPage",
