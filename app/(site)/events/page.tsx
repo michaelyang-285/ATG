@@ -84,5 +84,10 @@ export default async function Page({searchParams:q}:{searchParams:{city?:string;
     {periods.map(p=><section key={p.title}><h2>{p.title}</h2>{p.rows.length?<DatedList events={p.rows} from={from}/>:<p>No matching events.</p>}</section>)}
     {!date&&<section><h2>Looking Ahead</h2>{months.size?Array.from(months,([month,events])=><details className="agenda-month" key={month}><summary>{label(month+"-01",{month:"long",year:"numeric"})} ({events.length})</summary><DatedList events={events} from={from}/></details>):<p>No later events listed.</p>}</section>}
     <p><a className="text-link" href={facebookGroup} target="_blank" rel="noopener noreferrer">Ask neighbors about upcoming events in the ATG Facebook group ↗</a></p>
+    <nav aria-label="Explore more event calendars" className="agenda-calendar-ctas">
+      <Link className="button" href="/events/pokemon">Browse Pokémon events</Link>
+      <Link className="button" href="/events/gcps">View the GCPS school calendar</Link>
+      <Link className="button" href="/events/gwinnett-libraries">Find library events</Link>
+    </nav>
   </main>;
 }
