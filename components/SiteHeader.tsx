@@ -159,7 +159,7 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
             >
               {item.label}
             </Link>
-            <button
+            {item.children.length > 0 && <button
               aria-label={`Show ${item.label} links`}
               aria-expanded={expanded === item.href}
               aria-controls={`nav-submenu-${i}`}
@@ -178,7 +178,7 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
               >
                 <path d="m3 6 5 5 5-5" />
               </svg>
-            </button>
+            </button>}
             {expanded === item.href && (
               <ul id={`nav-submenu-${i}`} className="nav-submenu">
                 {item.children.map((c) => (
@@ -227,7 +227,9 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
         </div>
         <Search id="mobile-search" />
         <nav aria-label="Mobile navigation">
-          {items.map((item) => (
+          {items.map((item) => item.children.length === 0 ? (
+            <Link key={item.href} href={item.href} className="mobile-section-link" aria-current={pathname === item.href ? "page" : undefined} onClick={collapse}>{item.label}</Link>
+          ) : (
             <details key={item.href}>
               <summary>
                 {item.label}

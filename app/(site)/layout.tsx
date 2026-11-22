@@ -17,7 +17,7 @@ export default async function SiteLayout({
   return (
     <>
       <ExternalLinkTargets />
-      <SiteHeader items={navigation(data.stories, data.businesses)} />
+      <SiteHeader items={navigation(data.businesses)} />
       {children}
       <Footer />
     </>

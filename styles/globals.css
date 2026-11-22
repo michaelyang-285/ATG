@@ -762,6 +762,7 @@ img {
   .mobile-menu details {
     border-block-end: 1px solid var(--rule);
   }
+  .mobile-menu .mobile-section-link,
   .mobile-menu summary {
     display: flex;
     align-items: center;
