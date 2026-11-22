@@ -55,14 +55,19 @@ export async function enrich(event: Listing) {
   }
   return {...event,branch,address,ages,tags:Array.from(tags)};
 }
-export async function libraryWeek(offset:number) {
+export async function libraryAgenda() {
   const {events,updated} = await libraryFeed();
   const today = localClock(Date.now()).slice(0,10);
-  const from = shift(today,offset*7), to=shift(from,6);
-  const selected = events.filter(e=>e.day>=from && e.day<=to);
+  const thisEnd = shift(today,6-new Date(today).getUTCDay());
+  const nextEnd = shift(thisEnd,7);
+  const laterStart = shift(nextEnd,1);
+  const monthEnd = new Date(laterStart);
+  monthEnd.setUTCMonth(monthEnd.getUTCMonth()+1,0);
+  const to = monthEnd.toISOString().slice(0,10);
+  const selected = events.filter(e=>e.day>=today && e.day<=to);
   const rows: Awaited<ReturnType<typeof enrich>>[] = [];
   for(let i=0;i<selected.length;i+=12) rows.push(...await Promise.all(selected.slice(i,i+12).map(enrich)));
-  return {rows,updated,from,to,hasNext:events.some(e=>e.day>to)};
+  return {rows,updated,thisEnd,nextEnd,laterStart};
 }
 export function dayLabel(day:string) {
   return new Date(day+"T12:00:00Z").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:"UTC"});
