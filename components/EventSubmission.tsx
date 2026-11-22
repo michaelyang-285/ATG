@@ -266,6 +266,7 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
             </label>
             {register && input("ticketUrl", "Registration or ticket link", "url")}
             {input("url", "Official event page (optional)", "url", false)}
+            <label><input type="checkbox" name="newsletter" value="yes" /> Email me the All Things Gwinnett newsletter.</label>
             <button className="button button-orange">Submit for review</button>
       </fieldset>
       <p role="status">{message}</p>

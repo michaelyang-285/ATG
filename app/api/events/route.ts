@@ -1,3 +1,4 @@
+import { subscribeEmail } from "@/lib/newsletter";
 import { createHash } from "node:crypto";
 import { owner, human, respond, Failure, db } from "@/lib/directory/server";
 import { safeUrl } from "@/lib/publication";
@@ -160,6 +161,7 @@ export function POST(req: Request) {
       // A replay must never recreate a reviewed draft or a delivered alert.
       if ((error as { statusCode?: number }).statusCode !== 409 || !await store.getDocument(ownerId)) throw error;
     }
+    if (body.newsletter === "yes") await subscribeEmail(user.email!, "event");
     await notifySubmission("event", alertId);
     return { ok: true };
   });

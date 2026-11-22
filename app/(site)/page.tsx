@@ -1,3 +1,4 @@
+import WeekendPreview from "@/components/WeekendPreview";
 import CalendarHighlights from "@/components/CalendarHighlights";
 import groupAudience from "@/lib/facebook-group.json";
 import { DirectionIcon } from "@/components/DirectionIcon";
@@ -101,6 +102,7 @@ export default async function HomePage() {
           )}
         </aside>
       </div>
+      <WeekendPreview />
       <CalendarHighlights />
       <Newsletter url={settings.newsletterUrl} />
       <section className="guides-section">

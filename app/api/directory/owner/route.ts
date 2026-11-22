@@ -1,3 +1,4 @@
+import { subscribeEmail } from "@/lib/newsletter";
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
 import { listing } from "@/lib/directory/validate";
@@ -53,6 +54,7 @@ export function POST(req: Request) {
     if (result.error) throw result.error;
     if (!result.data)
       throw new Failure(409, "This listing changed. Reload before editing.");
+    if (!body.id && body.newsletter === true) await subscribeEmail(user.email!, "directory");
     if(body.listingId)await db().from("directory_progress").delete().eq("owner_id",user.id).eq("listing_id",body.listingId);
     if (result.data.profile_slug) revalidatePath(listingPath(result.data.profile_slug));
     revalidatePath("/directory");

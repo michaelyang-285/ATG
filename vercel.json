@@ -1,4 +1,13 @@
 {
   "framework": "nextjs",
-  "crons": [{ "path": "/api/admin/submission-alerts", "schedule": "15 12 * * *" }]
+  "crons": [
+    {
+      "path": "/api/admin/submission-alerts",
+      "schedule": "15 12 * * *"
+    },
+    {
+      "path": "/api/admin/newsletter-sync",
+      "schedule": "45 12 * * *"
+    }
+  ]
 }

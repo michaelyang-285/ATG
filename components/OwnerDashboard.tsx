@@ -318,6 +318,7 @@ export default function OwnerDashboard() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
+    const newsletter = new FormData(e.currentTarget as HTMLFormElement).get("newsletter") === "yes";
     await run(async()=>{
       if (form.categories.length > additionalCategoryLimit) {
         setStep(0);
@@ -341,7 +342,7 @@ export default function OwnerDashboard() {
       }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
-      const result = await api("owner", form);
+      const result = await api("owner", {...form, newsletter});
       setForm(null);
       if (!form.status || form.status === "unpaid") {
         await openCheckout(result.id);
@@ -625,6 +626,7 @@ export default function OwnerDashboard() {
               </>
             )}
             {msg && <p className="wizard-error" role="alert">{msg}</p>}
+            {step===4 && !form.status && <label><input type="checkbox" name="newsletter" value="yes"/> Email me the All Things Gwinnett newsletter.</label>}
             {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">The one-time listing fee is $3. You can enter a promotion code at Stripe Checkout. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>{setMsg("");setStep(step-1)}}>Back</button>}
               <button className="primary-action" disabled={busy || descriptionBlocked}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : "Continue to Stripe Checkout · $3"}</button>
