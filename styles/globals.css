@@ -200,7 +200,8 @@ img {
   background: none;
   border: 0;
   display: grid;
-  place-items: center;
+  place-items: center end;
+  padding: 0;
 }
 .nav-submenu {
   position: absolute;
@@ -347,6 +348,12 @@ img {
   justify-content: space-between;
   gap: 24px;
 }
+.guides-section .section-heading {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+.desktop-tools .text-link,
+.home-actions .text-link,
 .section-heading .text-link {
   margin: 0;
 }
