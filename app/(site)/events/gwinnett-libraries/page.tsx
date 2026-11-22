@@ -41,8 +41,9 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
       }
       const list = Array.from(days,([day,sessions])=><div key={day} className="library-day">
         <h3><time dateTime={day}>{dayLabel(day)}</time></h3>
-        <ul>{sessions.map(e=><li key={e.id}><span>{e.time}</span><div><Link href={libraryPath+"/"+e.id}>{e.title}</Link>
-          <small>{[e.branch||"See library for location",...e.ages].join(" · ")}</small></div></li>)}</ul>
+        <ul>{sessions.map(e=><li key={e.id}><strong className="library-location">{e.branch||"Check library for location"}</strong>
+          <Link href={libraryPath+"/"+e.id}>{e.title}</Link>
+          <span>{e.time}</span>{e.ages.length>0&&<small>{e.ages.join(" · ")}</small>}</li>)}</ul>
       </div>);
       return <section key={title} className="library-period"><h2>{title}</h2>
         {!events.length?<p>{empty}</p>:index===2?<details><summary>Show {events.length} more {events.length===1?"event":"events"}</summary>{list}</details>:list}
