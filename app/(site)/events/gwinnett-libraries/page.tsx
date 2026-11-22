@@ -1,3 +1,4 @@
+import LibraryFilters from "./LibraryFilters";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { libraryWeek, libraryPath, libraryCalendar, dayLabel, jsonLd } from "@/lib/library-events";
@@ -7,7 +8,7 @@ import "./library.css";
 const title = "Gwinnett County Public Library Events";
 export const metadata = eventPageMetadata(title,"Find upcoming Gwinnett library events by branch and audience, including toddler storytimes, kids’ programs and book clubs.",libraryPath);
 const faq = [
-  {question:"How do I find kids’ events at my library?",answer:"Pick a branch, select Kids under Audience, and apply the filters. Check each program’s age guidance for the best fit."},
+  {question:"How do I find kids’ events at my library?",answer:"Pick a branch and select Kids under Audience. The listings update after each selection. Check each program’s age guidance for the best fit."},
   {question:"Which programs are right for my child’s age?",answer:"Read the age range and description together. A program in the library’s Ages 0–5 group may be designed specifically for toddlers or preschoolers."},
   {question:"How do I register for a library event?",answer:"Open the event, then follow the official library listing for registration requirements and availability."},
   {question:"Where can I check for schedule changes?",answer:"Check the official library listing before heading out. It has the latest schedule and registration status."}
@@ -30,11 +31,8 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd(schema)}}/>
     <Link href="/events">‹ Events calendar</Link><h1>{title}</h1>
     <p>Find storytimes, workshops and book clubs at your Gwinnett library branch. All times are Eastern.</p>
-    <form action={libraryPath}><input type="hidden" name="week" value={week}/>
-      <label>Branch<select name="branch" defaultValue={q.branch||""}><option value="">All branches</option>{branches.map(b=><option key={b}>{b}</option>)}</select></label>
-      <label>Audience<select name="audience" defaultValue={q.audience||""}><option value="">Everyone</option>{["Kids","Teens","Adults","All ages"].map(a=><option key={a}>{a}</option>)}</select></label>
-      <button type="submit">Apply filters</button>{(q.branch||q.audience)&&<Link href={weekHref(week).split("?")[0]+"?week="+week}>Clear filters</Link>}
-    </form>
+    <LibraryFilters key={JSON.stringify([week,q.branch,q.audience])} path={libraryPath} week={week} branches={branches} branch={q.branch||""} audience={q.audience||""}/>
+    <p><strong>Before you go:</strong> Event dates and times can change, and our listings may lag behind the library’s updates. Check the <a href={libraryCalendar} target="_blank" rel="noopener noreferrer">official Gwinnett County Public Library calendar</a> for the latest schedule.</p>
     {data?<><nav aria-label="Library calendar week">{week>0&&<Link href={weekHref(week-1)}>‹ Previous week</Link>}<strong>{dayLabel(data.from)} – {dayLabel(data.to)}</strong>{data.hasNext&&<Link href={weekHref(week+1)}>Next week ›</Link>}</nav>
     {data.rows.some(e=>!e.branch||!e.ages.length)&&<p>Some listings have incomplete branch or audience information. Open the official listing to confirm details.</p>}
     {Array.from(groups.values()).map(([e,...more],i,all)=><section key={e.id}>{(!i||all[i-1][0].day!==e.day)&&<h2>{dayLabel(e.day)}</h2>}<article>
