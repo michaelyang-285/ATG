@@ -3,6 +3,7 @@ import { localClock, shift } from "@/lib/event-time";
 import Link from "next/link";
 import { calendarNotices } from "@/lib/gcps-calendar";
 import "@/components/community.css";
+import "@/components/calendar-dates.css";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export const metadata = {
 };
 
 const formatter = new Intl.DateTimeFormat("en-US", {
-  weekday: "short", month: "short", day: "numeric", timeZone: "UTC",
+  weekday: "long", month: "long", day: "numeric", timeZone: "UTC",
 });
 
 type SchoolDate = ReturnType<typeof calendarNotices>[number];
@@ -36,13 +37,15 @@ function details(event: SchoolDate) {
 
 function DateList({ dates }: { dates: SchoolDate[] }) {
   return (
-    <ul style={{ marginTop: "0.5rem", paddingInlineStart: "1.25rem", listStyle: "disc" }}>
-              {dates.map(event => (
-                <li key={event.day + event.title}>
-                  <DateRange event={event} /> · <strong>{event.title}</strong> · {details(event)}
-                </li>
-              ))}
-            </ul>
+    <ul className="school-date-list">
+      {dates.map(event => (
+        <li key={event.day + event.title}>
+          <div className="school-date-heading"><DateRange event={event} /></div>
+          <strong className="school-date-name">{event.title}</strong>
+          <span>{details(event)}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -84,7 +87,7 @@ export default function SchoolCalendar() {
     { title: "Past school dates", dates: dates.filter(event => event.end < today).sort((a, b) => a.day.localeCompare(b.day)) },
   ].filter(group => group.title === "This Week" || (group.title === "Looking Ahead" && months.length > 0) || group.dates.length);
   return (
-    <main id="main" className="site-width page-content atg-desk">
+    <main id="main" className="site-width page-content atg-desk gcps-calendar">
       <header>
         <Link className="text-link" href="/events">← All Gwinnett events</Link>
         <h1>Gwinnett County Public Schools (GCPS) Calendar 2026–27</h1>
