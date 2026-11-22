@@ -73,11 +73,69 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const hasCalendar = topics.length > 0 && story.body?.some(block => block._type === "upcomingGameEvents");
   const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];
   const canonical = "https://allthingsgwinnett.com/stories/" + encodeURIComponent(story.slug);
-  const datasets = (story.body || []).filter(block => block.dataset?.description && (
+  const figureMetadata: Record<string, { description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
+  "cityPop": {
+    "description": "July 2025 population estimates for each municipality’s Gwinnett residents and unincorporated Gwinnett.",
+    "period": "2025-07-01",
+    "variables": [
+      "Resident population"
+    ],
+    "sources": [
+      "source-20"
+    ]
+  },
+  "cityRace": {
+    "description": "Counts and percentages by Hispanic origin and non-Hispanic race within the Gwinnett portion of each city.",
+    "period": "2020-04-01",
+    "variables": [
+      "Resident population",
+      "Population share by race and Hispanic origin"
+    ],
+    "sources": [
+      "source-21"
+    ]
+  },
+  "gw6": {
+    "description": "Gwinnett County decennial population counts and the July 2025 population estimate.",
+    "period": "1970/2025",
+    "variables": [
+      "Resident population"
+    ],
+    "sources": [
+      "source-1",
+      "source-2",
+      "source-3"
+    ]
+  },
+  "gw24": {
+    "description": "Components of annual population change in Gwinnett County, measured in residents.",
+    "period": "2024-07-01/2025-07-01",
+    "variables": [
+      "Net domestic and international migration",
+      "Natural increase",
+      "Residual adjustment"
+    ],
+    "sources": [
+      "source-7"
+    ]
+  },
+  "gw30": {
+    "description": "Percentages of Gwinnett residents by race and Hispanic origin in 1990, 2010 and 2020.",
+    "period": "1990/2020",
+    "variables": [
+      "Population share by race and Hispanic origin"
+    ],
+    "sources": [
+      "source-9",
+      "source-19"
+    ]
+  }
+} : {};
+  const datasets = (story.body || []).filter(block => figureMetadata[block._key]?.description && (
     block._type === "callout" || (block._type === "image" && chartFigures[block.asset?._ref])
   )).map(block => {
     const url = canonical + "#" + encodeURIComponent(block._key);
-    const citations = (block.dataset.sources as string[]).map(key =>
+    const citations = (figureMetadata[block._key].sources as string[]).map(key =>
       story.body?.find(source => source._key === key)?.markDefs?.[0]?.href
     ).filter(Boolean);
     return {
@@ -85,10 +143,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
       "@id": url,
       url,
       name: block.heading || chartFigures[block.asset._ref].title,
-      description: block.dataset.description,
-      temporalCoverage: block.dataset.period,
+      description: figureMetadata[block._key].description,
+      temporalCoverage: figureMetadata[block._key].period,
       spatialCoverage: { "@type": "Place", name: story.location },
-      variableMeasured: block.dataset.variables,
+      variableMeasured: figureMetadata[block._key].variables,
       citation: citations,
       isPartOf: { "@id": canonical },
     };
@@ -154,7 +212,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </section>
                 ) : null,
                 image: ({ value }) =>
-                  chartFigures[value.asset?._ref] ? <div id={value.dataset ? value._key : undefined}><StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /></div> : value.imageUrl ? (
+                  chartFigures[value.asset?._ref] ? <div id={figureMetadata[value._key] ? value._key : undefined}><StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /></div> : value.imageUrl ? (
                     <figure>
                       <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
                       {value.caption && (
@@ -169,7 +227,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </blockquote>
                 ),
                 divider: () => <hr />,
-                callout: ({ value }) => value.dataset ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
+                callout: ({ value }) => figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
                 tldr: ({ value }) => (
                   <aside className="story-summary" aria-label="Article summary">
                     <h2>{value.heading || "TL;DR"}</h2>
