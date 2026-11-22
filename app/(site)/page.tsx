@@ -29,28 +29,20 @@ export default async function HomePage() {
     .slice(0, 2);
   return (
     <main id="main" className="site-width homepage">
-      <section className="home-welcome">
-        <div><h1>What’s happening in Gwinnett?</h1>
-        <p>Find a weekend plan, a new place to eat, or a local business your neighbors recommend.</p>
-        <div className="home-actions"><Link className="button button-orange" href="/events">Explore events</Link>
-        <Link className="text-link" href="/directory">Find a local business <DirectionIcon /></Link></div></div>
-        <aside className="home-community"><h2>Ask your Gwinnett neighbors</h2>
-        <p>Join <strong>{groupAudience.memberCountDisplay} members</strong> in the All Things Gwinnett Facebook group. Ask who cuts great locs, where to grab lunch in Duluth, or what’s open nearby.</p>
-        <a className="text-link" href={facebookGroup}>Join the Facebook group <DirectionIcon /></a></aside>
-      </section>
-      <Newsletter url={settings.newsletterUrl} />
-      <div className="lead-layout">
+      <a className="text-link" style={{ display: "flex", alignItems: "center", gap: ".45rem", paddingBlock: ".8rem", borderBottom: "1px solid currentColor" }} href={facebookGroup} target="_blank" rel="noopener noreferrer">
+        <strong>{groupAudience.memberCountDisplay} members</strong> in our Facebook group <DirectionIcon />
+      </a>
+      <div className="lead-layout" style={{ marginTop: "1.25rem" }}>
         <section className="lead-story" aria-label="Featured story">
           {featured ? (
             <>
+              <p className="story-label">{storyLabel(featured)}</p>
+              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3.6rem)", lineHeight: 1.06, margin: ".5rem 0 1rem" }}>
+                <Link href={storyHref(featured)}>{featured.title}</Link>
+              </h1>
               <Link href={storyHref(featured)} tabIndex={-1} aria-hidden="true">
                 <StoryImage story={featured} priority />
               </Link>
-              <h2><Link href={storyHref(featured)}>{featured.title}</Link></h2>
-              <p className="story-label">
-                {storyLabel(featured)}
-                {isGuide(featured) ? " · Guide" : ""}
-              </p>
               {featured.excerpt && (
                 <p className="lead-deck">{featured.excerpt}</p>
               )}
@@ -64,7 +56,7 @@ export default async function HomePage() {
               <div className="launch-art" aria-hidden="true">
                 <img src="/brand/logo.svg" alt="" width="360" height="120" />
               </div>
-              <h2>Good stories start close to home.</h2>
+              <h1>Good stories start close to home.</h1>
               <p className="lead-deck">
                 We’re getting our first local stories and guides ready. Until
                 then, the conversation is happening in our Facebook group.
@@ -110,6 +102,7 @@ export default async function HomePage() {
         </aside>
       </div>
       <CalendarHighlights />
+      <Newsletter url={settings.newsletterUrl} />
       <section className="guides-section">
         <div className="section-heading">
           <h2>More useful guides</h2>
