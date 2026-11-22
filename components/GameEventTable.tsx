@@ -13,7 +13,7 @@ export function GameEventTable({ events, caption }: { events: EventOccurrence[];
     <div className="story-table-wrap" role="region" aria-label={caption} tabIndex={0}>
       <table className="story-table">
         <caption>{caption}</caption>
-        <thead><tr><th scope="col">Date &amp; time (Eastern)</th><th scope="col">Event</th><th scope="col">Where</th></tr></thead>
+        <thead><tr><th scope="col">Date &amp; time</th><th scope="col">Event</th><th scope="col">Where</th></tr></thead>
         <tbody>{events.map(event => (
           <tr key={event._id + event.day}>
             <td><time dateTime={event.startsAt}>{when.format(new Date(event.startsAt))}</time></td>
