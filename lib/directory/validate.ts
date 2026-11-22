@@ -31,6 +31,8 @@ export function listing(input: any, email: string, uid: string) {
     if (v && !/^https?:\/\/[^\s/]+(?:[/?#][^\s]*)?$/i.test(v)) invalid(k);
     return v;
   }
+  if (typeof input.name === "string" && input.name.length > 100)
+    throw new Failure(400, "Shorten your business name to 100 characters or fewer.");
   const phone = field("phone", true);
   if (phone.replace(/\D/g, "").length < 7) invalid("phone");
   const city = field("city", true, 80), zip = field("zip", true, 10);
@@ -85,7 +87,7 @@ export function listing(input: any, email: string, uid: string) {
     },
     draft: {
       ...(providerType ? {providerType} : {}),
-      name: field("name", true),
+      name: field("name", true, 100),
       summary: summary.trim(),
       category,
       categories: extras,
