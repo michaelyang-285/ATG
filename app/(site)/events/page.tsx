@@ -64,7 +64,7 @@ function searchEvents(events:AgendaEvent[], query:string) {
       group.event.multiple=true;
     } else groups.set(e._id,{event:{...e},score});
   }
-  return [...groups.values()].sort((a,b)=>b.score-a.score || a.event.startsAt.localeCompare(b.event.startsAt)).map(row=>row.event);
+  return Array.from(groups.values()).sort((a,b)=>b.score-a.score || a.event.startsAt.localeCompare(b.event.startsAt)).map(row=>row.event);
 }
 
 function DatedList({events,from}:{events:AgendaEvent[];from:string}) {
