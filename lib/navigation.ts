@@ -19,6 +19,7 @@ export function navigation(
       href: "/events",
       children: [
         { label: "Events calendar", href: "/events" },
+        { label: "Library Events", href: "/events/gwinnett-libraries" },
         { label: "Submit an event", href: "/events/submit" },
       ],
     },
