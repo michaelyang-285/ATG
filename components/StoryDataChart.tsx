@@ -28,3 +28,87 @@ export function StoryDataChart({ chart, caption }: { chart: ChartData; caption?:
     {caption && <figcaption>{caption}</figcaption>}
   </figure>
 }
+
+export const chartFigures: Record<string, ChartData> = {
+  "image-97c5c523b2f0ad4466a71caedffb4280c15bc325-1800x920-png": {
+    "title": "Gwinnett’s population since 1970",
+    "unit": "people",
+    "labels": [
+      "1970",
+      "1980",
+      "1990",
+      "2000",
+      "2010",
+      "2020",
+      "2025 estimate"
+    ],
+    "series": [
+      {
+        "label": "Residents",
+        "values": [
+          72349,
+          166903,
+          352910,
+          588448,
+          805321,
+          957062,
+          1018099
+        ]
+      }
+    ]
+  },
+  "image-fcf2cc10962c751fb1579ca822ca91d5f31adcf4-1800x920-png": {
+    "title": "What changed Gwinnett’s population in one year?",
+    "unit": "people",
+    "labels": [
+      "International moves",
+      "Births minus deaths",
+      "Domestic moves",
+      "Census adjustment"
+    ],
+    "series": [
+      {
+        "label": "Residents",
+        "values": [
+          9700,
+          5865,
+          -7392,
+          62
+        ]
+      }
+    ]
+  },
+  "image-33b60ef2cd842ab8f82f2aa156e81c946b04bde2-1800x960-png": {
+    "title": "Race and ethnicity in Gwinnett County",
+    "unit": "%",
+    "labels": [
+      "White",
+      "Black",
+      "Hispanic or Latino",
+      "Asian / Pacific Islander",
+      "Other / mixed"
+    ],
+    "series": [
+      {
+        "label": "2010",
+        "values": [
+          44,
+          22.9,
+          20.1,
+          10.6,
+          2.5
+        ]
+      },
+      {
+        "label": "2020",
+        "values": [
+          32.5,
+          26.9,
+          23,
+          13.3,
+          4.4
+        ]
+      }
+    ]
+  }
+};
