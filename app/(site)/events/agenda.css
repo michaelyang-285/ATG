@@ -6,3 +6,5 @@
 .agenda-sessions summary::after { content:"+"; font-weight:700; }
 .agenda-sessions[open] summary::after { content:"−"; }
 .agenda-sessions p { margin:.45rem 0; }
+
+.agenda-day > ul { padding-inline-start: clamp(.75rem, 2vw, 1.25rem); }
