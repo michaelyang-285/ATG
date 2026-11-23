@@ -97,3 +97,67 @@
 .people-workspace article section > form.signup-card {
   max-width: 54rem;
 }
+
+.listing-panel > details {
+  margin-block: 1rem;
+}
+.listing-panel > details > summary {
+  padding: 0.85rem 0;
+  font-weight: 700;
+  cursor: pointer;
+}
+.listing-panel .signup-card {
+  margin-top: 0.7rem;
+}
+.listing-panel .listing-group + .listing-group,
+.listing-panel .listing-actions {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+}
+.listing-panel .listing-group h3,
+.listing-panel .hours-editor > legend {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 1rem;
+}
+.listing-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+}
+.listing-panel .listing-field-grid label {
+  margin: 0;
+}
+.listing-wide,
+.listing-check {
+  grid-column: 1/-1;
+}
+.listing-group > details,
+.listing-media fieldset + fieldset {
+  margin-top: 1.5rem;
+}
+.listing-panel .listing-media legend {
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+}
+.listing-media img + button,
+.listing-media a + button {
+  margin-top: 0.6rem;
+}
+.listing-media fieldset > label {
+  margin-top: 1rem;
+}
+.listing-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+@media (max-width: 640px) {
+  .listing-field-grid {
+    grid-template-columns: 1fr;
+  }
+  .listing-actions button {
+    width: 100%;
+  }
+}
