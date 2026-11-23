@@ -49,6 +49,7 @@ const blank = {
   hours: "",
   weeklyHours: defaultWeek() as DayHours[] | null,
   logo: "",
+  skipLogo: false,
   gallery: [] as string[],
 };
 export type Draft = typeof blank;
@@ -78,7 +79,7 @@ const listingTypes = [
   { value: "organization", label: "A business or organization", description: "I’m listing a company, team, or community group." },
 ];
 
-const sections=["Business basics","Service area","Contact & links","Photos","Review"];
+const sections=["Business basics","Service area","Contact & links","Your business logo","Review"];
 type Progress={listing_id:string,step:number,fields:Draft};
 const labels: Record<string, string> = {
   unpaid: "Ready to submit",
@@ -232,7 +233,7 @@ export default function OwnerDashboard() {
     const overLimit = draft.categories.length > additionalCategoryLimit;
     setUploadIssue(null);
     setForm(draft);
-    setStep(overLimit ? 0 : saved.step);
+    setStep(overLimit ? 0 : saved.step === 4 && !draft.logo && !draft.skipLogo ? 3 : saved.step);
     setMsg(overLimit ? additionalCategoryError : "");
   }
   useEffect(()=>{
@@ -322,7 +323,7 @@ export default function OwnerDashboard() {
           if (k==="gallery") data.set("galleryListing",form.id || form.listingId);
           const {url} = await api("upload", data);
           setForm(current => current && (k === "logo"
-            ? {...current, logo: url}
+            ? {...current, logo: url, skipLogo: false}
             : {...current, gallery: [...current.gallery, url]}));
         }
       } catch (error) {
@@ -381,6 +382,10 @@ export default function OwnerDashboard() {
         if(!hasAccountContact(data)){setStep(0);throw Error("Enter your name and phone number under Private listing contact.");}
         const result=await client.auth.updateUser({data});
         if(result.error) throw Error("Your contact details could not be saved. Please try again.");
+      }
+      if (step >= 3 && !form.logo && !form.skipLogo) {
+        setStep(3);
+        throw Error("Upload a logo or headshot, or select “No logo at the moment.”");
       }
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
       const saved=await api("owner", {...form, ...(!media ? {gallery:[]} : {}), newsletter});
@@ -639,12 +644,12 @@ export default function OwnerDashboard() {
                   {field("social","Other social profile",false,"url")}
                 </details>
                 {(premium || paidSignup) && <fieldset><legend>Manage deal</legend>{field("dealTitle","Offer (clear to end it)")}{field("dealTerms","Terms and how to redeem")}{field("dealEnd","Last day",false,"date")}</fieldset>}
-                </>}{step===3&&<><p>Choose JPG, PNG, or WebP images up to 10 MB each. Your device resizes them before upload. {media ? "Your logo and gallery are optional." : "Free listings include one logo."}</p>
+                </>}{step===3&&<><p>Upload your business logo or use a headshot so neighbors can recognize you.</p>
                 {(["logo", "gallery"] as const).filter(k=>k==="logo" || media).map((k) => (
                   <section key={k} className="upload-panel">
                     <label>
                       {k === "logo"
-                        ? "Business logo"
+                        ? "Upload a logo or headshot"
                         : `Photos of your work (${form.gallery.length} of ${galleryLimit})`}
                       <input
                         type="file"
@@ -658,6 +663,10 @@ export default function OwnerDashboard() {
                         }}
                       />
                     </label>
+                    {k === "logo" && <>
+                      <small>JPG, PNG or WebP, up to 10 MB.</small>
+                      {!form.logo && <label><input type="checkbox" checked={form.skipLogo} onChange={e => change("skipLogo", e.target.checked)} /> No logo at the moment</label>}
+                    </>}
                     {uploadIssue?.field === k && <p role="alert" className="wizard-error">{uploadIssue.message}</p>}
                     <div className="upload-previews">{(k === "logo"
                       ? [form.logo].filter(Boolean)
@@ -694,7 +703,7 @@ export default function OwnerDashboard() {
             {step===4 && !form.status && <label><input type="checkbox" name="newsletter" value="yes"/> Email me the All Things Gwinnett newsletter.</label>}
             {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">{paidSignup ? "Your paid listing is $9 per year. Continue to Stripe to subscribe." : "Basic listings are free."} For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>{setMsg("");setStep(step-1)}}>Back</button>}
-              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : paidSignup ? "Continue to checkout · $9/year" : "Submit free listing for review"}</button>
+              <button className="primary-action" disabled={busy || descriptionBlocked || (step === 3 && !form.logo && !form.skipLogo)}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : paidSignup ? "Continue to checkout · $9/year" : "Submit free listing for review"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
         </form>
