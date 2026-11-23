@@ -1,0 +1,32 @@
+.directory-owner:has(.account-masthead) {max-width:76rem;}
+.directory-owner .account-masthead {display:flex;align-items:center;justify-content:space-between;gap:1rem 2rem;padding:0 0 clamp(1.25rem,3vw,2rem);border-bottom:2px solid var(--ink,#171717);}
+.directory-owner .account-masthead h1 {margin:0;font-size:clamp(2rem,4vw,3rem);line-height:1.1;}
+.directory-owner .account-identity {margin:.45rem 0 0;color:#575752;font-size:.95rem;overflow-wrap:anywhere;}
+.account-utilities {display:flex;align-items:center;gap:1rem;flex-shrink:0;}
+.directory-owner .account-utilities a,.directory-owner .account-utilities button {display:inline-flex;align-items:center;min-height:44px;font-size:.92rem;}
+.directory-owner .account-utilities a {font-weight:700;text-decoration:underline;text-underline-offset:.2em;}
+.directory-owner .account-utilities button {background:transparent;border:0;color:#595954;padding:0 .25rem;}
+.account-workspace {display:grid;align-items:start;gap:clamp(1.5rem,4vw,3.5rem);margin-top:clamp(1.25rem,3vw,2.25rem);}
+.account-workspace:has(.account-tools) {grid-template-columns:minmax(15rem,19rem) minmax(0,1fr);}
+.account-tools {padding:1.25rem;background:#f5f5f2;border-radius:.65rem;}
+.directory-owner .account-tools h2 {margin:0 0 1rem;font-size:1.18rem;}
+.account-tools a {display:flex;align-items:center;min-height:44px;}
+.account-tools .account-admin-action {justify-content:space-between;gap:1rem;padding:.9rem 1rem;background:#ff4d22;color:#171717;font-weight:750;line-height:1.25;border-radius:.35rem;}
+.account-admin-action:hover {background:#ff633c;}
+.account-assignment-link {justify-content:space-between;font-weight:650;padding:.75rem .2rem;}
+.account-tools .account-notifications {margin:1rem 0 0;padding:1rem 0 0;border-top:1px solid #ccccc5;}
+.directory-owner .account-notifications h3 {margin:0 0 .35rem;font-size:1rem;}
+.account-notifications a {align-items:flex-start;justify-content:center;flex-direction:column;gap:.2rem;}
+.account-pending {color:#565650;font-size:.85rem;font-weight:500;font-variant-numeric:tabular-nums;}
+.directory-owner .account-submissions > h2 {margin:0 0 1.25rem;font-size:clamp(1.55rem,2.6vw,2.1rem);}
+.account-submissions .owner-section-heading {display:flex;flex-flow:row wrap;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem;}
+.directory-owner .account-submissions .owner-section-heading h3 {margin:0;font-size:1.15rem;}
+.account-submissions .owner-section-controls {display:flex;flex-wrap:wrap;gap:.5rem;}
+.directory-owner .account-submissions .owner-section-controls button {min-height:44px;padding:.5rem .85rem;font-size:.9rem;}
+.account-workspace :is(a,button):focus-visible,.account-utilities :is(a,button):focus-visible {outline:3px solid #a32b0c;outline-offset:3px;}
+@media(max-width:760px){
+ .account-workspace:has(.account-tools){grid-template-columns:minmax(0,1fr);}
+ .directory-owner .account-masthead{flex-wrap:wrap;}
+ .account-tools{padding:1rem;}
+ .account-tools .account-admin-action{gap:.75rem;}
+}

@@ -372,29 +372,19 @@ export default function OwnerDashboard() {
   return (
     <>
       {!form && !checkout && status}
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My account"}</h1>
-        {!checkout && !form && accountAdmin(session.user) && (
-          <a className="button button-orange w-full justify-center sm:w-auto" href="/admin/people">
-            Manage people and assignments <span aria-hidden="true">→</span>
-          </a>
-        )}
-      </div>
-      <div className="owner-session">
-        <span>Signed in as {session.user.email}</span>
-        <a className="text-link" href="/account/profile">My profile</a>
-        <button
-          disabled={busy}
-          onClick={() =>
-            run(async () => {
-              const { error } = await client.auth.signOut();
-              if (error) throw error;
-            })
-          }
-        >
-          Sign out
-        </button>
-      </div>
+      <header className={form || checkout ? undefined : "account-masthead"}>
+        <div>
+          <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My account"}</h1>
+          <p className="account-identity"><span className="sr-only">Signed in as </span>{session.user.email}</p>
+        </div>
+        <nav className="account-utilities" aria-label="Account settings">
+          <a href="/account/profile">My profile</a>
+          <button disabled={busy} onClick={() => run(async () => {
+            const {error} = await client.auth.signOut();
+            if(error) throw error;
+          })}>Sign out</button>
+        </nav>
+      </header>
       {checkout ? (
         <section className="checkout-handoff" aria-label="Listing payment">
           <p>Your listing is saved.</p>
@@ -407,10 +397,15 @@ export default function OwnerDashboard() {
           </div>
         </section>
       ) : !form ? (
-        <>
-          {session.user.app_metadata.approved_author && <p><a className="text-link" href="/assignments">My assignments</a></p>}
-          {canOpenQueue && <ApprovalNotifications key={session.user.id} session={session} refreshKey={refreshKey} />}
-          <section aria-labelledby="my-submissions">
+        <div className="account-workspace">
+          {(accountAdmin(session.user) || session.user.app_metadata.approved_author || canOpenQueue) &&
+            <aside className="account-tools">
+              <h2>Workspace</h2>
+              {accountAdmin(session.user) && <a className="account-admin-action" href="/admin/people"><span>Manage people and assignments</span><span aria-hidden="true">→</span></a>}
+              {session.user.app_metadata.approved_author && <a className="account-assignment-link" href="/assignments">My assignments <span aria-hidden="true">→</span></a>}
+              {canOpenQueue && <ApprovalNotifications key={session.user.id} session={session} refreshKey={refreshKey} />}
+            </aside>}
+          <section className="account-submissions" aria-labelledby="my-submissions">
             <h2 id="my-submissions">My submissions</h2>
             <section className="owner-submissions-section" aria-labelledby="directory-submissions">
               <div className="owner-section-heading">
@@ -458,7 +453,7 @@ export default function OwnerDashboard() {
             </section>
             <MySubmissions key={session.user.id} session={session} refreshKey={refreshKey} />
           </section>
-        </>
+        </div>
       ) : (
         <form className="listing-wizard" onSubmit={submit}><Completion completed={step+1}/><h2>{sections[step]}</h2>
           <fieldset disabled={busy}>

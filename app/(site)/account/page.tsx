@@ -1,3 +1,4 @@
+import "./account.css";
 import OwnerDashboard from "@/components/OwnerDashboard";
 export const metadata = {
   title: "My account",

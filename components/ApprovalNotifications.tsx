@@ -39,10 +39,10 @@ export default function ApprovalNotifications({ session, refreshKey }: { session
 
   const label = typeof pending === "number" ? `${pending} pending ${pending === 1 ? "item" : "items"}`
     : pending === "loading" ? "loading count…" : "count unavailable";
-  return <section aria-labelledby="approval-notifications" className="mb-8 border-b border-[var(--rule)] pb-6">
-    <h2 id="approval-notifications">Notifications</h2>
+  return <section aria-labelledby="approval-notifications" className="account-notifications">
+    <h3 id="approval-notifications">Notifications</h3>
     <a className="text-link" href="/admin/approvals">
-      Open approval queue <span aria-live="polite" className="whitespace-nowrap">({label})</span>
+      Open approval queue <span aria-live="polite" className="account-pending">{label}</span>
     </a>
   </section>;
 }
