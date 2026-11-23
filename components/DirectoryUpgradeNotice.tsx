@@ -11,7 +11,7 @@ export default function DirectoryUpgradeNotice({listings,busy,onUpgrade}:{listin
   const selected=available.find(row=>row.id===choice) || available[0];
   return <aside className="directory-upgrade-note" aria-labelledby="upgrade-notice-title">
     <h3 id="upgrade-notice-title">Have a deal for Gwinnett?</h3>
-    <p>For $9 a year, add an offer to the deals page we share weekly with our {group.memberCountDisplay} Facebook group members. It’s also in our welcome post for new members.</p>
+    <p>For $9 a year, add an offer to the deals page we share weekly with our {group.memberCountDisplay} Facebook group members. We also share deals in our weekly newsletter and link to the deals page in our new-member welcome post.</p>
     {available.length>1 && <label>Choose a free listing<select value={selected.id} onChange={e=>setChoice(e.target.value)}>{available.map(row=><option key={row.id} value={row.id}>{row.draft.name}</option>)}</select></label>}
     <div><button className="primary-action" disabled={busy} onClick={()=>onUpgrade(selected.id)}>Upgrade {available.length===1 ? selected.draft.name || "my listing" : "selected listing"} · $9/year</button><Link href="/directory/submit">Compare plans</Link></div>
   </aside>;

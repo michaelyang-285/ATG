@@ -15,7 +15,7 @@ export default async function Deals() {
       <p>
         Every week, we’ll share the Gwinnett Deals page with the{" "}
         {groupAudience.memberCountDisplay} members of the All Things Gwinnett
-        Facebook group. We’ll also include it in our welcome post so new members
+        Facebook group. We also share deals in our weekly newsletter. We’ll include the deals page in our welcome post so new members
         can find current offers when they join.
       </p>
       {offers.length ? (
