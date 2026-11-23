@@ -98,7 +98,7 @@ export default function SignupCard({
         <p className="fee-note">
           {event
             ? "Create your free account, then add your event details for review."
-            : tier==="paid" ? "Create your account, build your paid listing, then check out for $9 per year." : "Create your account and basic listing for free."}
+            : tier==="paid" ? "Create your account, build your paid listing, then check out for $12 per year." : "Create your account and basic listing for free."}
         </p>
       </aside>}
       <div className="signup-card">

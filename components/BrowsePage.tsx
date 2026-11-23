@@ -234,7 +234,7 @@ export default async function BrowsePage({
       {kind === "directory" && (
         <aside className="directory-owner-tools" aria-labelledby="business-owners">
           <h2 id="business-owners">For businesses and independent providers</h2>
-          <p>List your business for free with a logo, hours and contact details. Include your website and booking links for free. Upgrade for $9 a year for priority placement, photos and a deal for local members.</p>
+          <p>List your business for free with a logo, hours and contact details. Include your website and booking links for free. Advertise for $1/month, billed at $12 per year, with priority placement, photos and a deal for local members.</p>
           <div><Link href="/directory/submit">Free and paid listings</Link><Link href="/deals">Gwinnett Deals</Link><Link href="/account?mode=signin">Manage my listings</Link></div>
         </aside>
       )}

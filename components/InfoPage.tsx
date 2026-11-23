@@ -55,7 +55,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
     title: "List your independent business",
     paragraphs: [
       "The directory is for independent small businesses around Gwinnett, including food businesses, beauty professionals, and local services. Franchises and large businesses aren’t the focus.",
-      "Basic listings are free. Owners can upgrade for $9 per year. A listing is not an editorial endorsement, and an exclusive group promotion is not required for a basic listing.",
+      "Basic listings are free. Owners can upgrade for $12 per year. A listing is not an editorial endorsement, and an exclusive group promotion is not required for a basic listing.",
       "Submissions and payment are not open yet. The billing and review details will be shown before you submit or pay. In the meantime, contact the group admins to express interest.",
     ],
   },

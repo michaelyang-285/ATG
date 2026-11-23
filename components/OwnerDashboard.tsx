@@ -475,7 +475,7 @@ export default function OwnerDashboard() {
               {rows.map((r) => (
                 <article key={r.id}>
                   <OwnerListingHeading data={r.draft} href={r.profilePath} status={labels[r.status]} />
-                  {r.status==="unpaid" && r.contact.tier==="paid" && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Continue paid signup · $9/year</button>}
+                  {r.status==="unpaid" && r.contact.tier==="paid" && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Continue paid signup · $12/year</button>}
                   {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
                   {r.billing && r.premium_until && <p>Paid listing through {new Date(r.premium_until).toLocaleDateString("en-US")}</p>}
                   {r.billing && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Manage billing</button>}
@@ -502,7 +502,7 @@ export default function OwnerDashboard() {
                           {r.profilePath && <a className="button button-orange" href={r.profilePath}>View public profile</a>}
                           <button onClick={() => edit(r)}>Edit listing</button>
                           {r.profilePath && !r.billing && (
-                            <button disabled={busy} onClick={() => run(() => openCheckout(r.id))}>Upgrade · $9/year</button>
+                            <button disabled={busy} onClick={() => run(() => openCheckout(r.id))}>Upgrade · $12/year</button>
                           )}
                         </div>
                         <button className="request-deletion" disabled={busy} onClick={() => {
@@ -527,7 +527,7 @@ export default function OwnerDashboard() {
                 <p className="quiet">Here’s what neighbors will see in the directory.</p>
                 <ListingPreview data={media ? form : {...form,gallery:[]}} />
                 {!form.id && !paidSignup && <aside className="directory-upgrade-note" aria-labelledby="final-plan-choice">
-                  <h3 id="final-plan-choice">Want to promote a deal for $9 a year?</h3>
+                  <h3 id="final-plan-choice">Advertise your deal for $1 a month</h3>
                   <p>Add up to 10 photos, get priority placement and the ATG Verified check, and promote one active deal through:</p>
                   <ul className="list-disc pl-6">{dealPromotions.map(label=><li key={label}>{label}</li>)}</ul>
                   <button type="button" disabled={busy} onClick={()=>run(async()=>{
@@ -535,7 +535,7 @@ export default function OwnerDashboard() {
                     await checkpoint(2,paid);
                     setForm(paid);setStep(2);
                     window.scrollTo({top:0,behavior:"smooth"});
-                  })}>Switch to paid · $9/year</button>
+                  })}>Switch to paid · $12/year</button>
                   <p>Prefer the free listing? Submit it below.</p>
                 </aside>}
                 {descriptionOver && <p className="description-count" data-over="true">
@@ -717,9 +717,9 @@ export default function OwnerDashboard() {
             )}
             {msg && <p className="wizard-error" role="alert">{msg}</p>}
             {step===4 && !form.status && <label><input type="checkbox" name="newsletter" value="yes"/> Email me the All Things Gwinnett newsletter.</label>}
-            {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">{paidSignup ? "Your paid listing is $9 per year. Continue to Stripe to subscribe." : "Basic listings are free."} For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
+            {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">{paidSignup ? "Advertise for $1/month, billed at $12 per year. Continue to Stripe to subscribe." : "Basic listings are free."} For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>{setMsg("");setStep(step-1)}}>Back</button>}
-              <button className="primary-action" disabled={busy || descriptionBlocked || (step === 3 && !form.logo && !form.skipLogo)}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : paidSignup ? "Continue to checkout · $9/year" : "Submit free listing for review"}</button>
+              <button className="primary-action" disabled={busy || descriptionBlocked || (step === 3 && !form.logo && !form.skipLogo)}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : paidSignup ? "Continue to checkout · $12/year" : "Submit free listing for review"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
         </form>

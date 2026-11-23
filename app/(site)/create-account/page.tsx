@@ -15,7 +15,7 @@ export default function CreateAccount() {
         <section className="signup-intro">
           <h1>Create an ATG account</h1>
           <p>Hosting a trade night in Duluth? Cutting hair in Buford? Create a free account to submit your event or add your business or independent service to the Gwinnett directory.</p>
-          <p className="fee-note">One account covers both. Event submissions are free. Basic directory listings are free, with an optional $9 annual upgrade.</p>
+          <p className="fee-note">One account covers both. Event submissions are free. Basic directory listings are free, with optional advertising for $1/month, billed at $12 per year.</p>
           <h2>Meet the neighbors behind ATG</h2>
           <p>Our Facebook group has <strong>{groupAudience.memberCountDisplay} members</strong>. Neighbors share weekend plans, ask who they should hire, and trade local recommendations. The group averaged <strong>9,500 comments a month</strong> in September and October 2026.</p>
           <p><a className="text-link" href={facebookGroup}>Visit the Facebook group</a></p>

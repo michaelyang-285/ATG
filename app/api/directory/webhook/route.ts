@@ -45,7 +45,7 @@ export function POST(req: Request) {
     }
     if(subscriptionId) {
       const sub=await stripe.subscriptions.retrieve(subscriptionId,{expand:["latest_invoice"]});
-      const item=sub.items.data.find(i=>sub.metadata.plan==="atg_annual" && i.price.currency==="usd" && i.price.unit_amount===900 && i.price.recurring?.interval==="year");
+      const item=sub.items.data.find(i=>sub.metadata.plan==="atg_annual" && i.price.currency==="usd" && (i.price.unit_amount===1200 || i.price.unit_amount===900) && i.price.recurring?.interval==="year");
       const id=sub.metadata.directory_entry;
       if(item && id) {
         const table=db().from("directory_entries");

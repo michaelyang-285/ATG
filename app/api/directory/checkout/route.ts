@@ -51,7 +51,7 @@ export function POST(req: Request) {
       const prior = await stripe.checkout.sessions.retrieve(
         data.checkout_session,
       );
-      if (prior.mode === "subscription" && prior.status === "open")
+      if (prior.mode === "subscription" && prior.status === "open" && prior.amount_subtotal === 1200)
         return { url: prior.url };
       if (prior.mode === "subscription" && prior.status === "complete")
         throw new Failure(
@@ -68,7 +68,7 @@ export function POST(req: Request) {
           {
             price_data: {
               currency: "usd",
-              unit_amount: 900,
+              unit_amount: 1200,
               recurring: { interval: "year" },
               ...(process.env.STRIPE_SECRET_KEY?.includes("_live_")
                 ? { product: "prod_atg_directory_profile" }
@@ -86,7 +86,7 @@ export function POST(req: Request) {
         cancel_url: home,
       },
       {
-        idempotencyKey: "directory-annual-" + id + "-" + data.checkout_attempt,
+        idempotencyKey: "directory-annual-12-" + id + "-" + data.checkout_attempt,
       },
     );
     const saved = await table

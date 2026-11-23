@@ -5,7 +5,7 @@ import "./plans.css";
 
 export const metadata = {
   title: "List your business in Gwinnett | Compare free and paid listings",
-  description: "Create a free Gwinnett business listing, or upgrade for $9 a year to share a local deal, show your work and take bookings.",
+  description: "Create a free Gwinnett business listing, or advertise for $1/month, billed at $12 per year, to share a local deal, show your work and take bookings.",
 };
 
 const features = [
@@ -23,17 +23,17 @@ const features = [
 export default function Submit() {
   return <main id="main" className="site-width directory-pricing">
     <header className="pricing-intro"><h1>List your business in Gwinnett.</h1>
-      <p>Start free so neighbors can find you. Include your website and social links at no charge. For $9 a year, get priority in the directory, show your work and share a deal with local customers.</p>
+      <p>Start free so neighbors can find you. Include your website and social links at no charge. For $1/month, billed at $12 per year, get priority in the directory, show your work and share a deal with local customers.</p>
     </header>
     <table className="pricing-matrix">
       <caption className="sr-only">Compare free and paid directory listings</caption>
       <colgroup><col className="feature-column"/><col/><col/></colgroup>
       <thead><tr><th scope="col" className="matrix-label">Compare listings</th>
         <th scope="col"><span>Free listing</span><strong>$0</strong></th>
-        <th scope="col" className="paid-heading"><span>Paid listing</span><strong>$9<small> / year</small></strong></th>
+        <th scope="col" className="paid-heading"><span>Advertise your business</span><strong>$1<small> / month</small></strong><span>Billed at $12 per year</span></th>
       </tr></thead>
       <tbody>{features.map(([label,free,paid])=><tr key={label}><th scope="row">{label}</th><td>{free}</td><td>{paid}</td></tr>)}</tbody>
-      <tfoot><tr><td></td><td><Link className="text-link" href="/account?mode=signup&tier=free">Create a free business listing</Link></td><td><Link className="button button-orange" aria-label="Get Started with a paid listing for $9 per year" href="/account?mode=signup&tier=paid">Get Started</Link></td></tr></tfoot>
+      <tfoot><tr><td></td><td><Link className="text-link" href="/account?mode=signup&tier=free">Create a free business listing</Link></td><td><Link className="button button-orange" aria-label="Get Started with a paid listing for $12 per year" href="/account?mode=signup&tier=paid">Get Started</Link></td></tr></tfoot>
     </table>
     <p className="pricing-claim"><Link href="/account?mode=signin">Already listed? Sign in</Link></p>
     <section className="pricing-deals"><div><h2>Give Gwinnett a reason to stop by.</h2><Link href="/deals">Explore Gwinnett Deals <DirectionIcon/></Link></div>
