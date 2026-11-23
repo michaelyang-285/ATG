@@ -48,7 +48,13 @@ function interview(s){
  const q=s.questions[active];
  const picker='<label>Reporting stop<select id="stage">'+doc.sections.map((v,i)=>'<option value="'+i+'" '+(i===section?'selected':'')+'>'+esc(v.name)+'</option>').join('')+'</select></label>';
  const nav=q?'<label>Question<select id="questionNav">'+s.questions.map((v,i)=>'<option value="'+i+'" '+(i===active?'selected':'')+'>'+(i+1)+'. '+esc(v.text)+'</option>').join('')+'</select></label>':'';
- const answer=q?'<article><small>Question '+(active+1)+' of '+s.questions.length+'</small><h3>'+esc(q.text)+'</h3>'+(q.skipped?'<p>Flagged as irrelevant. '+esc(q.reason)+'</p>':'')+btn(q.audio?'Record again':'Record answer','record',q.id,true)+(q.audio?'<audio controls src="'+esc(mediaUrls[q.audio])+'"></audio>'+btn('Transcribe recording','transcribe',q.id):'')+field('Written answer or transcript','a'+q.id,q.answer,true)+btn('Save answer','answer',q.id)+(q.answer&&!q.skipped?btn('Review answer','review',q.id):'')+(q.feedback?'<aside class="feedback"><strong>Editorial feedback</strong><p>'+esc(q.feedback)+'</p></aside>':'')+'<details><summary>Question is irrelevant</summary>'+field('Reason (optional)','r'+q.id,q.reason)+btn('Flag question','skip',q.id)+'</details>'+(active+1<s.questions.length?btn('Next question','next'):'')+'</article>':'<p>Generate interview questions from your brief or add a question below.</p>';
+ const parts=q?audioParts(q):[];
+ const continuation=q&&(q.answer||parts.length);
+ const audioActions=q?btn(continuation?'Add to answer':'Record answer','record',q.id,true)
+   +parts.map((part,i)=>'<small>Recording '+(i+1)+'</small><audio controls src="'+esc(mediaUrls[part.file])+'"></audio>').join('')
+   +(parts.some(part=>!part.transcribed)?btn('Transcribe pending audio','transcribe',q.id):'')
+   +(continuation?'<details><summary>Start over</summary>'+btn('Replace answer with new recording','replace',q.id)+'</details>':''):'';
+ const answer=q?'<article><small>Question '+(active+1)+' of '+s.questions.length+'</small><h3>'+esc(q.text)+'</h3>'+(q.skipped?'<p>Flagged as irrelevant. '+esc(q.reason)+'</p>':'')+audioActions+field('Written answer or transcript','a'+q.id,q.answer,true)+btn('Save answer','answer',q.id)+(q.answer&&!q.skipped?btn('Review answer','review',q.id):'')+(q.feedback?'<aside class="feedback"><strong>Editorial feedback</strong><p>'+esc(q.feedback)+'</p></aside>':'')+'<details><summary>Question is irrelevant</summary>'+field('Reason (optional)','r'+q.id,q.reason)+btn('Flag question','skip',q.id)+'</details>'+(active+1<s.questions.length?btn('Next question','next'):'')+'</article>':'<p>Generate interview questions from your brief or add a question below.</p>';
  return picker+nav+answer+btn(q?'Generate more questions':'Generate questions from brief','generate','',!q)+'<details><summary>Add your own question</summary>'+field('Question','manual')+btn('Add question','manual')+'</details><details><summary>Field notes and photos ('+s.photos.length+')</summary>'+field('Visit notes','notes',s.notes,true)+btn('Save notes','notes')+'<label>Add a photo<input type="file" id="photo" accept="image/png,image/jpeg,image/webp"></label>'+s.photos.map(id=>'<a href="'+esc(mediaUrls[id])+'" target="_blank"><img alt="Open interview photo" src="'+esc(mediaUrls[id])+'"></a>').join('')+'</details>'
 }
 function review(){
@@ -71,14 +77,25 @@ async function change(action,data){
  catch(e){statusLine.textContent='Answer saved. Feedback unavailable. '+e.message}
  }
 }
-async function mic(id,button){
+function audioParts(q){return q.clips??(q.audio?[{file:q.audio,transcribed:Boolean(q.answer.trim())}]:[])}
+async function transcribePending(id){
+ const current=()=>doc.sections[section].questions.find(q=>q.id===id);
+ while(audioParts(current()).some(part=>!part.transcribed)){
+  statusLine.textContent='Recording saved. Adding to transcript…';
+  doc=await api('transcribe',{question:id,text:edits.get('a'+id)??current().answer});
+  edits.delete('a'+id);render();
+ }
+ statusLine.textContent='Transcript saved. Reviewing the combined answer…';
+ doc=await api('review',{question:id});render();statusLine.textContent='Answer and feedback saved.';
+}
+async function mic(id,button,replace=false){
  if(recording){recording.stop();return}
  const stream=await navigator.mediaDevices.getUserMedia({audio:true});
  try{
  const mime=['audio/webm','audio/mp4','audio/ogg'].find(m=>MediaRecorder.isTypeSupported(m));if(!mime)throw Error('This browser cannot record a supported format.');
  const rec=new MediaRecorder(stream,{mimeType:mime}),chunks=[];let size=0;
  rec.ondataavailable=e=>{chunks.push(e.data);size+=e.data.size;if(size>22500000&&rec.state==='recording')rec.stop()};
- rec.onstop=async()=>{working=true;stream.getTracks().forEach(t=>t.stop());try{await change('record',{question:id,blob:new Blob(chunks,{type:mime})})}catch(e){statusLine.textContent=e.message}finally{recording=null;working=false;view.inert=false;render()}};
+ rec.onstop=async()=>{working=true;stream.getTracks().forEach(t=>t.stop());try{await change('record',{question:id,replace,text:value('a'+id),blob:new Blob(chunks,{type:mime})});await transcribePending(id)}catch(e){statusLine.textContent=e.message}finally{recording=null;working=false;view.inert=false;render()}};
  rec.start(1000);recording=rec;view.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=el!==button);button.textContent='Stop and save recording';statusLine.textContent='Recording…';
  }catch(e){stream.getTracks().forEach(t=>t.stop());throw e}
 }
@@ -95,7 +112,11 @@ view.addEventListener('click',async e=>{
  try{
  if(action==='new'){newBrief();statusLine.textContent='';return}
  if(action==='screen'||action==='next'){if(action==='next')active++;else screen=id;render();statusLine.textContent='';return}
- if(action==='record'){if(!recording&&doc.sections[section].questions.find(q=>q.id===id)?.answer&&!confirm('Replace this answer with a new recording?'))return;await mic(id,button);return}
+ if(action==='transcribe'){await transcribePending(id);return}
+ if(action==='record'||action==='replace'){
+  if(action==='replace'&&!recording&&!confirm('Replace the existing answer and recordings after saving your new recording?'))return;
+  await mic(id,button,action==='replace');return
+ }
  if(action==='back'){if(!dirty||confirm('Leave and discard unsaved field edits?'))await library();statusLine.textContent='';return}
  if(action==='open'){doc=(await api('list')).find(d=>d.id===id);await loadMedia(doc.id);render();statusLine.textContent='';return}
  if(action==='export'){const lines=[doc.topic,'Writer: '+doc.author,doc.guidelines,...doc.sections.flatMap(s=>['## '+s.name,s.notes,...s.questions.flatMap(q=>['### '+q.text,q.skipped?'Flagged: '+q.reason:q.answer,q.feedback])]),'## Ranking',...doc.ranking.map((n,i)=>(i+1)+'. '+n),'## Draft',doc.draft];const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n\n')],{type:'text/markdown'}));a.download='interview.md';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);statusLine.textContent='Markdown exported for Notion import.';return}

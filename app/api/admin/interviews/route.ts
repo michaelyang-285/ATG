@@ -7,7 +7,10 @@ import { db, owner, respond, Failure } from "@/lib/directory/server";
 
 export const maxDuration = 60;
 const bucket = "admin-interview-media";
-const question = (text: string) => ({ id: randomUUID(), text, answer: "", feedback: "", skipped: false, reason: "", audio: "" });
+const question = (text: string) => ({ id: randomUUID(), text, answer: "", feedback: "", skipped: false, reason: "", audio: "", clips: [] as {file:string;transcribed:boolean}[] });
+function clipsFor(q: ReturnType<typeof question>) {
+ return q.clips ?? (q.audio ? [{file:q.audio,transcribed:Boolean(q.answer?.trim())}] : []);
+}
 const section = (name: string) => ({name, notes: "", photos: [] as string[], questions: [] as ReturnType<typeof question>[]});
 type Interview = {id:string;revision:number;topic:string;guidelines:string;author:string;ranking:string[];draft:string;sections:ReturnType<typeof section>[]};
 function check(ok: unknown, msg: string): asserts ok { if (!ok) throw new Failure(400, msg); }
@@ -66,7 +69,7 @@ export function POST(req:Request) {
   const doc=row.data.document as Interview;
   const prefix=uid+"/"+doc.id+"/";
   if(b.action==="mediaUrls"){
-   const files=doc.sections.flatMap(s=>[...s.photos,...s.questions.map(q=>q.audio).filter(Boolean)]);
+   const files=doc.sections.flatMap(s=>[...s.photos,...s.questions.flatMap(q=>clipsFor(q).map(clip=>clip.file))]);
    if(!files.length)return {};
    const {data,error}=await media.createSignedUrls(files,3600);if(error)throw error;
    return Object.fromEntries(data.filter(v=>v.signedUrl).map(v=>[v.path,v.signedUrl]));
@@ -84,7 +87,15 @@ export function POST(req:Request) {
     check(typeof b.file==="string" && b.file.startsWith(prefix) && /^[a-f0-9-]+\.(jpg|png|webp|mp4|webm|ogg)$/.test(b.file.slice(prefix.length)),"Invalid upload.");
     const image=/\.(jpg|png|webp)$/.test(b.file);check(image===(b.action==="photo"),"Invalid media type.");
     const {data,error}=await media.info(b.file);check(!error&&data,"Upload incomplete.");
-    if(image)s.photos.push(b.file);else {check(q,"Select a question.");Object.assign(q,{audio:b.file,answer:"",feedback:"",skipped:false,reason:""});}break;
+    if(image)s.photos.push(b.file);
+    else {
+     check(q,"Select a question.");
+     const clips=b.replace===true?[]:clipsFor(q);
+     check(!clips.some(clip=>clip.file===b.file),"This recording is already saved.");
+     const answer=b.replace===true?"":b.text===undefined?q.answer:string(b.text);
+     Object.assign(q,{clips:[...clips,{file:b.file,transcribed:false}],audio:b.file,answer,feedback:"",skipped:false,reason:""});
+    }
+    break;
    }
    case "brief":doc.topic=string(b.topic,500).trim();check(doc.topic,"Enter a topic.");doc.guidelines=string(b.guidelines);doc.author=string(b.author,500);break;
    case "notes":s.notes=string(b.text);break;
@@ -96,13 +107,18 @@ export function POST(req:Request) {
    case "answer":check(q,"Select a question.");Object.assign(q,{answer:string(b.text),feedback:"",skipped:false,reason:""});break;
    case "skip":check(q,"Select a question.");Object.assign(q,{skipped:true,reason:string(b.text),feedback:""});break;
    case "transcribe":{
-    check(q?.audio,"Record an answer first.");const {data,error}=await media.download(q.audio);if(error)throw error;
-    const form=new FormData();form.append("model","whisper-1");form.append("file",data,"recording."+q.audio.split(".").pop());
-    q.answer=string((await provider(key,"audio/transcriptions",form)).text);q.feedback="";break;
+    check(q,"Select a question.");q.clips=clipsFor(q);
+    const clip=q.clips.find(part=>!part.transcribed);check(clip,"All recordings are already transcribed.");
+    const {data,error}=await media.download(clip.file);if(error)throw error;
+    const form=new FormData();form.append("model","whisper-1");form.append("file",data,"recording."+clip.file.split(".").pop());
+    const addition=string((await provider(key,"audio/transcriptions",form)).text).trim();
+    check(addition,"No speech detected in the recording.");
+    q.answer=[b.text===undefined?q.answer:string(b.text),addition].filter(Boolean).join("\n\n");
+    clip.transcribed=true;q.feedback="";break;
    }
    case "review":{
     check(q?.answer?.trim()&&!q.skipped,"Save an answer first.");
-    const result=await write(key,'Return {"feedback":"Addressed, Partial or Off track with specific feedback","followup":"one relevant follow-up or empty if complete"}.',doc,{visit:s.name,question:q.text,answer:q.answer});
+    const result=await write(key,'Return {"feedback":"exactly one rating (Addressed, Partial or Off track), followed by specific feedback on the complete accumulated answer to this question","followup":"one relevant follow-up or empty if complete"}.',doc,{visit:s.name,question:q.text,answer:q.answer});
     q.feedback=string(result.feedback);if(result.followup&&!s.questions.some(x=>x.text===result.followup))s.questions.splice(s.questions.indexOf(q)+1,0,question(string(result.followup,2000)));break;
    }
    case "rank":check([b.index,b.to].every(i=>Number.isInteger(i)&&i>=0&&i<doc.ranking.length),"Invalid ranking.");doc.ranking.splice(b.to,0,doc.ranking.splice(b.index,1)[0]);break;
