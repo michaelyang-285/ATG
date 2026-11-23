@@ -11,6 +11,8 @@ import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/
 import MySubmissions from "./MySubmissions";
 import {accountAdmin} from "@/lib/account-admin";
 import ApprovalNotifications from "./ApprovalNotifications";
+import CompleteAccount from "./CompleteAccount";
+import {hasAccountContact} from "@/lib/account-contact";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
 import { allOfGwinnett, formatServiceAreas, serviceAreaCities } from "@/lib/directory/locations";
@@ -149,7 +151,7 @@ export default function OwnerDashboard() {
       .then((data) => {
         if (!active) return;
         setRows(data.rows); setCanOpenQueue(data.canOpenQueue);setProgress(data.progress);setLoaded(true);
-        if (new URLSearchParams(location.search).get("next") === "approvals")
+        if (hasAccountContact(session.user.user_metadata) && new URLSearchParams(location.search).get("next") === "approvals")
           location.replace("/admin/approvals");
       })
       .catch((e) => {
@@ -365,6 +367,7 @@ export default function OwnerDashboard() {
       <SignupCard {...{client,signin,setSignin,sent,setSent,email,setEmail,googleEnabled,busy,account,setAccount,status,setMsg,run}}
         register={password=>api("login",{email,account,password})}/>
     );
+  if (!hasAccountContact(session.user.user_metadata)) return <CompleteAccount user={session.user} client={client}/>;
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>

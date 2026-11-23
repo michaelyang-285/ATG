@@ -171,7 +171,7 @@ export default function SignupCard({
                         options: {
                           redirectTo: new URL(
                             generalAccount ? "/create-account" : event ? "/events/submit" :
-                              new URLSearchParams(location.search).get("next") === "approvals" ? "/admin/approvals" : "/account",
+                              new URLSearchParams(location.search).get("next") === "approvals" ? "/account?next=approvals" : "/account",
                             window.location.origin,
                           ).href,
                           queryParams: { prompt: "select_account" },
@@ -245,7 +245,7 @@ export default function SignupCard({
                     signin
                       ? k === "email"
                       : !event ||
-                        ["firstName", "lastName", "email"].includes(k),
+                        ["firstName", "lastName", "email", "phone"].includes(k),
                   )
                   .map(([k, label, auto, type]) => (
                     <label

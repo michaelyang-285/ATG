@@ -1,5 +1,6 @@
 "use client";
 import "./people.css";
+import AdminListingMediaHours from "@/components/AdminListingMediaHours";
 import { useEffect, useState } from "react";
 import { portalRequest, type Assignment } from "@/lib/portal-request";
 type Person = {
@@ -363,7 +364,7 @@ export default function People() {
                         listingId: l.id,
                         status: l.status,
                         revision: l.revision,
-                        fields,
+                        fields: {...fields, gallery: JSON.parse(String(data.get("gallery"))), weeklyHours: JSON.parse(String(data.get("weeklyHours")))},
                       });
                     } catch {
                       setMsg(
@@ -373,7 +374,7 @@ export default function People() {
                   }}
                 >
                   {Object.entries({ ...l.draft, ...l.contact })
-                    .filter(([key]) => key !== "email")
+                    .filter(([key]) => !["email","gallery","weeklyHours","hours"].includes(key))
                     .map(([key, value]) => (
                       <label key={key} className="capitalize">
                         {key.replace(/([A-Z])/g, " $1")}
@@ -401,6 +402,7 @@ export default function People() {
                         )}
                       </label>
                     ))}
+                  <AdminListingMediaHours listingId={l.id} draft={l.draft} onUpload={setBusy}/>
                   <button disabled={busy}>
                     {l.status === "published"
                       ? "Update published listing"
