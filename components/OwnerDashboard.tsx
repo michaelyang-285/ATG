@@ -398,15 +398,17 @@ export default function OwnerDashboard() {
         </section>
       ) : !form ? (
         <div className="account-workspace">
-          {(accountAdmin(session.user) || session.user.app_metadata.approved_author || canOpenQueue) &&
+          {(accountAdmin(session.user) || canOpenQueue) &&
             <aside className="account-tools">
-              <h2>Workspace</h2>
-              {accountAdmin(session.user) && <a className="account-admin-action" href="/admin/people"><span>Manage people and assignments</span><span aria-hidden="true">→</span></a>}
-              {session.user.app_metadata.approved_author && <a className="account-assignment-link" href="/assignments">My assignments <span aria-hidden="true">→</span></a>}
+              <h2>Administration</h2>
+              {accountAdmin(session.user) && <a className="account-admin-action" href="/admin/people"><span>Manage people</span><span aria-hidden="true">→</span></a>}
               {canOpenQueue && <ApprovalNotifications key={session.user.id} session={session} refreshKey={refreshKey} />}
             </aside>}
           <section className="account-submissions" aria-labelledby="my-submissions">
-            <h2 id="my-submissions">My submissions</h2>
+            <div className="account-submissions-heading">
+              <h2 id="my-submissions">My submissions</h2>
+              {session.user.app_metadata.approved_author && <a className="account-assignment-link" href="/assignments">My assignments</a>}
+            </div>
             <section className="owner-submissions-section" aria-labelledby="directory-submissions">
               <div className="owner-section-heading">
                 <h3 id="directory-submissions">Directory listings</h3>
