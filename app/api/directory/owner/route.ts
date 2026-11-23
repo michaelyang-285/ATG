@@ -1,5 +1,4 @@
 import { notifySubmission } from "@/lib/submission-alerts";
-import { networks } from "@/lib/directory/social";
 import { subscribeEmail } from "@/lib/newsletter";
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
@@ -35,12 +34,15 @@ export function POST(req: Request) {
     const values = listing(body, user.email!, user.id),
       table = db().from("directory_entries");
     if (!user.email_confirmed_at) throw new Failure(403,"Verify your email before submitting a listing.");
-    const current = body.id ? await table.select("paid_session,premium_until").eq("id",body.id).eq("owner_id",user.id).single() : null;
+    const current = body.id ? await table.select("paid_session,premium_until,status,contact").eq("id",body.id).eq("owner_id",user.id).single() : null;
     if (current?.error) throw new Failure(404,"Listing unavailable.");
     const premium = Date.parse(current?.data?.premium_until || "") > Date.now();
-    if (!premium && !current?.data?.paid_session && (values.draft.gallery.length || [values.draft.url,values.draft.booking,values.draft.social,...networks.map(n=>body[n.key])].some(Boolean)))
+    const paidSignup=body.id ? current?.data?.status==="unpaid" && current.data.contact?.tier==="paid" : body.tier==="paid";
+    Object.assign(values.contact,{tier:paidSignup ? "paid" : current?.data?.contact?.tier || "free",url:values.draft.url});
+    if(!premium && !paidSignup && !current?.data?.paid_session) values.draft.url="";
+    if (!paidSignup && !premium && !current?.data?.paid_session && (values.draft.gallery.length || [values.draft.url,values.draft.booking,values.draft.social].some(Boolean)))
       throw new Failure(400,"Upgrade before adding links or gallery photos.");
-    if (premium && body.dealTitle?.trim()) {
+    if ((premium || paidSignup) && body.dealTitle?.trim()) {
       if (typeof body.dealTerms !== "string" || !body.dealTerms.trim() || body.dealTerms.length>500 || body.dealTitle.length>100 || !/^\d{4}-\d{2}-\d{2}$/.test(body.dealEnd)) throw new Failure(400,"Include the offer, redemption details and expiration date.");
       Object.assign(values.draft,{deal:{title:body.dealTitle.trim(),terms:body.dealTerms.trim(),end:body.dealEnd}});
     }
@@ -49,7 +51,7 @@ export function POST(req: Request) {
           .update({
             ...values,
             revision: body.revision + 1,
-            status: "review",
+            status: paidSignup ? "unpaid" : "review",
             review_note: "",
           })
           .eq("owner_id", user.id)
@@ -60,7 +62,7 @@ export function POST(req: Request) {
           .select("id,profile_slug")
           .maybeSingle()
       : await table
-          .insert({ ...values, ...(body.listingId?{id:body.listingId}:{}),owner_id: user.id, status:"review" })
+          .insert({ ...values, ...(body.listingId?{id:body.listingId}:{}),owner_id: user.id, status:paidSignup ? "unpaid" : "review" })
           .select("id,profile_slug")
           .single();
     if (result.error?.code === "P0429") throw new Failure(429,"You can submit up to three new listings per day.");
@@ -68,7 +70,7 @@ export function POST(req: Request) {
     if (result.error) throw result.error;
     if (!result.data)
       throw new Failure(409, "This listing changed. Reload before editing.");
-    if (!body.id || body.status==="unpaid") await notifySubmission("profile",result.data.id);
+    if (!paidSignup && (!body.id || body.status==="unpaid")) await notifySubmission("profile",result.data.id);
     if (!body.id && body.newsletter === true) await subscribeEmail(user.email!, "directory");
     if(body.listingId)await db().from("directory_progress").delete().eq("owner_id",user.id).eq("listing_id",body.listingId);
     if (result.data.profile_slug) revalidatePath(listingPath(result.data.profile_slug));

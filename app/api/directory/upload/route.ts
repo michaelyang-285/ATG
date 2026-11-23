@@ -21,8 +21,11 @@ export function POST(req: Request) {
     if(!quota.data) throw new Failure(429,"Upload limit reached. Try again in an hour.");
     const data = await req.formData();
     if(data.has("thumbnail") && !data.has("listingId")){
-      const listing=await db().from("directory_entries").select("paid_session,premium_until").eq("id",data.get("galleryListing")).eq("owner_id",user.id).single();
-      if(!listing.data || !(listing.data.paid_session || Date.parse(listing.data.premium_until)>Date.now())) throw new Failure(403,"Upgrade before adding gallery photos.");
+      const listing=await db().from("directory_entries").select("paid_session,premium_until,status,contact").eq("id",data.get("galleryListing")).eq("owner_id",user.id).single();
+      if(!(listing.data?.paid_session || Date.parse(listing.data?.premium_until)>Date.now() || (listing.data?.status==="unpaid" && listing.data.contact?.tier==="paid"))) {
+        const draft=await db().from("directory_progress").select("fields").eq("listing_id",data.get("galleryListing")).eq("owner_id",user.id).maybeSingle();
+        if(!draft.data || draft.data.fields?.id || draft.data.fields?.tier!=="paid") throw new Failure(403,"Choose a paid listing to add gallery photos.");
+      }
     }
     const display = await imageData(data.get("file"), storedImageLimit);
     const preview = data.has("thumbnail") ? await imageData(data.get("thumbnail"), thumbnailLimit) : null;

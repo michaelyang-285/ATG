@@ -12,6 +12,7 @@ export type SignupDetails = {
   name: string;
 };
 type Props = {
+  tier?: string;
   event?: boolean;
   generalAccount?: boolean;
   client: SupabaseClient;
@@ -55,7 +56,7 @@ export function Completion({
   );
 }
 export default function SignupCard({
-  event = false,
+  tier, event = false,
   generalAccount = false,
   client,
   signin,
@@ -102,7 +103,7 @@ export default function SignupCard({
         <p className="fee-note">
           {event
             ? "Create your free account, then add your event details for review."
-            : "Create your account and basic listing for free."}
+            : tier==="paid" ? "Create your account, build your paid listing, then check out for $9 per year." : "Create your account and basic listing for free."}
         </p>
       </aside>}
       <div className="signup-card">
@@ -171,7 +172,7 @@ export default function SignupCard({
                         options: {
                           redirectTo: new URL(
                             generalAccount ? "/create-account" : event ? "/events/submit" :
-                              new URLSearchParams(location.search).get("next") === "approvals" ? "/account?next=approvals" : "/account",
+                              new URLSearchParams(location.search).get("next") === "approvals" ? "/account?next=approvals" : tier ? "/account?tier="+tier : "/account",
                             window.location.origin,
                           ).href,
                           queryParams: { prompt: "select_account" },

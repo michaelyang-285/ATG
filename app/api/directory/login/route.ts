@@ -4,7 +4,7 @@ import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 export function POST(req: Request) {
   return respond(async () => {
     await human();
-    const { email, password, account, eventSignup, generalAccount } = await req.json();
+    const { email, password, account, tier, eventSignup, generalAccount } = await req.json();
     if (!account || typeof password !== "string" || password.length < 8) throw new Failure(400, "Use a password with at least 8 characters.");
     if (account) {
       if (eventSignup !== true && typeof account.name === "string" && account.name.length > 100)
@@ -46,7 +46,7 @@ export function POST(req: Request) {
             }
           : {}),
         emailRedirectTo: new URL(
-          generalAccount === true ? "/create-account" : eventSignup === true ? "/events/submit" : "/account",
+          generalAccount === true ? "/create-account" : eventSignup === true ? "/events/submit" : tier==="paid" || tier==="free" ? "/account?tier="+tier : "/account",
           process.env.DIRECTORY_SITE_URL!,
         ).href,
       },

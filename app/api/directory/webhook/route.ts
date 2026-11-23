@@ -56,6 +56,9 @@ export function POST(req: Request) {
         } else if(sub.status==="active" && typeof sub.latest_invoice==="object" && sub.latest_invoice?.status==="paid") {
           const saved=await table.update({subscription_id:sub.id,billing_customer:sub.customer,premium_until:new Date(item.current_period_end*1000).toISOString()}).eq("id",id).or("subscription_id.is.null,subscription_id.eq."+sub.id);
           if(saved.error) throw saved.error;
+          const queued=await table.update({status:"review"}).eq("id",id).eq("subscription_id",sub.id).eq("status","unpaid").eq("contact->>tier","paid").select("id").maybeSingle();
+          if(queued.error) throw queued.error;
+          if(queued.data) await notifySubmission("profile",id);
         }
       }
     }

@@ -10,7 +10,7 @@ export const metadata = {
 
 const features = [
   ["Business profile", "Logo, hours, phone & service area", "Everything in Free"],
-  ["Customer links", "None", "Website, socials & booking"],
+  ["Customer links", "Social profiles", "Socials, website & booking"],
   ["Photos of your work", "Logo only", "Logo + 10 photos"],
   ["Deals & events", "None on profile", "One active deal + approved events"],
 ];
@@ -28,11 +28,9 @@ export default function Submit() {
         <th scope="col" className="paid-heading"><span>Paid listing</span><strong>$9<small> / year</small></strong></th>
       </tr></thead>
       <tbody>{features.map(([label,free,paid])=><tr key={label}><th scope="row">{label}</th><td>{free}</td><td>{paid}</td></tr>)}</tbody>
+      <tfoot><tr><td></td><td><Link className="text-link" href="/account?mode=signup&tier=free">Create a free business listing</Link></td><td><Link className="button button-orange" aria-label="Get Started with a paid listing for $9 per year" href="/account?mode=signup&tier=paid">Get Started</Link></td></tr></tfoot>
     </table>
-    <div className="pricing-actions">
-      <Link className="button button-orange" href="/account?mode=signup">Create my free listing <DirectionIcon/></Link>
-      <Link className="text-link" href="/account?mode=signin">Already listed? Sign in</Link>
-    </div>
+    <p className="pricing-claim"><Link href="/account?mode=signin">Already listed? Sign in</Link></p>
     <section className="pricing-deals"><div><h2>Give Gwinnett a reason to stop by.</h2><Link href="/deals">Explore Gwinnett Deals <DirectionIcon/></Link></div>
       <p>Publish an offer on <strong>Gwinnett Deals</strong> with your paid listing. Every week, we share the deals page with our <strong>{group.memberCountDisplay} Facebook group members</strong>. We also link to it in our welcome post for new members.</p>
     </section>

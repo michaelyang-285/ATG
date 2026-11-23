@@ -24,7 +24,7 @@ import {blankSocial, networks} from "@/lib/directory/social";
 const blank = {
   ...blankSocial,
   dealTitle:"", dealTerms:"", dealEnd:"",
-  listingId: "",
+  tier:"free", listingId: "",
   id: "",
   revision: 0,
   status: "",
@@ -104,7 +104,10 @@ export default function OwnerDashboard() {
     [account,setAccount]=useState({firstName:"",lastName:"",phone:"",name:""}),
     [msg, setMsg] = useState(""),
     [busy, setBusy] = useState(false);
+  const [signupTier,setSignupTier]=useState("");
   useEffect(() => {
+    const tier=new URLSearchParams(location.search).get("tier");
+    if(tier==="free" || tier==="paid") setSignupTier(tier);
     setSignin(new URLSearchParams(location.search).get("mode")==="signin");
     if (new URLSearchParams(window.location.search).get("mode") === "signin") setSignin(true);
     if (!client) return;
@@ -229,7 +232,14 @@ export default function OwnerDashboard() {
     setStep(overLimit ? 0 : saved.step);
     setMsg(overLimit ? additionalCategoryError : "");
   }
-  function edit(row?: Row) {
+  useEffect(()=>{
+    if(!loaded || !session || !signupTier || !hasAccountContact(session.user.user_metadata)) return;
+    const saved=progress.find(p=>!p.fields.id && p.fields.tier===signupTier);
+    if(saved) resume(saved); else edit(undefined,signupTier);
+    setSignupTier("");
+    const url=new URL(location.href);url.searchParams.delete("tier");history.replaceState(history.state,"",url);
+  },[loaded,signupTier,session]);
+  function edit(row?: Row, tier="free") {
     setUploadIssue(null);
     const existing=row&&progress.find(p=>p.listing_id===row.id&&p.fields.revision===row.revision);
     if(existing){resume(existing);return}
@@ -241,12 +251,13 @@ export default function OwnerDashboard() {
         ? restoreDraft({
             ...row.contact,
             ...row.draft,
+            url:row.draft.url || row.contact.url || "",
             dealTitle:row.draft.deal?.title || "", dealTerms:row.draft.deal?.terms || "", dealEnd:row.draft.deal?.end || "",
             id: row.id,listingId:row.id,
             revision: row.revision,
             status: row.status,
           })
-        : { ...blank,listingId:crypto.randomUUID(),firstName:m.firstName||m.given_name||"",lastName:m.lastName||m.family_name||"",phone:m.phone||"",name:m.businessName||"",city:m.city||locationHint.city||"",zip:m.zip||locationHint.zip||"" },
+        : { ...blank,tier,listingId:crypto.randomUUID(),firstName:m.firstName||m.given_name||"",lastName:m.lastName||m.family_name||"",phone:m.phone||"",name:m.businessName||"",city:m.city||locationHint.city||"",zip:m.zip||locationHint.zip||"" },
     );
     setStep(0);
     setMsg("");
@@ -296,7 +307,7 @@ export default function OwnerDashboard() {
           const data = new FormData();
           data.set("file", display, "display");
           if (preview) data.set("thumbnail", preview, "thumbnail.jpg");
-          if (k==="gallery" && form.id) data.set("galleryListing",form.id);
+          if (k==="gallery") data.set("galleryListing",form.id || form.listingId);
           const {url} = await api("upload", data);
           setForm(current => current && (k === "logo"
             ? {...current, logo: url}
@@ -322,7 +333,8 @@ export default function OwnerDashboard() {
 
   const editing = rows.find(row=>row.id===form?.id);
   const premium = Date.parse(editing?.premium_until || "") > Date.now();
-  const media = premium || editing?.legacy;
+  const paidSignup=form?.tier==="paid" && (!form.id || editing?.status==="unpaid");
+  const media = premium || editing?.legacy || paidSignup;
   const descriptionCount = descriptionLength(form?.summary || "");
   const descriptionOver = descriptionCount > descriptionLimit;
   const descriptionBlocked = descriptionOver && (step === 0 || step === 4);
@@ -353,9 +365,10 @@ export default function OwnerDashboard() {
       }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
-      await api("owner", {...form, ...(!media ? {...blankSocial,url:"",social:"",booking:"",gallery:[]} : {}), newsletter});
+      const saved=await api("owner", {...form, ...(!media ? {social:"",booking:"",gallery:[]} : {}), newsletter});
       setForm(null);
       await refresh();
+      if(paidSignup){await openCheckout(saved.id);return}
       setMsg("Listing submitted for review.");
     });
   }
@@ -368,8 +381,8 @@ export default function OwnerDashboard() {
     return <p>Directory signup is being set up. Please check back soon.</p>;
   if (!session)
     return (
-      <SignupCard {...{client,signin,setSignin,sent,setSent,email,setEmail,googleEnabled,busy,account,setAccount,status,setMsg,run}}
-        register={password=>api("login",{email,account,password})}/>
+      <SignupCard tier={signupTier} {...{client,signin,setSignin,sent,setSent,email,setEmail,googleEnabled,busy,account,setAccount,status,setMsg,run}}
+        register={password=>api("login",{email,account,password,tier:signupTier})}/>
     );
   if (!hasAccountContact(session.user.user_metadata)) return <CompleteAccount user={session.user} client={client}/>;
   if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
@@ -378,7 +391,7 @@ export default function OwnerDashboard() {
       {!form && !checkout && status}
       <header className={form || checkout ? undefined : "account-masthead"}>
         <div>
-          <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My account"}</h1>
+          <h1>{checkout ? "Listing checkout" : form ? (media ? "Build your paid listing" : "Build your free listing") : "My account"}</h1>
           <p className="account-identity"><span className="sr-only">Signed in as </span>{session.user.email}</p>
         </div>
         <nav className="account-utilities" aria-label="Account settings">
@@ -431,6 +444,7 @@ export default function OwnerDashboard() {
               {rows.map((r) => (
                 <article key={r.id}>
                   <OwnerListingHeading data={r.draft} href={r.profilePath} status={labels[r.status]} />
+                  {r.status==="unpaid" && r.contact.tier==="paid" && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Continue paid signup · $9/year</button>}
                   {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
                   {r.billing && r.premium_until && <p>Paid listing through {new Date(r.premium_until).toLocaleDateString("en-US")}</p>}
                   {r.billing && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Manage billing</button>}
@@ -471,7 +485,7 @@ export default function OwnerDashboard() {
             {step===4 ? (
               <>
                 <p className="quiet">Here’s what neighbors will see in the directory.</p>
-                <ListingPreview data={form} />
+                <ListingPreview data={media ? form : {...form,url:"",booking:"",gallery:[]}} />
                 {descriptionOver && <p className="description-count" data-over="true">
                   Your description exceeds 1,000 characters.{" "}
                   <button type="button" onClick={() => setStep(0)}>Edit description</button>
@@ -587,19 +601,21 @@ export default function OwnerDashboard() {
                   onChange={e => setForm(current => current && ({...current, hidePhone:e.target.checked,
                     businessPhone: current.businessPhone || current.phone}))} />Hide phone number on profile</label>
                 {!form.hidePhone && field("businessPhone", "Business phone shown on profile", true, "tel")}
-                {media && <>{field("url", "Website", false, "url")}
-                {field("booking", "Booking or ordering link", false, "url")}
+                {field("url",media ? "Website" : "Website (optional, saved privately)",false,"url")}
+                {!media && <p>Free listings show your social profiles. A public website link is included with the paid plan.</p>}
+                {media && <>
+                {field("booking", "Booking or ordering link", false, "url")}</>}
                 <details><summary>Social profiles (optional)</summary>
                   {networks.map(({key,label})=><div key={key}>{field(key,label+" URL",false,"url")}</div>)}
-                  {field("social","Other social profile",false,"url")}
-                </details></>}
-                {premium && <fieldset><legend>Manage deal</legend>{field("dealTitle","Offer (clear to end it)")}{field("dealTerms","Terms and how to redeem")}{field("dealEnd","Last day",false,"date")}</fieldset>}
-                </>}{step===3&&<><p>Choose JPG, PNG, or WebP images up to 10 MB each. Your device resizes them before upload. Logo and photos are optional.</p>
+                  {media && field("social","Other social profile",false,"url")}
+                </details>
+                {(premium || paidSignup) && <fieldset><legend>Manage deal</legend>{field("dealTitle","Offer (clear to end it)")}{field("dealTerms","Terms and how to redeem")}{field("dealEnd","Last day",false,"date")}</fieldset>}
+                </>}{step===3&&<><p>Choose JPG, PNG, or WebP images up to 10 MB each. Your device resizes them before upload. {media ? "Your logo and gallery are optional." : "Free listings include one logo."}</p>
                 {(["logo", "gallery"] as const).filter(k=>k==="logo" || media).map((k) => (
                   <section key={k} className="upload-panel">
                     <label>
                       {k === "logo"
-                        ? "Logo or profile photo"
+                        ? "Business logo"
                         : `Photos of your work (${form.gallery.length} of ${galleryLimit})`}
                       <input
                         type="file"
@@ -647,9 +663,9 @@ export default function OwnerDashboard() {
             )}
             {msg && <p className="wizard-error" role="alert">{msg}</p>}
             {step===4 && !form.status && <label><input type="checkbox" name="newsletter" value="yes"/> Email me the All Things Gwinnett newsletter.</label>}
-            {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">Basic listings are free. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
+            {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">{paidSignup ? "Your paid listing is $9 per year. Continue to Stripe to subscribe." : "Basic listings are free."} For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>{setMsg("");setStep(step-1)}}>Back</button>}
-              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : "Submit free listing for review"}</button>
+              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : paidSignup ? "Continue to checkout · $9/year" : "Submit free listing for review"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
         </form>

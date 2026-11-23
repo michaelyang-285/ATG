@@ -22,7 +22,7 @@ export function POST(req: Request) {
     const table = db().from("directory_entries");
     const { data, error } = await table
       .select(
-        "id,published,billing_customer,subscription_id,checkout_attempt,checkout_session,deletion_due_at",
+        "id,published,billing_customer,subscription_id,checkout_attempt,checkout_session,deletion_due_at,status,contact",
       )
       .eq("id", id)
       .eq("owner_id", user.id)
@@ -42,7 +42,7 @@ export function POST(req: Request) {
         })
         .then(({ url }) => ({ url }));
     }
-    if (!data.published || data.deletion_due_at)
+    if ((!data.published && !(data.status==="unpaid" && data.contact?.tier==="paid")) || data.deletion_due_at)
       throw new Failure(
         409,
         "An approved, visible listing is required to upgrade.",

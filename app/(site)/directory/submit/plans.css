@@ -29,3 +29,7 @@
   .pricing-matrix small {font-size:.75rem}
   .pricing-deals {grid-template-columns:1fr;gap:1rem}
 }
+
+.pricing-matrix tfoot td {vertical-align:top}
+.pricing-matrix tfoot .button {min-width:0;padding:.65rem clamp(.4rem,2vw,1.25rem);font-size:1rem}
+.pricing-matrix tfoot .text-link {font-size:1rem}
