@@ -57,11 +57,12 @@ function studio(doc: Doc) {
 }
 export default function People() {
   const [page, setPage] = useState(1),
+    [filter, setFilter] = useState("all"),
     [perPage, setPerPage] = useState(50),
     [loading, setLoading] = useState(true),
     [listError, setListError] = useState(""),
     [people, setPeople] = useState<Person[]>([]),
-    [selected, setSelected] = useState<Person|null>(null),
+    [selected, setSelected] = useState<Person | null>(null),
     [next, setNext] = useState(false),
     [id, setId] = useState(""),
     [detail, setDetail] = useState<Detail | null>(null),
@@ -72,7 +73,9 @@ export default function People() {
     let active = true;
     setLoading(true);
     setListError("");
-    portalRequest(`/api/admin/people?page=${page}&perPage=${perPage}`)
+    portalRequest(
+      `/api/admin/people?page=${page}&perPage=${perPage}&filter=${filter}`,
+    )
       .then((d) => {
         if (active) {
           setPeople(d.people);
@@ -84,7 +87,7 @@ export default function People() {
     return () => {
       active = false;
     };
-  }, [page, perPage, version]);
+  }, [page, perPage, filter, version]);
   useEffect(() => {
     if (!id || id.startsWith("newsletter:")) return;
     let active = true;
@@ -147,6 +150,20 @@ export default function People() {
                       ? `People ${(page - 1) * perPage + 1}–${(page - 1) * perPage + people.length}`
                       : "No people yet"}
               </strong>
+              <label>
+                Show{" "}
+                <select
+                  value={filter}
+                  onChange={(e) => {
+                    setFilter(e.target.value);
+                    setPage(1);
+                  }}
+                >
+                  <option value="all">All people</option>
+                  <option value="accounts">ATG accounts</option>
+                  <option value="newsletter">Newsletter subscribers</option>
+                </select>
+              </label>
               <label>
                 Rows per page{" "}
                 <select
@@ -245,7 +262,21 @@ export default function People() {
             >
               ← Back to people
             </button>
-            {id.startsWith("newsletter:") && selected ? <article><h2>{selected.email}</h2><p>Newsletter signup · {new Date(selected.created).toLocaleDateString("en-US")}</p><p>This contact will appear with their ATG account once they verify the same email address.</p></article> : !detail && !msg && <p role="status">Loading profile…</p>}
+            {id.startsWith("newsletter:") && selected ? (
+              <article>
+                <h2>{selected.email}</h2>
+                <p>
+                  Newsletter signup ·{" "}
+                  {new Date(selected.created).toLocaleDateString("en-US")}
+                </p>
+                <p>
+                  This contact will appear with their ATG account once they
+                  verify the same email address.
+                </p>
+              </article>
+            ) : (
+              !detail && !msg && <p role="status">Loading profile…</p>
+            )}
           </>
         )}
         {detail && (
@@ -287,7 +318,12 @@ export default function People() {
                       name: "Business name",
                       phone: "Phone",
                       city: "City",
-                      zip: "ZIP",
+                      zip: "Business ZIP",
+                      personalStreet: "Private street address",
+                      personalUnit: "Apartment or suite",
+                      personalCity: "Private city",
+                      personalState: "Private state",
+                      personalZip: "Private ZIP",
                     }[k]
                   }
                   <input name={k} defaultValue={v} />
@@ -370,7 +406,13 @@ export default function People() {
                         listingId: l.id,
                         status: l.status,
                         revision: l.revision,
-                        fields: {...fields, gallery: JSON.parse(String(data.get("gallery"))), weeklyHours: JSON.parse(String(data.get("weeklyHours")))},
+                        fields: {
+                          ...fields,
+                          gallery: JSON.parse(String(data.get("gallery"))),
+                          weeklyHours: JSON.parse(
+                            String(data.get("weeklyHours")),
+                          ),
+                        },
                       });
                     } catch {
                       setMsg(
@@ -380,7 +422,12 @@ export default function People() {
                   }}
                 >
                   {Object.entries({ ...l.draft, ...l.contact })
-                    .filter(([key]) => !["email","gallery","weeklyHours","hours"].includes(key))
+                    .filter(
+                      ([key]) =>
+                        !["email", "gallery", "weeklyHours", "hours"].includes(
+                          key,
+                        ),
+                    )
                     .map(([key, value]) => (
                       <label key={key} className="capitalize">
                         {key.replace(/([A-Z])/g, " $1")}
@@ -408,7 +455,11 @@ export default function People() {
                         )}
                       </label>
                     ))}
-                  <AdminListingMediaHours listingId={l.id} draft={l.draft} onUpload={setBusy}/>
+                  <AdminListingMediaHours
+                    listingId={l.id}
+                    draft={l.draft}
+                    onUpload={setBusy}
+                  />
                   <button disabled={busy}>
                     {l.status === "published"
                       ? "Update published listing"

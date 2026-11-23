@@ -1,8 +1,58 @@
+"use client";
+import { useState } from "react";
+
 export default function NewsletterSignup() {
-  return <div style={{minWidth:0,width:"100%"}}>
-    <iframe title="Subscribe to the All Things Gwinnett newsletter" loading="lazy"
-      src="https://subscribe-forms.beehiiv.com/b38f40a3-6d50-4ce7-b8af-18396ae74771"
-      style={{width:"100%",height:260,border:0,background:"#fff"}} />
-    <a className="text-link" href="https://allthingsgwinnett.beehiiv.com/subscribe" target="_blank" rel="noopener noreferrer">Open the newsletter signup ↗</a>
-  </div>;
+  const [saved, setSaved] = useState(false),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  if (saved)
+    return (
+      <div role="status">
+        <strong>Thanks for signing up.</strong>
+        <p>
+          Want to tell us where in Gwinnett you live?{" "}
+          <a className="text-link" href="/account/profile">
+            Add to your private profile
+          </a>
+        </p>
+      </div>
+    );
+  return (
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        const email = new FormData(e.currentTarget).get("email");
+        setBusy(true);
+        setError("");
+        try {
+          const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+          if (!res.ok) throw Error();
+          setSaved(true);
+        } catch {
+          setError("Couldn’t save your signup. Please try again.");
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <label className="block font-semibold">
+        Email address
+        <input
+          className="block w-full rounded border p-3 my-2"
+          type="email"
+          name="email"
+          required
+          autoComplete="email"
+        />
+      </label>
+      <button className="button button-orange" disabled={busy}>
+        Get the newsletter
+      </button>
+      {error && <p role="alert">{error}</p>}
+    </form>
+  );
 }

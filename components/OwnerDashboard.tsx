@@ -382,6 +382,7 @@ export default function OwnerDashboard() {
       </div>
       <div className="owner-session">
         <span>Signed in as {session.user.email}</span>
+        <a className="text-link" href="/account/profile">My profile</a>
         <button
           disabled={busy}
           onClick={() =>

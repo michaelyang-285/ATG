@@ -43,6 +43,7 @@ export default function CompleteAccount({
       }}
     >
       <h2>Complete your account</h2>
+      <p>These details are required to submit events or directory listings. You can also <a className="text-link" href="/account/profile">edit your private profile</a> at any time.</p>
       <label>
         First name
         <input
