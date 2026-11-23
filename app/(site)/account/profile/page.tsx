@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
+import "./profile.css";
 import { browserClient } from "@/lib/browser-client";
 
 const fields = [
@@ -18,7 +19,13 @@ export default function MyProfile() {
   const [user, setUser] = useState<User | null>(null),
     [ready, setReady] = useState(false),
     [busy, setBusy] = useState(false),
-    [message, setMessage] = useState("");
+    [message, setMessage] = useState(""),
+    [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (!saved) return;
+    const timer = window.setTimeout(() => setSaved(false), 6000);
+    return () => window.clearTimeout(timer);
+  }, [saved]);
   useEffect(() => {
     const client = browserClient();
     if (!client) {
@@ -33,16 +40,24 @@ export default function MyProfile() {
     return () => data.subscription.unsubscribe();
   }, []);
   return (
-    <main id="main" className="site-width page-content directory-owner">
-      <a href="/account">My account</a>
-      <h1>My profile</h1>
+    <main
+      id="main"
+      className="site-width page-content directory-owner private-profile"
+    >
+      <header className="private-profile-header">
+        <a href="/account">← My account</a>
+        <h1>My profile</h1>
+        {user && <p>{user.email}</p>}
+      </header>
       {!ready ? (
         <p>Loading profile…</p>
       ) : !user ? (
         <form
-          className="signup-card"
+          className="profile-signin"
           onSubmit={async (e) => {
             e.preventDefault();
+            setMessage("");
+            setSaved(false);
             const email = String(
               new FormData(e.currentTarget).get("email"),
             ).trim();
@@ -78,10 +93,16 @@ export default function MyProfile() {
         </form>
       ) : (
         <form
-          className="signup-card"
+          className="profile-editor"
+          onChange={() => {
+            setSaved(false);
+            setMessage("");
+          }}
           key={user.id}
           onSubmit={async (e) => {
             e.preventDefault();
+            setMessage("");
+            setSaved(false);
             const form = new FormData(e.currentTarget);
             const data = Object.fromEntries(
               fields.map(([key]) => [key, String(form.get(key) || "").trim()]),
@@ -96,7 +117,7 @@ export default function MyProfile() {
               if (!client) throw Error();
               const { error } = await client.auth.updateUser({ data });
               if (error) throw error;
-              setMessage("Your profile is saved.");
+              setSaved(true);
             } catch {
               setMessage("Couldn’t save your changes. Please try again.");
             } finally {
@@ -104,29 +125,72 @@ export default function MyProfile() {
             }
           }}
         >
-          <p>Signed in as {user.email}</p>
-          <p>
-            Share as much or as little as you like. These details are private to
-            you and ATG. Adding a phone number does not subscribe you to texts.
-          </p>
-          {fields.map(([key, label, auto]) => (
-            <label key={key}>
-              {label}
-              <input
-                name={key}
-                autoComplete={auto}
-                type={key === "phone" ? "tel" : "text"}
-                maxLength={240}
-                defaultValue={user.user_metadata[key] ?? ""}
-              />
-            </label>
+          {[
+            {
+              heading: "Contact details",
+              description:
+                "Your name and phone are optional. Adding a number won’t sign you up for texts.",
+              items: fields.slice(0, 3),
+            },
+            {
+              heading: "Private address",
+              description:
+                "Only you and ATG can see this address. Share as much or as little as you like.",
+              items: fields.slice(3),
+            },
+          ].map((group) => (
+            <section className="profile-form-section" key={group.heading}>
+              <div>
+                <h2>{group.heading}</h2>
+                <p>{group.description}</p>
+              </div>
+              <fieldset className="profile-inputs" disabled={busy}>
+                <legend className="sr-only">{group.heading}</legend>
+                {group.items.map(([key, label, auto]) => (
+                  <label
+                    key={key}
+                    className={
+                      key === "phone" || key === "personalStreet"
+                        ? "profile-wide"
+                        : undefined
+                    }
+                  >
+                    {label}
+                    <input
+                      name={key}
+                      autoComplete={auto}
+                      type={key === "phone" ? "tel" : "text"}
+                      maxLength={240}
+                      defaultValue={user.user_metadata[key] ?? ""}
+                    />
+                  </label>
+                ))}
+              </fieldset>
+            </section>
           ))}
-          <button className="primary-action" disabled={busy}>
-            Save profile
-          </button>
+          <footer>
+            <button className="primary-action" disabled={busy}>
+              {busy ? "Saving…" : "Save profile"}
+            </button>
+          </footer>
         </form>
       )}
-      <p role="status">{message}</p>
+      <div role="status" aria-live="polite" aria-atomic="true">
+        {saved && user && (
+          <div className="profile-saved">
+            <span aria-hidden="true">↑</span>
+            <strong>Profile updated</strong>
+            <button
+              type="button"
+              aria-label="Dismiss confirmation"
+              onClick={() => setSaved(false)}
+            >
+              ×
+            </button>
+          </div>
+        )}
+        {message && <p>{message}</p>}
+      </div>
     </main>
   );
 }
