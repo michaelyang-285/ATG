@@ -1,3 +1,4 @@
+import DealDetails from "@/components/DealDetails";
 import { dealPromotions } from "@/lib/directory/promotions";
 import Link from "next/link";
 import { directoryPublic } from "@/lib/directory/public";
@@ -19,8 +20,7 @@ export default async function Deals() {
           <article key={row._id}>
             <h2>{row.deal.title}</h2>
             <Link href={listingPath(row.slug)}>{row.name}</Link>
-            <p>{row.deal.terms}</p>
-            <p>Valid through {row.deal.end}</p>
+            <DealDetails deal={row.deal}/>
           </article>
         ))
       ) : (

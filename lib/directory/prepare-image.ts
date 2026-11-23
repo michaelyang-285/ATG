@@ -17,15 +17,17 @@ function encode(canvas: HTMLCanvasElement, type: string, quality: number): Promi
   }, type, quality));
 }
 
-async function displayImage(image: HTMLImageElement, longestSide: number) {
-  let scale = Math.min(1, longestSide / Math.max(image.naturalWidth, image.naturalHeight));
+async function displayImage(image: HTMLImageElement, longestSide: number, cropDeal = false) {
+  const width = cropDeal ? Math.min(image.naturalWidth, image.naturalHeight * 4 / 3) : image.naturalWidth;
+  const height = cropDeal ? width * 3 / 4 : image.naturalHeight;
+  let scale = Math.min(1, longestSide / Math.max(width, height));
   for (;;) {
     const {canvas, context} = canvasWithContext(
-      Math.max(1, Math.round(image.naturalWidth * scale)),
-      Math.max(1, Math.round(image.naturalHeight * scale)),
+      Math.max(1, Math.round(width * scale)),
+      Math.max(1, Math.round(height * scale)),
     );
     try {
-      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      context.drawImage(image, (image.naturalWidth-width)/2, (image.naturalHeight-height)/2, width, height, 0, 0, canvas.width, canvas.height);
       const blob = await encode(canvas, "image/webp", .84);
       if (blob.size <= storedImageLimit) return blob;
     } finally {
@@ -55,7 +57,7 @@ async function thumbnail(image: HTMLImageElement) {
   }
 }
 
-export async function prepareDirectoryImage(file: File, kind: "logo" | "gallery") {
+export async function prepareDirectoryImage(file: File, kind: "logo" | "gallery" | "deal") {
   if (!file.size || file.size > sourceImageLimit) throw Error("Choose a photo of 10 MB or less.");
   const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer());
   if (!directoryImageType(bytes)) throw Error("Choose a JPG, PNG, or WebP image.");
@@ -65,7 +67,7 @@ export async function prepareDirectoryImage(file: File, kind: "logo" | "gallery"
     image.src = url;
     await image.decode().catch(() => { throw Error("This photo couldn’t be opened. Try another image."); });
     if (!image.naturalWidth || !image.naturalHeight) throw Error("This image has no usable dimensions.");
-    const display = await displayImage(image, kind === "logo" ? 512 : 1600);
+    const display = await displayImage(image, kind === "logo" ? 512 : 1600, kind === "deal");
     return { display, preview: kind === "gallery" ? await thumbnail(image) : null };
   } finally {
     URL.revokeObjectURL(url);

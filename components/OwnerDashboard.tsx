@@ -62,7 +62,7 @@ type Row = {
   profilePath?: string | null;
   deletion_due_at: string | null;
   contact: Partial<Draft>;
-  draft: Partial<Draft> & {deal?:{title:string;terms:string;end:string}};
+  draft: Partial<Draft> & {deal?:import("@/lib/directory/deal").DirectoryDeal};
 };
 const dueDate = (value: string) => new Date(value).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York"}) + " ET";
 function restoreDraft(saved: Partial<Draft>): Draft {
@@ -479,7 +479,12 @@ export default function OwnerDashboard() {
                   {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
                   {r.billing && r.premium_until && <p>Paid listing through {new Date(r.premium_until).toLocaleDateString("en-US")}</p>}
                   {r.billing && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Manage billing</button>}
-                  {Date.parse(r.premium_until || "")>Date.now() && !r.deletion_due_at && <MemberDeal key={r.revision} row={r} onSave={async deal => {
+                  {Date.parse(r.premium_until || "")>Date.now() && !r.deletion_due_at && <MemberDeal key={r.revision} row={r} uploadImage={async file => {
+                    const {display} = await prepareDirectoryImage(file,"deal");
+                    const data = new FormData();
+                    data.append("file",display,"offer.webp");
+                    return (await api("upload",data)).url;
+                  }} onSave={async deal => {
                     await api("owner", {action:"saveDeal", id:r.id, revision:r.revision, deal});
                     await refresh();
                     setMsg("Deal changes submitted for review.");
@@ -733,11 +738,13 @@ function OwnerListingHeading({data, href, status}: {data: Partial<Draft>; href?:
   </header>;
 }
 
-function MemberDeal({row, onSave}: {row: Row; onSave: (deal: Row["draft"]["deal"] | null) => Promise<void>}) {
+function MemberDeal({row, onSave, uploadImage}: {row: Row; uploadImage: (file: File) => Promise<string>; onSave: (deal: Row["draft"]["deal"] | null) => Promise<void>}) {
   const deal = row.draft.deal;
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [image, setImage] = useState(deal?.image || "");
+  const [channel, setChannel] = useState(deal?.channel || "");
   const expired = deal && deal.end < new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
   async function save(value: typeof deal | null) {
     setSaving(true);
@@ -753,15 +760,34 @@ function MemberDeal({row, onSave}: {row: Row; onSave: (deal: Row["draft"]["deal"
     {open ? <form onSubmit={e => {
       e.preventDefault();
       const data = new FormData(e.currentTarget);
-      void save({title:String(data.get("title")), terms:String(data.get("terms")), end:String(data.get("end"))});
+      const value = (key: string) => String(data.get(key) || "").trim();
+      void save({image, channel, destination:value("destination"), start:value("start"), description:value("description"), code:value("code"), link:value("link"), title:String(data.get("title")), terms:String(data.get("terms")), end:String(data.get("end"))});
     }}><fieldset disabled={saving}>
-      <label>Your offer<input name="title" required maxLength={100} defaultValue={deal?.title}/></label>
-      <label>Terms and how to redeem<textarea name="terms" required maxLength={500} defaultValue={deal?.terms}/></label>
-      <label>Last day<input type="date" name="end" required defaultValue={deal?.end}/></label>
+      <label>Deal image (4:3)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={async e => {
+        const file = e.currentTarget.files?.[0];
+        if (!file) return;
+        setError(""); setSaving(true);
+        try { setImage(await uploadImage(file)); }
+        catch (err) { setError(err instanceof Error ? err.message : "Upload failed."); }
+        finally { setSaving(false); }
+      }}/></label>
+      <small>Images are center-cropped to 4:3. Keep the offer in the center.</small>
+      {image && <div><img src={image} alt="Deal image preview" width={240} height={180}/><button type="button" onClick={() => setImage("")}>Remove image</button></div>}
+      <label>Name of deal<input name="title" required maxLength={100} defaultValue={deal?.title}/></label>
+      <label>Start date<input name="start" type="date" required defaultValue={deal?.start}/></label>
+      <label>Description<textarea name="description" required maxLength={1500} defaultValue={deal?.description}/></label>
+      <label>How to redeem<textarea name="terms" required maxLength={500} defaultValue={deal?.terms}/></label>
+      <label>End date<input type="date" name="end" required defaultValue={deal?.end}/></label>
+      <label>Promo code (optional)<input name="code" maxLength={80} defaultValue={deal?.code}/></label>
+      <label>Deal link (optional)<input name="link" inputMode="url" defaultValue={deal?.link}/></label>
+      <label>Contact button<select value={channel} onChange={e => setChannel(e.target.value)}>
+        <option value="">No contact button</option><option value="call">Call</option><option value="email">Email</option><option value="social">Reach out on social media</option>
+      </select></label>
+      {channel && <label key={channel}>{channel === "call" ? "Public phone number" : channel === "email" ? "Public email address" : "Social profile or messaging link"}<input name="destination" required type={channel === "email" ? "email" : channel === "call" ? "tel" : "text"} defaultValue={channel === deal?.channel ? deal.destination : ""}/></label>}
       <button className="primary-action">Submit deal for review</button>
       <button type="button" onClick={() => setOpen(false)}>Cancel</button>
       {deal && <button type="button" onClick={() => void save(null)}>End deal</button>}
     </fieldset>{error && <p role="alert">{error}</p>}</form> :
-    <button onClick={() => setOpen(true)}>{deal ? "Manage deal" : "Create a deal"}</button>}
+    <button onClick={() => {setImage(deal?.image || ""); setChannel(deal?.channel || ""); setError(""); setOpen(true);}}>{deal ? "Manage deal" : "Create a deal"}</button>}
   </section>;
 }

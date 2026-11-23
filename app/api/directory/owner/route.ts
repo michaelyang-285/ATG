@@ -2,6 +2,7 @@ import { notifySubmission } from "@/lib/submission-alerts";
 import { subscribeEmail } from "@/lib/newsletter";
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
+import { directoryWebLink } from "@/lib/directory/web-link";
 import { listing } from "@/lib/directory/validate";
 import { listingPath } from "@/lib/directory/profile";
 import { revalidatePath } from "next/cache";
@@ -47,7 +48,34 @@ export function POST(req: Request) {
           typeof end !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(end) ||
           !Number.isFinite(Date.parse(end)) || new Date(end).toISOString().slice(0,10) !== end)
           throw new Failure(400, "Include an offer, redemption instructions and a valid last day.");
-        draft.deal = { title: title.trim(), terms: terms.trim(), end };
+        const detail = (key: string, max: number) => {
+          const value = body.deal[key] ?? "";
+          if (typeof value !== "string" || value.length > max) throw new Failure(400,"Check the " + key + " field.");
+          return value.trim();
+        }
+        const start = detail("start",10), description = detail("description",1500);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !Number.isFinite(Date.parse(start)) ||
+          new Date(start).toISOString().slice(0,10) !== start || start > end)
+          throw new Failure(400,"Choose a valid start date on or before the end date.");
+        if (!description) throw new Failure(400,"Add a description of your deal.");
+        const image = detail("image",1000);
+        const prefix = process.env.NEXT_PUBLIC_SUPABASE_URL + "/storage/v1/object/public/directory-media/" + user.id + "/";
+        if (image && !(image.startsWith(prefix) && /^[-a-f0-9]+\.(png|jpg|webp)$/.test(image.slice(prefix.length))))
+          throw new Failure(400,"Upload a deal image from your account.");
+        const link = directoryWebLink(detail("link",1000));
+        if (link === null) throw new Failure(400,"Enter a valid deal link.");
+        const channel = detail("channel",10);
+        let destination = detail("destination",1000);
+        if (!["","email","call","social"].includes(channel)) throw new Failure(400,"Choose a contact button.");
+        if (channel === "call" && (!/^[+() .0-9-]+$/.test(destination) || !/^\d{7,15}$/.test(destination.replace(/\D/g,""))))
+          throw new Failure(400,"Enter a valid contact phone number.");
+        if (channel === "email" && !/^[^@\s?#%]+@[^@\s?#%]+\.[^@\s?#%]+$/.test(destination))
+          throw new Failure(400,"Enter a valid contact email.");
+        if (channel === "social") {
+          destination = directoryWebLink(destination) || "";
+          if (!destination) throw new Failure(400,"Enter a social profile or messaging link.");
+        }
+        draft.deal = {title:title.trim(), terms:terms.trim(), end, start, description, image, code:detail("code",80), link, channel, destination:channel ? destination : ""};
       }
       const saved = await table.update({draft, status:"review", revision:row.revision + 1, review_note:""})
         .eq("id",body.id).eq("owner_id",user.id).eq("revision",body.revision).eq("status",row.status)
