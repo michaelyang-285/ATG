@@ -32,7 +32,6 @@ export default function Submit() {
     <div className="pricing-actions">
       <Link className="button button-orange" href="/account?mode=signin">Upgrade my listing <DirectionIcon/></Link>
       <Link className="text-link" href="/account?mode=signup">Create a free listing</Link>
-      <p>New listings start free and go through review. Upgrade after approval. Paid listings renew annually.</p>
     </div>
     <section className="pricing-deals"><div><h2>Give Gwinnett a reason to stop by.</h2><Link href="/deals">Explore Gwinnett Deals <DirectionIcon/></Link></div>
       <p>Publish an offer on <strong>Gwinnett Deals</strong> with your paid listing. Every week, we share the deals page with our <strong>{group.memberCountDisplay} Facebook group members</strong>. We also link to it in our welcome post for new members.</p>
