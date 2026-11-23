@@ -1,119 +1,102 @@
-import { descriptionLimit, descriptionLength } from "@/lib/directory/description";
 import Stripe from "stripe";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
-import { eligibleLocation } from "@/lib/directory/business-location";
+
 export function GET(req: Request) {
   return respond(async () => {
     const user = await owner(req);
-    const id = new URL(req.url).searchParams.get("id");
-    if (!id || !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id))
-      throw new Failure(400, "Invalid listing ID.");
-
     const { data, error } = await db()
       .from("directory_entries")
-      .select("paid_session,checkout_session")
-      .eq("id", id)
+      .select("premium_until")
       .eq("owner_id", user.id)
-      .maybeSingle();
-    if (error) throw error;
-    if (!data) throw new Failure(404, "Listing unavailable.");
-    if (data.paid_session) return { completed: true };
-    if (!data.checkout_session || !process.env.STRIPE_SECRET_KEY)
-      return { completed: false };
-
-    // Stripe can confirm the checkout before the webhook updates the listing.
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    const session = await stripe.checkout.sessions.retrieve(data.checkout_session);
-    return {
-      completed: session.status === "complete" &&
-        (session.payment_status === "paid" || session.payment_status === "no_payment_required"),
-    };
+      .eq("id", new URL(req.url).searchParams.get("id"))
+      .single();
+    if (error) throw new Failure(404, "Listing unavailable.");
+    return { completed: Date.parse(data.premium_until) > Date.now() };
   });
 }
-
 export function POST(req: Request) {
   return respond(async () => {
     await human();
     const user = await owner(req),
-      { id } = await req.json(),
-      table = db().from("directory_entries");
+      { id } = await req.json();
+    const table = db().from("directory_entries");
     const { data, error } = await table
-      .select("id,paid_session,checkout_session,checkout_attempt,contact,deletion_due_at,summary:draft->>summary")
+      .select(
+        "id,published,billing_customer,subscription_id,checkout_attempt,checkout_session,deletion_due_at",
+      )
       .eq("id", id)
       .eq("owner_id", user.id)
       .single();
-    if (error || !data) throw new Failure(404, "Listing unavailable.");
-    if (data.deletion_due_at) throw new Failure(409, "This listing is pending deletion.");
-    if (descriptionLength(data.summary || "") > descriptionLimit)
-      throw new Failure(409, "Edit your listing and shorten the description to 1,000 characters or fewer.");
-    if (!data.contact?.streetAddress || !eligibleLocation(data.contact.city, data.contact.zip))
-      throw new Failure(409, "Edit your listing and complete the business address before checkout.");
-    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_DIRECTORY_WEBHOOK_SECRET)
-      throw new Failure(503, "Your listing is saved. Payments are not open yet. Return to Manage listings when checkout opens.");
-    if (data.paid_session)
-      throw new Failure(409, "This listing is already paid.");
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!),
-      home = new URL("/account", process.env.DIRECTORY_SITE_URL!).href;
-    const liveMode = process.env.STRIPE_SECRET_KEY.includes("_live_");
-    let attempt = data.checkout_attempt;
-    if (data.checkout_session) {
-      // A listing started during testing may still reference a sandbox session.
-      const staleTestSession = liveMode && data.checkout_session.startsWith("cs_test_");
-      if (!liveMode && data.checkout_session.startsWith("cs_live_"))
-        throw new Failure(503, "Live checkout is temporarily unavailable. Your listing is saved.");
-      const prior = staleTestSession ? null : await stripe.checkout.sessions.retrieve(data.checkout_session);
-      if (prior?.status === "open" && prior.allow_promotion_codes && prior.url) return { url: prior.url };
-      if (prior?.status === "open") await stripe.checkout.sessions.expire(prior.id);
-      if (prior?.status === "complete")
+    if (error || !data)
+      throw new Failure(409, "Your listing must be approved before upgrading.");
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const home = new URL("/account", process.env.DIRECTORY_SITE_URL!).href;
+    if (data.subscription_id && data.billing_customer) {
+      return stripe.billingPortal.sessions
+        .create({
+          customer: data.billing_customer,
+          return_url: home,
+          ...(process.env.STRIPE_SECRET_KEY?.includes("_live_")
+            ? { configuration: "bpc_1UeyRNEFAD5SU8Kybse4wnD0" }
+            : {}),
+        })
+        .then(({ url }) => ({ url }));
+    }
+    if (!data.published || data.deletion_due_at)
+      throw new Failure(
+        409,
+        "An approved, visible listing is required to upgrade.",
+      );
+    if (data.checkout_session?.startsWith(process.env.STRIPE_SECRET_KEY?.includes("_live_") ? "cs_live_" : "cs_test_")) {
+      const prior = await stripe.checkout.sessions.retrieve(
+        data.checkout_session,
+      );
+      if (prior.mode === "subscription" && prior.status === "open")
+        return { url: prior.url };
+      if (prior.mode === "subscription" && prior.status === "complete")
         throw new Failure(
           409,
-          "Payment is processing. Refresh your listing status shortly.",
+          "Payment is processing. Refresh your account shortly.",
         );
-      const reset = await table
-        .update({ checkout_session: null, checkout_attempt: attempt + 1 })
-        .eq("id", id)
-        .eq("checkout_attempt", attempt)
-        .is("paid_session", null)
-        .select("id")
-        .maybeSingle();
-      if (reset.error) throw reset.error;
-      if (!reset.data) throw new Failure(409, "Checkout changed. Try again.");
-      attempt++;
+      if (prior.status === "open")
+        await stripe.checkout.sessions.expire(prior.id);
     }
     const session = await stripe.checkout.sessions.create(
       {
-        mode: "payment",
-        allow_promotion_codes: true,
-        allowed_payment_method_types: ["card"],
-        client_reference_id: id,
-        metadata: { directory_entry: id },
+        mode: "subscription",
         line_items: [
           {
-            quantity: 1,
             price_data: {
               currency: "usd",
-              unit_amount: 300,
-              ...(liveMode
-                ? {product: "prod_atg_directory_profile"}
-                : {product_data: {name: "All Things Gwinnett directory listing"}}),
+              unit_amount: 900,
+              recurring: { interval: "year" },
+              ...(process.env.STRIPE_SECRET_KEY?.includes("_live_")
+                ? { product: "prod_atg_directory_profile" }
+                : { product_data: { name: "ATG paid directory listing" } }),
             },
+            quantity: 1,
           },
         ],
+        client_reference_id: id,
+        subscription_data: {
+          metadata: { directory_entry: id, plan: "atg_annual" },
+        },
+        customer_email: user.email,
         success_url: home + "?payment=returned",
         cancel_url: home,
       },
-      { idempotencyKey: "directory-promo-v2-" + id + "-" + attempt },
+      {
+        idempotencyKey: "directory-annual-" + id + "-" + data.checkout_attempt,
+      },
     );
     const saved = await table
-      .update({ checkout_session: session.id })
+      .update({
+        checkout_session: session.id,
+        checkout_attempt: data.checkout_attempt + 1,
+      })
       .eq("id", id)
-      .eq("checkout_attempt", attempt)
-      .is("paid_session", null)
-      .select("id")
-      .maybeSingle();
+      .eq("checkout_attempt", data.checkout_attempt);
     if (saved.error) throw saved.error;
-    if (!saved.data || !session.url)
-      throw new Failure(409, "Refresh your listing status.");
     return { url: session.url };
   });
 }

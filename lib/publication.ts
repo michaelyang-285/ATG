@@ -33,6 +33,8 @@ export type Story = {
   body?: any[];
 };
 export type Business = {
+  premium?:boolean;
+  deal?:import("./directory/deal").DirectoryDeal;
   providerType?: "independent" | "organization";
   _id: string;
   name: string;

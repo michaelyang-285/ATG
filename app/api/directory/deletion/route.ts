@@ -1,3 +1,4 @@
+import Stripe from "stripe";
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { revalidatePath } from "next/cache";
 import { listingPath } from "@/lib/directory/profile";
@@ -14,6 +15,16 @@ export function POST(req: Request) {
     const now = new Date();
     let query;
     if (action === "request") {
+      const existing=await table.select("subscription_id,checkout_session").eq("id",id).eq("owner_id",user.id).single();
+      if(existing.error) throw new Failure(404,"Listing unavailable.");
+      if(existing.data.subscription_id) {
+        await new Stripe(process.env.STRIPE_SECRET_KEY!).subscriptions.update(existing.data.subscription_id,{cancel_at_period_end:true});
+      } else if(existing.data.checkout_session?.startsWith(process.env.STRIPE_SECRET_KEY?.includes("_live_") ? "cs_live_" : "cs_test_")) {
+        const stripe=new Stripe(process.env.STRIPE_SECRET_KEY!);
+        const pending=await stripe.checkout.sessions.retrieve(existing.data.checkout_session);
+        if(pending.status==="open") await stripe.checkout.sessions.expire(pending.id);
+        else if(pending.mode==="subscription" && typeof pending.subscription==="string") await stripe.subscriptions.update(pending.subscription,{cancel_at_period_end:true});
+      }
       const due = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
       query = table.update({ deletion_due_at: due.toISOString() })
         .eq("owner_id", user.id).is("deletion_due_at", null);

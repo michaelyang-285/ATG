@@ -46,7 +46,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
       "You can browse this site without creating an account. Search terms are used to display matching public content.",
       "This website is hosted by Vercel, and published content is served through Sanity. Those services receive normal technical request information needed to deliver the website, such as your IP address and browser details.",
       "Directory and event accounts use Supabase authentication. Your account email and private contact details are used to manage submissions. Published listings display the contact fields, service areas, links, and photos you choose to share. Event organizers supply public venue and event details.",
-      "Stripe processes directory checkout. ATG uses the payment confirmation to send your listing for review. To request a correction, removal, or help with a charge, contact a group admin privately.",
+      "Stripe processes directory checkout. ATG reviews all listings. Stripe handles the optional annual upgrade. To request a correction, removal, or help with a charge, contact a group admin privately.",
       "Links to Facebook and other external websites take you to services with their own privacy practices.",
       "To ask about privacy, contact the All Things Gwinnett group admins through Facebook.",
     ],
@@ -55,7 +55,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
     title: "List your independent business",
     paragraphs: [
       "The directory is for independent small businesses around Gwinnett, including food businesses, beauty professionals, and local services. Franchises and large businesses aren’t the focus.",
-      "The signup price is $3 for a basic directory listing. A listing is not an editorial endorsement, and an exclusive group promotion is not required for a basic listing.",
+      "Basic listings are free. Owners can upgrade for $9 per year. A listing is not an editorial endorsement, and an exclusive group promotion is not required for a basic listing.",
       "Submissions and payment are not open yet. The billing and review details will be shown before you submit or pay. In the meantime, contact the group admins to express interest.",
     ],
   },
