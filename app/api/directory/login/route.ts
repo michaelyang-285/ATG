@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { human, respond, Failure } from "@/lib/directory/server";
-import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 export function POST(req: Request) {
   return respond(async () => {
     await human();
@@ -18,7 +17,6 @@ export function POST(req: Request) {
           account[k].length > 240
         )
           throw new Failure(400, "Complete all account fields.");
-      if (eventSignup !== true && !eligibleLocation(account.city, account.zip)) throw new Failure(400, areaError);
       if (account.phone.replace(/\D/g, "").length < 7)
         throw new Failure(400, "Enter a valid phone number.");
     }
@@ -41,7 +39,7 @@ export function POST(req: Request) {
                 phone: account.phone.trim(),
                 ...(eventSignup === true
                   ? {}
-                  : { name: account.name.trim(), city: account.city.trim(), zip: account.zip.trim() }),
+                  : { name: account.name.trim() }),
               },
             }
           : {}),

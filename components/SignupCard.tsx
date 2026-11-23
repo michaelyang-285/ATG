@@ -1,6 +1,4 @@
 "use client";
-import BusinessLocationFields from "./BusinessLocationFields";
-import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 import { useState, type ReactNode } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 export type SignupDetails = {
@@ -75,9 +73,6 @@ export default function SignupCard({
   register,
 }: Props) {
   const [password, setPassword] = useState("");
-  function checkLocation() {
-    if (!event && !signin && !eligibleLocation(account.city, account.zip)) throw Error(areaError);
-  }
   return (
     <section className={generalAccount ? undefined : "signup-layout"}>
       {!generalAccount && <aside className="signup-intro">
@@ -121,11 +116,6 @@ export default function SignupCard({
         ) : (
           <>
             <h2>{signin ? "Sign in" : "Create your account"}</h2>
-            {!signin && !event && <fieldset className="account-grid">
-              <legend>Business location</legend>
-              <BusinessLocationFields city={account.city || ""} zip={account.zip || ""}
-                onChange={(key, value) => setAccount({...account, [key]: value})} />
-            </fieldset>}
             {googleEnabled && (
               <>
                 <style jsx>{`
@@ -165,8 +155,6 @@ export default function SignupCard({
                   disabled={busy}
                   onClick={() =>
                     run(async () => {
-                      checkLocation();
-                      if (!event && !signin) sessionStorage.setItem("atg-directory-location", JSON.stringify({city: account.city, zip: account.zip}));
                       const { error } = await client.auth.signInWithOAuth({
                         provider: "google",
                         options: {
@@ -215,7 +203,6 @@ export default function SignupCard({
               onSubmit={(e) => {
                 e.preventDefault();
                 run(async () => {
-                  checkLocation();
                   if (signin) {
                     const { error } = await client.auth.signInWithPassword({email: email.trim(), password});
                     if (error) throw Error("Couldn’t sign in. Check your email and password, or use password recovery.");
