@@ -40,6 +40,9 @@ export async function searchDirectory(terms: string, cities: string[] | null, ca
     businesses.push(...data.map(({business}: {business: Business & {profileSlug?: string}}) =>
       business.profileSlug ? {...business, slug: business.profileSlug} : business
     ));
-    if (data.length < 500) return businesses;
+    if (data.length < 500) {
+      const exact=terms.trim().toLowerCase();
+      return businesses.sort((a,b)=> Number(b.name.toLowerCase()===exact)-Number(a.name.toLowerCase()===exact) || Number(!!b.premium)-Number(!!a.premium));
+    }
   }
 }

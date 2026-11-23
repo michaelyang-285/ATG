@@ -1,3 +1,4 @@
+import AtgVerified from "./AtgVerified";
 import IndependentProBadge from "@/components/IndependentProBadge";
 import LocalLife from "./LocalLife";
 import ThingsToDo from "./ThingsToDo";
@@ -71,7 +72,7 @@ export default async function BrowsePage({
   if (kind === "things-to-do") {
     return <ThingsToDo stories={stories} filtered={Boolean(filters.format || filters.topic || filters.area)} />;
   }
-  const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>a.name.localeCompare(b.name)) : data.businesses;
+  const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>Number(!!b.premium)-Number(!!a.premium) || a.name.localeCompare(b.name)) : data.businesses;
   const rawArea = kind !== "directory" && typeof filters.area === "string" ? filters.area : "";
   const countyLink = {pathname: "/directory", query: {provider: filters.provider, q: query || undefined, category: filters.category, service: filters.service}};
   let businesses = directoryBusinesses
@@ -217,7 +218,7 @@ export default async function BrowsePage({
                     style={{objectFit:"contain", ...(b.logo ? {} : {filter:"grayscale(1)", opacity:0.5})}}
                   />
                   <div>
-                    <p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}
+                    <p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />} {b.premium && <AtgVerified/>}
                     <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`}>{b.name}</Link></h2>
                   </div>
                 </div>
@@ -233,7 +234,7 @@ export default async function BrowsePage({
       {kind === "directory" && (
         <aside className="directory-owner-tools" aria-labelledby="business-owners">
           <h2 id="business-owners">For businesses and independent providers</h2>
-          <p>List your business for free with a logo, hours and contact details. Upgrade for $9 a year to add website and booking links, a photo gallery, events and a deal for local members.</p>
+          <p>List your business for free with a logo, hours and contact details. Include your website and booking links for free. Upgrade for $9 a year for priority placement, photos and a deal for local members.</p>
           <div><Link href="/directory/submit">Free and paid listings</Link><Link href="/deals">Gwinnett Deals</Link><Link href="/account?mode=signin">Manage my listings</Link></div>
         </aside>
       )}

@@ -365,7 +365,7 @@ export default function OwnerDashboard() {
       }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
-      const saved=await api("owner", {...form, ...(!media ? {social:"",booking:"",gallery:[]} : {}), newsletter});
+      const saved=await api("owner", {...form, ...(!media ? {gallery:[]} : {}), newsletter});
       setForm(null);
       await refresh();
       if(paidSignup){await openCheckout(saved.id);return}
@@ -485,7 +485,7 @@ export default function OwnerDashboard() {
             {step===4 ? (
               <>
                 <p className="quiet">Here’s what neighbors will see in the directory.</p>
-                <ListingPreview data={media ? form : {...form,url:"",booking:"",gallery:[]}} />
+                <ListingPreview data={media ? form : {...form,gallery:[]}} />
                 {descriptionOver && <p className="description-count" data-over="true">
                   Your description exceeds 1,000 characters.{" "}
                   <button type="button" onClick={() => setStep(0)}>Edit description</button>
@@ -601,13 +601,12 @@ export default function OwnerDashboard() {
                   onChange={e => setForm(current => current && ({...current, hidePhone:e.target.checked,
                     businessPhone: current.businessPhone || current.phone}))} />Hide phone number on profile</label>
                 {!form.hidePhone && field("businessPhone", "Business phone shown on profile", true, "tel")}
-                {field("url",media ? "Website" : "Website (optional, saved privately)",false,"url")}
-                {!media && <p>Free listings show your social profiles. A public website link is included with the paid plan.</p>}
-                {media && <>
-                {field("booking", "Booking or ordering link", false, "url")}</>}
+                {field("url","Website (optional)",false,"url")}
+                <p>Your website, social profiles and booking link can appear on either plan.</p>
+                {field("booking", "Booking or ordering link", false, "url")}
                 <details><summary>Social profiles (optional)</summary>
                   {networks.map(({key,label})=><div key={key}>{field(key,label+" URL",false,"url")}</div>)}
-                  {media && field("social","Other social profile",false,"url")}
+                  {field("social","Other social profile",false,"url")}
                 </details>
                 {(premium || paidSignup) && <fieldset><legend>Manage deal</legend>{field("dealTitle","Offer (clear to end it)")}{field("dealTerms","Terms and how to redeem")}{field("dealEnd","Last day",false,"date")}</fieldset>}
                 </>}{step===3&&<><p>Choose JPG, PNG, or WebP images up to 10 MB each. Your device resizes them before upload. {media ? "Your logo and gallery are optional." : "Free listings include one logo."}</p>

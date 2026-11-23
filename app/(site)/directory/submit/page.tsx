@@ -10,15 +10,18 @@ export const metadata = {
 
 const features = [
   ["Business profile", "Logo, hours, phone & service area", "Everything in Free"],
-  ["Customer links", "Social profiles", "Socials, website & booking"],
+  ["Customer links", "Website, socials & booking", "Website, socials & booking"],
   ["Photos of your work", "Logo only", "Logo + 10 photos"],
+  ["Directory placement", "Standard", "Priority in matching results"],
+  ["Profile flair", "Standard profile", "ATG Verified blue check"],
+  ["Search optimization", "Business details for search engines", "Additional SEO markup for gallery photos and active offers"],
   ["Deals & events", "None on profile", "One active deal + approved events"],
 ];
 
 export default function Submit() {
   return <main id="main" className="site-width directory-pricing">
     <header className="pricing-intro"><h1>List your business in Gwinnett.</h1>
-      <p>Start free so neighbors can find you. For $9 a year, show them your work, give them a deal and send them straight to your booking page.</p>
+      <p>Start free so neighbors can find you. Include your website and social links at no charge. For $9 a year, get priority in the directory, show your work and share a deal with local customers.</p>
     </header>
     <table className="pricing-matrix">
       <caption className="sr-only">Compare free and paid directory listings</caption>

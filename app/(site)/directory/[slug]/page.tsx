@@ -1,3 +1,4 @@
+import AtgVerified from "@/components/AtgVerified";
 import {upcomingListingEvents, occurrencePath} from "@/lib/events";
 import {activeDeal} from "@/lib/directory/deal";
 import IndependentProBadge from "@/components/IndependentProBadge";
@@ -72,7 +73,7 @@ export default async function Page({params}:Props) {
     <Link className="text-link" href="/directory">← Gwinnett directory</Link>
     <header className="listing-heading">
       {photo && <img src={photo === b.gallery?.[0] ? directoryThumbnail(photo) : photo} width="112" height="112" alt=""/>}
-      <div><p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}<h1>{b.name}</h1>
+      <div><p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}<h1>{b.name}</h1>{b.premium && <AtgVerified/>}
       {b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>{instagramWebsite ? "Go to Instagram" : "Visit website"} <span aria-hidden="true">↗</span></a>}</div>
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>

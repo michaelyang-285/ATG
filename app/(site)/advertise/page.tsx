@@ -51,7 +51,7 @@ export default function AdvertisePage() {
         <p>Message a group admin with your target cities, timing, budget range, and what you’d like neighbors to do. We’ll discuss availability and placement options. We label sponsored placements and choose editorial stories independently.</p>
         <a className="button button-orange" href={facebookGroup}>Find the group admins on Facebook</a>
         <h3>Give your business a directory listing</h3>
-        <p>Help neighbors find your hours, service area, website, and directions. Basic listings are free, with a $9 annual upgrade for links, photos and deals.</p>
+        <p>Help neighbors find your hours, service area, website, and directions. Basic listings are free, with a $9 annual upgrade for priority placement, photos and deals.</p>
         <Link className="text-link" href="/account">Create a directory listing</Link>
       </section>
     </main>

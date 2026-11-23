@@ -39,9 +39,8 @@ export function POST(req: Request) {
     const premium = Date.parse(current?.data?.premium_until || "") > Date.now();
     const paidSignup=body.id ? current?.data?.status==="unpaid" && current.data.contact?.tier==="paid" : body.tier==="paid";
     Object.assign(values.contact,{tier:paidSignup ? "paid" : current?.data?.contact?.tier || "free",url:values.draft.url});
-    if(!premium && !paidSignup && !current?.data?.paid_session) values.draft.url="";
-    if (!paidSignup && !premium && !current?.data?.paid_session && (values.draft.gallery.length || [values.draft.url,values.draft.booking,values.draft.social].some(Boolean)))
-      throw new Failure(400,"Upgrade before adding links or gallery photos.");
+    if (!paidSignup && !premium && !current?.data?.paid_session && values.draft.gallery.length)
+      throw new Failure(400,"Choose a paid listing to add gallery photos.");
     if ((premium || paidSignup) && body.dealTitle?.trim()) {
       if (typeof body.dealTerms !== "string" || !body.dealTerms.trim() || body.dealTerms.length>500 || body.dealTitle.length>100 || !/^\d{4}-\d{2}-\d{2}$/.test(body.dealEnd)) throw new Failure(400,"Include the offer, redemption details and expiration date.");
       Object.assign(values.draft,{deal:{title:body.dealTitle.trim(),terms:body.dealTerms.trim(),end:body.dealEnd}});
