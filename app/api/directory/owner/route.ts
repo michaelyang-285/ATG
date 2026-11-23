@@ -31,20 +31,42 @@ export function POST(req: Request) {
     await human();
     const user = await owner(req),
       body = await req.json();
+    if (body.action === "saveDeal") {
+      const table = db().from("directory_entries");
+      const { data: row, error } = await table.select("draft,status,revision")
+        .eq("id", body.id).eq("owner_id", user.id).gt("premium_until", new Date().toISOString())
+        .is("deletion_due_at", null).maybeSingle();
+      if (error) throw error;
+      if (!row) throw new Failure(403, "An active subscription is required for deals.");
+      const draft = { ...row.draft };
+      if (body.deal === null) delete draft.deal;
+      else {
+        const { title, terms, end } = body.deal || {};
+        if (typeof title !== "string" || !title.trim() || title.length > 100 ||
+          typeof terms !== "string" || !terms.trim() || terms.length > 500 ||
+          typeof end !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(end) ||
+          !Number.isFinite(Date.parse(end)) || new Date(end).toISOString().slice(0,10) !== end)
+          throw new Failure(400, "Include an offer, redemption instructions and a valid last day.");
+        draft.deal = { title: title.trim(), terms: terms.trim(), end };
+      }
+      const saved = await table.update({draft, status:"review", revision:row.revision + 1, review_note:""})
+        .eq("id",body.id).eq("owner_id",user.id).eq("revision",body.revision).eq("status",row.status)
+        .gt("premium_until",new Date().toISOString()).is("deletion_due_at",null).select("id").maybeSingle();
+      if (saved.error) throw saved.error;
+      if (!saved.data) throw new Failure(409,"This listing changed. Refresh before editing the deal.");
+      return {id: saved.data.id};
+    }
     const values = listing(body, user.email!, user.id),
       table = db().from("directory_entries");
     if (!user.email_confirmed_at) throw new Failure(403,"Verify your email before submitting a listing.");
-    const current = body.id ? await table.select("paid_session,premium_until,status,contact").eq("id",body.id).eq("owner_id",user.id).single() : null;
+    const current = body.id ? await table.select("paid_session,premium_until,status,contact,draft").eq("id",body.id).eq("owner_id",user.id).single() : null;
     if (current?.error) throw new Failure(404,"Listing unavailable.");
     const premium = Date.parse(current?.data?.premium_until || "") > Date.now();
     const paidSignup=body.id ? current?.data?.status==="unpaid" && current.data.contact?.tier==="paid" : body.tier==="paid";
     Object.assign(values.contact,{tier:paidSignup ? "paid" : current?.data?.contact?.tier || "free",url:values.draft.url});
     if (!paidSignup && !premium && !current?.data?.paid_session && values.draft.gallery.length)
       throw new Failure(400,"Choose a paid listing to add gallery photos.");
-    if ((premium || paidSignup) && body.dealTitle?.trim()) {
-      if (typeof body.dealTerms !== "string" || !body.dealTerms.trim() || body.dealTerms.length>500 || body.dealTitle.length>100 || !/^\d{4}-\d{2}-\d{2}$/.test(body.dealEnd)) throw new Failure(400,"Include the offer, redemption details and expiration date.");
-      Object.assign(values.draft,{deal:{title:body.dealTitle.trim(),terms:body.dealTerms.trim(),end:body.dealEnd}});
-    }
+    if (current?.data?.draft?.deal) Object.assign(values.draft, {deal: current.data.draft.deal});
     const result = body.id
       ? await table
           .update({

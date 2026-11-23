@@ -185,13 +185,21 @@ export default function OwnerDashboard() {
     if (!listingId) return;
 
     const controller = new AbortController();
-    fetch("/api/directory/checkout?" + new URLSearchParams({ id: listingId }), {
-      headers: { Authorization: "Bearer " + accessToken },
-      cache: "no-store",
-      signal: controller.signal,
-    })
-      .then(async response => {
-        if (!response.ok || !(await response.json()).completed || controller.signal.aborted) return;
+    async function confirmPayment() {
+      for (let attempt = 0; attempt < 20 && !controller.signal.aborted; attempt++) {
+        const response = await fetch("/api/directory/checkout?" + new URLSearchParams({id:listingId!}), {
+          headers: {Authorization:"Bearer " + accessToken}, cache:"no-store", signal:controller.signal
+        });
+        if (!response.ok) return false;
+        if ((await response.json()).completed) return true;
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+      return false;
+    }
+    confirmPayment()
+      .then(async completed => {
+        if (!completed || controller.signal.aborted) return;
+        await refresh();
         const { gtag } = window as Window & {
           gtag?: (command: "event", name: string, params: { value: number; currency: string }) => void;
         };
@@ -471,7 +479,11 @@ export default function OwnerDashboard() {
                   {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
                   {r.billing && r.premium_until && <p>Paid listing through {new Date(r.premium_until).toLocaleDateString("en-US")}</p>}
                   {r.billing && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Manage billing</button>}
-                  {Date.parse(r.premium_until || "")>Date.now() && !r.deletion_due_at && <button onClick={()=>{edit(r);setStep(2)}}>Manage deal</button>}
+                  {Date.parse(r.premium_until || "")>Date.now() && !r.deletion_due_at && <MemberDeal key={r.revision} row={r} onSave={async deal => {
+                    await api("owner", {action:"saveDeal", id:r.id, revision:r.revision, deal});
+                    await refresh();
+                    setMsg("Deal changes submitted for review.");
+                  }}/>}
                   {r.review_note && <p>{r.review_note}</p>}
                   {r.deletion_due_at && <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>}
                   <div className="owner-listing-actions">
@@ -643,7 +655,6 @@ export default function OwnerDashboard() {
                   {networks.map(({key,label})=><div key={key}>{field(key,label+" URL",false,"url")}</div>)}
                   {field("social","Other social profile",false,"url")}
                 </details>
-                {(premium || paidSignup) && <fieldset><legend>Manage deal</legend>{field("dealTitle","Offer (clear to end it)")}{field("dealTerms","Terms and how to redeem")}{field("dealEnd","Last day",false,"date")}</fieldset>}
                 </>}{step===3&&<><p>Upload your business logo or use a headshot so neighbors can recognize you.</p>
                 {(["logo", "gallery"] as const).filter(k=>k==="logo" || media).map((k) => (
                   <section key={k} className="upload-panel">
@@ -720,4 +731,37 @@ function OwnerListingHeading({data, href, status}: {data: Partial<Draft>; href?:
       {status && <p>{status}</p>}
     </div>
   </header>;
+}
+
+function MemberDeal({row, onSave}: {row: Row; onSave: (deal: Row["draft"]["deal"] | null) => Promise<void>}) {
+  const deal = row.draft.deal;
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const expired = deal && deal.end < new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
+  async function save(value: typeof deal | null) {
+    setSaving(true);
+    setError("");
+    try { await onSave(value); setOpen(false); }
+    catch (e) { setError(e instanceof Error ? e.message : "Please try again."); }
+    finally { setSaving(false); }
+  }
+  return <section className="directory-upgrade-note">
+    <h3>{deal ? expired ? "Renew your deal" : deal.title : "Give Gwinnett neighbors a reason to visit"}</h3>
+    {(!deal || expired) && <><p>Add an offer for {row.draft.name}. We share the ATG deals page in three places.</p>
+      <ul className="list-disc pl-6">{dealPromotions.map(label => <li key={label}>{label}</li>)}</ul></>}
+    {open ? <form onSubmit={e => {
+      e.preventDefault();
+      const data = new FormData(e.currentTarget);
+      void save({title:String(data.get("title")), terms:String(data.get("terms")), end:String(data.get("end"))});
+    }}><fieldset disabled={saving}>
+      <label>Your offer<input name="title" required maxLength={100} defaultValue={deal?.title}/></label>
+      <label>Terms and how to redeem<textarea name="terms" required maxLength={500} defaultValue={deal?.terms}/></label>
+      <label>Last day<input type="date" name="end" required defaultValue={deal?.end}/></label>
+      <button className="primary-action">Submit deal for review</button>
+      <button type="button" onClick={() => setOpen(false)}>Cancel</button>
+      {deal && <button type="button" onClick={() => void save(null)}>End deal</button>}
+    </fieldset>{error && <p role="alert">{error}</p>}</form> :
+    <button onClick={() => setOpen(true)}>{deal ? "Manage deal" : "Create a deal"}</button>}
+  </section>;
 }
