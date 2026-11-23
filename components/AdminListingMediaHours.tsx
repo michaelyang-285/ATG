@@ -5,6 +5,7 @@ import { defaultWeek, isWeek } from "@/lib/directory/hours";
 import { galleryLimit, sourceImageLimit } from "@/lib/directory/gallery";
 import { prepareDirectoryImage } from "@/lib/directory/prepare-image";
 import { directoryThumbnail } from "@/lib/directory/thumbnail";
+import { services } from "@/lib/directory/categories";
 import { browserClient } from "@/lib/browser-client";
 
 export default function AdminListingMediaHours({
@@ -16,6 +17,12 @@ export default function AdminListingMediaHours({
   draft: Record<string, unknown>;
   onUpload: (busy: boolean) => void;
 }) {
+  const [logo, setLogo] = useState(
+    typeof draft.logo === "string" ? draft.logo : "",
+  );
+  const [selected, setSelected] = useState<string[]>(
+    Array.isArray(draft.services) ? draft.services : [],
+  );
   const [gallery, setGallery] = useState<string[]>(
     Array.isArray(draft.gallery) ? draft.gallery : [],
   );
@@ -28,9 +35,9 @@ export default function AdminListingMediaHours({
   );
   const [uploading, setUploading] = useState(false),
     [error, setError] = useState("");
-  async function upload(files: File[]) {
+  async function upload(files: File[], kind: "gallery" | "logo") {
     setError("");
-    if (files.length + gallery.length > galleryLimit) {
+    if (kind === "gallery" && files.length + gallery.length > galleryLimit) {
       setError("Choose fewer photos. The gallery holds " + galleryLimit + ".");
       return;
     }
@@ -43,10 +50,7 @@ export default function AdminListingMediaHours({
       for (const file of files) {
         if (file.size > sourceImageLimit)
           throw Error("Choose photos of 10 MB or less.");
-        const { display, preview } = await prepareDirectoryImage(
-          file,
-          "gallery",
-        );
+        const { display, preview } = await prepareDirectoryImage(file, kind);
         const form = new FormData();
         form.set("listingId", listingId);
         form.set("file", display, "photo");
@@ -58,7 +62,8 @@ export default function AdminListingMediaHours({
         });
         const result = await res.json();
         if (!res.ok) throw Error(result.error || "Photo upload failed.");
-        setGallery((g) => [...g, result.url]);
+        if (kind === "logo") setLogo(result.url);
+        else setGallery((g) => [...g, result.url]);
       }
     } catch (e) {
       setError((e as Error).message);
@@ -69,6 +74,68 @@ export default function AdminListingMediaHours({
   }
   return (
     <>
+      <details>
+        <summary>
+          Services · {selected.length ? selected.join(", ") : "Select services"}
+        </summary>
+        <fieldset>
+          <legend className="sr-only">Service options</legend>
+          {services.map((service) => (
+            <label key={service}>
+              <input
+                type="checkbox"
+                checked={selected.includes(service)}
+                onChange={() =>
+                  setSelected((current) =>
+                    current.includes(service)
+                      ? current.filter((v) => v !== service)
+                      : [...current, service],
+                  )
+                }
+              />
+              {service === "Mobile"
+                ? "Mobile · I travel to customers"
+                : service}
+            </label>
+          ))}
+        </fieldset>
+      </details>
+      <input type="hidden" name="services" value={JSON.stringify(selected)} />
+      <fieldset>
+        <legend>Business logo</legend>
+        <input type="hidden" name="logo" value={logo} />
+        {logo ? (
+          <>
+            <img
+              src={logo}
+              className="h-24 w-24 rounded border bg-white object-contain"
+              alt="Current business logo"
+            />
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => setLogo("")}
+            >
+              Remove logo
+            </button>
+          </>
+        ) : (
+          <p>No logo uploaded.</p>
+        )}
+        <label>
+          {logo ? "Replace logo" : "Add logo"}
+          <input
+            type="file"
+            disabled={uploading}
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) void upload([file], "logo");
+            }}
+          />
+        </label>
+      </fieldset>
       <OperatingHoursFields
         week={week}
         legacy={String(draft.hours || "")}
@@ -113,12 +180,12 @@ export default function AdminListingMediaHours({
             onChange={(e) => {
               const files = Array.from(e.target.files || []);
               e.target.value = "";
-              void upload(files);
+              void upload(files, "gallery");
             }}
           />
         </label>
-        <p role="status">{uploading ? "Uploading photos…" : error}</p>
       </fieldset>
+      <p role="status">{uploading ? "Uploading image…" : error}</p>
     </>
   );
 }

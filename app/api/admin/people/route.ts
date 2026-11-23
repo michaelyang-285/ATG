@@ -62,6 +62,21 @@ export function GET(req: Request) {
         next: result.data.length > perPage,
       };
     }
+    if (id.startsWith("newsletter:")) {
+      const contact = await client
+        .from("newsletter_subscribers")
+        .select("email,subscribed_at")
+        .eq("contact_id", id.slice(11))
+        .maybeSingle();
+      if (contact.error || !contact.data)
+        throw new Failure(404, "Newsletter contact unavailable.");
+      return {
+        subscriber: {
+          email: contact.data.email,
+          created: contact.data.subscribed_at,
+        },
+      };
+    }
     const assignments = await client
       .from("author_assignments")
       .select("*")
@@ -75,7 +90,12 @@ export function GET(req: Request) {
     if (result.error || !result.data.user)
       throw new Failure(404, "Account unavailable.");
     const person = profile(result.data.user);
-    const [listings, content] = await Promise.all([
+    const [subscription, listings, content] = await Promise.all([
+      client
+        .from("newsletter_subscribers")
+        .select("email")
+        .eq("email", person.email?.trim().toLowerCase())
+        .maybeSingle(),
       client
         .from("directory_entries")
         .select("id,status,draft,contact,published,revision,profile_slug")
@@ -92,7 +112,11 @@ export function GET(req: Request) {
     ]);
     if (listings.error) throw listings.error;
     return {
-      person,
+      person: {
+        ...person,
+        newsletter:
+          !!result.data.user.email_confirmed_at && !!subscription.data,
+      },
       listings: listings.data,
       ...content,
       assignments: assignments.data,
