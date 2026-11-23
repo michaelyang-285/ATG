@@ -483,7 +483,22 @@ export default function OwnerDashboard() {
               <h2 id="my-submissions">My submissions</h2>
               {session.user.app_metadata.approved_author && <a className="account-assignment-link" href="/assignments">My assignments</a>}
             </div>
-            <DirectoryUpgradeNotice listings={rows} busy={busy} onUpgrade={id=>run(()=>openCheckout(id))}/>
+            <section id="deals" className="owner-submissions-section" aria-labelledby="member-deals">
+              <div className="owner-section-heading"><h3 id="member-deals">Deals</h3><a className="text-link" href="/deals">Browse Gwinnett Deals</a></div>
+              <DirectoryUpgradeNotice listings={rows} busy={busy} onUpgrade={id=>run(()=>openCheckout(id))}/>
+              {rows.filter(r => !r.deletion_due_at && Date.parse(r.premium_until || "") > Date.now()).map(r =>
+                r.contact.onboarding ? <div key={r.id}><p>Finish your listing for {r.draft.name} to create your first deal.</p><button onClick={()=>edit(r)}>Finish your listing</button></div> :
+                <MemberDeal key={r.id + "-" + r.revision} row={r} uploadImage={async file => {
+                    const {display} = await prepareDirectoryImage(file,"deal");
+                    const data = new FormData();
+                    data.append("file",display,"offer.webp");
+                    return (await api("upload",data)).url;
+                  }} onSave={async deal => {
+                    await api("owner", {action:"saveDeal", id:r.id, revision:r.revision, deal});
+                    await refresh();
+                    setMsg("Deal changes submitted for review.");
+                  }}/>)}
+            </section>
             <section className="owner-submissions-section" aria-labelledby="directory-submissions">
               <div className="owner-section-heading">
                 <h3 id="directory-submissions">Directory listings</h3>
@@ -504,16 +519,6 @@ export default function OwnerDashboard() {
                   {!r.contact.onboarding && r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
                   {r.billing && r.premium_until && <p>Paid listing through {new Date(r.premium_until).toLocaleDateString("en-US")}</p>}
                   {r.billing && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Manage billing</button>}
-                  {Date.parse(r.premium_until || "")>Date.now() && !r.contact.onboarding && !r.deletion_due_at && <MemberDeal key={r.revision} row={r} uploadImage={async file => {
-                    const {display} = await prepareDirectoryImage(file,"deal");
-                    const data = new FormData();
-                    data.append("file",display,"offer.webp");
-                    return (await api("upload",data)).url;
-                  }} onSave={async deal => {
-                    await api("owner", {action:"saveDeal", id:r.id, revision:r.revision, deal});
-                    await refresh();
-                    setMsg("Deal changes submitted for review.");
-                  }}/>}
                   {r.review_note && <p>{r.review_note}</p>}
                   {r.deletion_due_at && <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>}
                   <div className="owner-listing-actions">
