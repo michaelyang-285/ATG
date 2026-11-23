@@ -1,3 +1,4 @@
+import { directoryWebLink } from "./web-link";
 import { formatServiceAreas, serviceAreaCities } from "./locations";
 import { hoursError, validTime, type DayHours } from "./hours";
 import { descriptionLimit, descriptionLength } from "./description";
@@ -27,9 +28,8 @@ export function listing(input: any, email: string, uid: string) {
     return Array.from(new Set<string>(a));
   }
   function url(k: string) {
-    const v = field(k, false, 1000);
-    if (v && !/^https?:\/\/[^\s/]+(?:[/?#][^\s]*)?$/i.test(v)) invalid(k);
-    return v;
+    const link = directoryWebLink(field(k, false, 1000));
+    return link ?? invalid(k);
   }
   if (typeof input.name === "string" && input.name.length > 100)
     throw new Failure(400, "Shorten your business name to 100 characters or fewer.");

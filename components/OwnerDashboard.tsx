@@ -1,4 +1,5 @@
 "use client";
+import { directoryWebLink } from "@/lib/directory/web-link";
 import { eligibleLocation, areaError } from "@/lib/directory/business-location";
 import BusinessLocationFields from "./BusinessLocationFields";
 import { descriptionLength, descriptionLimit } from "@/lib/directory/description";
@@ -277,11 +278,20 @@ export default function OwnerDashboard() {
       <label>
         {label}
         <input
-          type={type}
+          type={type === "url" ? "text" : type}
+          inputMode={type === "url" ? "url" : undefined}
+          onBlur={type === "url" ? (e) => {
+            const link = directoryWebLink(e.currentTarget.value);
+            if (link !== null) change(k, link);
+          } : undefined}
           required={required}
           value={String(form[k])}
           maxLength={type === "url" ? 1000 : 240}
-          onChange={(e) => change(k, e.target.value)}
+          onChange={(e) => {
+            const input = e.currentTarget;
+            if (type === "url") input.setCustomValidity(directoryWebLink(input.value) === null ? "Enter a website address like example.com." : "");
+            change(k, input.value);
+          }}
         />
       </label>
     );
