@@ -408,6 +408,8 @@ export default function People() {
                         revision: l.revision,
                         fields: {
                           ...fields,
+                          logo: String(data.get("logo") || ""),
+                          services: JSON.parse(String(data.get("services"))),
                           gallery: JSON.parse(String(data.get("gallery"))),
                           weeklyHours: JSON.parse(
                             String(data.get("weeklyHours")),
@@ -424,9 +426,14 @@ export default function People() {
                   {Object.entries({ ...l.draft, ...l.contact })
                     .filter(
                       ([key]) =>
-                        !["email", "gallery", "weeklyHours", "hours"].includes(
-                          key,
-                        ),
+                        ![
+                          "email",
+                          "gallery",
+                          "weeklyHours",
+                          "hours",
+                          "logo",
+                          "services",
+                        ].includes(key),
                     )
                     .map(([key, value]) => (
                       <label key={key} className="capitalize">
