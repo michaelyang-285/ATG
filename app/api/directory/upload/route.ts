@@ -15,7 +15,15 @@ export function POST(req: Request) {
   return respond(async () => {
     await human();
     const user = await owner(req);
+    if(!user.email_confirmed_at) throw new Failure(403,"Verify your email before uploading.");
+    const quota=await db().rpc("reserve_directory_upload",{uid:user.id});
+    if(quota.error) throw quota.error;
+    if(!quota.data) throw new Failure(429,"Upload limit reached. Try again in an hour.");
     const data = await req.formData();
+    if(data.has("thumbnail") && !data.has("listingId")){
+      const listing=await db().from("directory_entries").select("paid_session,premium_until").eq("id",data.get("galleryListing")).eq("owner_id",user.id).single();
+      if(!listing.data || !(listing.data.paid_session || Date.parse(listing.data.premium_until)>Date.now())) throw new Failure(403,"Upgrade before adding gallery photos.");
+    }
     const display = await imageData(data.get("file"), storedImageLimit);
     const preview = data.has("thumbnail") ? await imageData(data.get("thumbnail"), thumbnailLimit) : null;
     if (preview && preview.ext !== "jpg") throw new Failure(400, "The thumbnail must be a JPEG.");

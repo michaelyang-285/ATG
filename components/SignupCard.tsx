@@ -102,7 +102,7 @@ export default function SignupCard({
         <p className="fee-note">
           {event
             ? "Create your free account, then add your event details for review."
-            : "Free to create an account. The one-time $3 listing fee comes at the end."}
+            : "Create your account and basic listing for free."}
         </p>
       </aside>}
       <div className="signup-card">

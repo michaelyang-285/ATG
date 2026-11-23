@@ -122,6 +122,10 @@ export function POST(req: Request) {
       id.slice(0, 8);
     const digest = createHash("sha256").update(user.id + ":" + id).digest("hex");
     const eventId = "community-event-" + digest;
+    if(body.directoryEntry) {
+      const match=await db().from("directory_entries").select("id").eq("owner_id",user.id).eq("id",body.directoryEntry).gt("premium_until",new Date().toISOString()).is("deletion_due_at",null).maybeSingle();
+      if(match.error || !match.data) throw new Failure(400,"Choose a paid listing from your account.");
+    }
     const store = eventStore();
     const ownerId = "ownership." + digest;
     const alertId = "drafts.review-alert-" + digest;
@@ -142,6 +146,7 @@ export function POST(req: Request) {
         city,
         neighborhood: city,
         organizer,
+        ...(body.directoryEntry ? {directoryEntry:body.directoryEntry} : {}),
         startsAt,
         ...(endsAt ? { endsAt } : {}),
         ...(until ? { weeklyUntil: until } : {}),

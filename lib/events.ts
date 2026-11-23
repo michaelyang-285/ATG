@@ -108,3 +108,8 @@ function orderedOccurrences(events: EventRecord[], include: (e: EventOccurrence)
       return true;
     });
 }
+
+export async function upcomingListingEvents(id:string) {
+  const events=await publication.fetch<EventRecord[]>('*[_type=="event" && directoryEntry==$id && cancelled!=true]{'+eventFields+'}',{id},{next:{revalidate:60}});
+  return orderedOccurrences(events,e=>Date.parse(e.endsAt || e.startsAt)>=Date.now()).slice(0,6);
+}

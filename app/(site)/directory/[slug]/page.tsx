@@ -1,3 +1,5 @@
+import {upcomingListingEvents, occurrencePath} from "@/lib/events";
+import {activeDeal} from "@/lib/directory/deal";
 import IndependentProBadge from "@/components/IndependentProBadge";
 import { defaultWeek } from "@/lib/directory/hours";
 import OperatingHours from "@/components/OperatingHours";
@@ -56,6 +58,8 @@ export default async function Page({params}:Props) {
   const destination = b.address?.trim() ? encodeURIComponent(b.address.trim()) : "";
   const phone = b.publicPhone?.trim();
   const phoneLabel = phone?.replace(/^(?:\+?1[ .-]?)?\(?(\d{3})\)?[ .-]?(\d{3})[ .-]?(\d{4})$/, "($1) $2-$3");
+  const events=b.premium ? await upcomingListingEvents(b._id) : [];
+  const deal = activeDeal(b.deal);
   const booking = safeUrl(b.booking);
   const otherSocial = safeUrl(b.social);
   const socials = networks.flatMap(n=>{
@@ -73,6 +77,8 @@ export default async function Page({params}:Props) {
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>
       <div className="listing-tags">{tags.map(tag=><span key={tag}>{tag}</span>)}</div>
+      {deal && <section><h2>{deal.title}</h2><p>{deal.terms}</p><p>Valid through {deal.end}</p><Link href="/deals">More Gwinnett Deals</Link></section>}
+      {events.length>0 && <section><h2>Upcoming events</h2><ul>{events.map(e=><li key={e._id+e.startsAt}><Link href={occurrencePath(e)}>{e.title}</Link> · {e.day}</li>)}</ul></section>}
       {coverage.length>0 && <section className="directory-coverage"><h2>On All Things Gwinnett</h2>
         <ul>{coverage.map(piece=><li key={piece._id}><Link href={storyHref(piece)}>
           <span>{isGuide(piece) ? "Featured in an ATG Guide" : "Mentioned on ATG"}</span>
@@ -101,6 +107,7 @@ export default async function Page({params}:Props) {
       </div></section>}
       {socials.length>0 && <section><h3>Social profiles</h3><div className="profile-links">{socials.map(n=>
         <a key={n.key} href={n.href}><DirectorySocialIcon network={n.key}/>{n.label}</a>)}</div></section>}
+      <p>Own this business? <Link href="/contact">Request to claim this listing</Link> and include its URL for verification.</p>
       <ListingCorrection name={b.name} slug={b.slug} sample={demo} />
     </aside></div></main>;
 }

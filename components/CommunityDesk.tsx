@@ -12,7 +12,7 @@ const desks = {
       ],
       [
         "Give your business a home",
-        "A directory profile is where neighbors can find your hours, service area, website, and directions. The one-time $3 fee helps keep spam out; submissions go through review.",
+        "A directory profile is where neighbors can find your hours, service area, website, and directions. Basic listings are free. ATG reviews submissions before publication.",
       ],
       [
         "How editorial coverage works",

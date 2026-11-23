@@ -22,6 +22,7 @@ import { additionalCategories, additionalCategoryError, additionalCategoryLimit,
 import {blankSocial, networks} from "@/lib/directory/social";
 const blank = {
   ...blankSocial,
+  dealTitle:"", dealTerms:"", dealEnd:"",
   listingId: "",
   id: "",
   revision: 0,
@@ -49,6 +50,7 @@ const blank = {
 };
 export type Draft = typeof blank;
 type Row = {
+  premium_until: string | null; legacy:boolean; billing:boolean;
   id: string;
   revision: number;
   status: string;
@@ -56,7 +58,7 @@ type Row = {
   profilePath?: string | null;
   deletion_due_at: string | null;
   contact: Partial<Draft>;
-  draft: Partial<Draft>;
+  draft: Partial<Draft> & {deal?:{title:string;terms:string;end:string}};
 };
 const dueDate = (value: string) => new Date(value).toLocaleString("en-US", {dateStyle: "medium", timeStyle: "short", timeZone: "America/New_York"}) + " ET";
 function restoreDraft(saved: Partial<Draft>): Draft {
@@ -76,7 +78,7 @@ const listingTypes = [
 const sections=["Business basics","Service area","Contact & links","Photos","Review"];
 type Progress={listing_id:string,step:number,fields:Draft};
 const labels: Record<string, string> = {
-  unpaid: "Awaiting $3 payment",
+  unpaid: "Ready to submit",
   review: "In review",
   published: "Published",
   changes: "Changes requested",
@@ -199,7 +201,7 @@ export default function OwnerDashboard() {
           // Session storage still prevents a repeat in this tab.
         }
         sessionStorage.removeItem("atg-directory-checkout");
-        gtag("event", "directory_signup", { value: 3, currency: "USD" });
+        gtag("event", "directory_upgrade", { value: 9, currency: "USD" });
       })
       .catch(() => {
         // Analytics must not interrupt the listing dashboard.
@@ -238,6 +240,7 @@ export default function OwnerDashboard() {
         ? restoreDraft({
             ...row.contact,
             ...row.draft,
+            dealTitle:row.draft.deal?.title || "", dealTerms:row.draft.deal?.terms || "", dealEnd:row.draft.deal?.end || "",
             id: row.id,listingId:row.id,
             revision: row.revision,
             status: row.status,
@@ -292,6 +295,7 @@ export default function OwnerDashboard() {
           const data = new FormData();
           data.set("file", display, "display");
           if (preview) data.set("thumbnail", preview, "thumbnail.jpg");
+          if (k==="gallery" && form.id) data.set("galleryListing",form.id);
           const {url} = await api("upload", data);
           setForm(current => current && (k === "logo"
             ? {...current, logo: url}
@@ -315,6 +319,9 @@ export default function OwnerDashboard() {
     window.location.assign(url);
   }
 
+  const editing = rows.find(row=>row.id===form?.id);
+  const premium = Date.parse(editing?.premium_until || "") > Date.now();
+  const media = premium || editing?.legacy;
   const descriptionCount = descriptionLength(form?.summary || "");
   const descriptionOver = descriptionCount > descriptionLimit;
   const descriptionBlocked = descriptionOver && (step === 0 || step === 4);
@@ -345,14 +352,10 @@ export default function OwnerDashboard() {
       }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
-      const result = await api("owner", {...form, newsletter});
+      await api("owner", {...form, ...(!media ? {...blankSocial,url:"",social:"",booking:"",gallery:[]} : {}), newsletter});
       setForm(null);
-      if (!form.status || form.status === "unpaid") {
-        await openCheckout(result.id);
-        return;
-      }
       await refresh();
-      setMsg("Edits submitted for review.");
+      setMsg("Listing submitted for review.");
     });
   }
   async function checkpoint(next:number){
@@ -427,6 +430,8 @@ export default function OwnerDashboard() {
                 <article key={r.id}>
                   <OwnerListingHeading data={r.draft} href={r.profilePath} status={labels[r.status]} />
                   {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
+                  {r.billing && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Manage billing</button>}
+                  {Date.parse(r.premium_until || "")>Date.now() && !r.deletion_due_at && <button onClick={()=>{edit(r);setStep(2)}}>Manage deal</button>}
                   {r.review_note && <p>{r.review_note}</p>}
                   {r.deletion_due_at && <p>Hidden from the directory. Scheduled for deletion by {dueDate(r.deletion_due_at)}.</p>}
                   <div className="owner-listing-actions">
@@ -439,8 +444,8 @@ export default function OwnerDashboard() {
                         <div className="owner-listing-links">
                           {r.profilePath && <a className="button button-orange" href={r.profilePath}>View public profile</a>}
                           <button onClick={() => edit(r)}>Edit listing</button>
-                          {r.status === "unpaid" && (
-                            <button disabled={busy} onClick={() => run(() => openCheckout(r.id))}>Continue to checkout</button>
+                          {r.profilePath && !r.billing && (
+                            <button disabled={busy} onClick={() => run(() => openCheckout(r.id))}>Upgrade · $9/year</button>
                           )}
                         </div>
                         <button className="request-deletion" disabled={busy} onClick={() => {
@@ -579,14 +584,15 @@ export default function OwnerDashboard() {
                   onChange={e => setForm(current => current && ({...current, hidePhone:e.target.checked,
                     businessPhone: current.businessPhone || current.phone}))} />Hide phone number on profile</label>
                 {!form.hidePhone && field("businessPhone", "Business phone shown on profile", true, "tel")}
-                {field("url", "Website", false, "url")}
+                {media && <>{field("url", "Website", false, "url")}
                 {field("booking", "Booking or ordering link", false, "url")}
                 <details><summary>Social profiles (optional)</summary>
                   {networks.map(({key,label})=><div key={key}>{field(key,label+" URL",false,"url")}</div>)}
                   {field("social","Other social profile",false,"url")}
-                </details>
+                </details></>}
+                {premium && <fieldset><legend>Manage deal</legend>{field("dealTitle","Offer (clear to end it)")}{field("dealTerms","Terms and how to redeem")}{field("dealEnd","Last day",false,"date")}</fieldset>}
                 </>}{step===3&&<><p>Choose JPG, PNG, or WebP images up to 10 MB each. Your device resizes them before upload. Logo and photos are optional.</p>
-                {(["logo", "gallery"] as const).map((k) => (
+                {(["logo", "gallery"] as const).filter(k=>k==="logo" || media).map((k) => (
                   <section key={k} className="upload-panel">
                     <label>
                       {k === "logo"
@@ -638,9 +644,9 @@ export default function OwnerDashboard() {
             )}
             {msg && <p className="wizard-error" role="alert">{msg}</p>}
             {step===4 && !form.status && <label><input type="checkbox" name="newsletter" value="yes"/> Email me the All Things Gwinnett newsletter.</label>}
-            {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">The one-time listing fee is $3. You can enter a promotion code at Stripe Checkout. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
+            {step===4 && (!form.status || form.status==="unpaid") && <p className="checkout-note">Basic listings are free. ATG reviews submissions before publication. For billing or review questions, <a href="/contact">contact ATG</a>.</p>}
             <div className="wizard-actions">{step>0&&<button type="button" onClick={()=>{setMsg("");setStep(step-1)}}>Back</button>}
-              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : "Continue to Stripe Checkout · $3"}</button>
+              <button className="primary-action" disabled={busy || descriptionBlocked}>{busy ? "Saving…" : step < 4 ? "Next" : form.status && form.status !== "unpaid" ? "Submit edits for review" : "Submit free listing for review"}</button>
               <button type="button" className="text-action" onClick={()=>run(async()=>{await checkpoint(step);await refresh();setForm(null);setMsg("Draft saved. You can finish it later.")})}>Save and exit</button></div>
           </fieldset>
         </form>

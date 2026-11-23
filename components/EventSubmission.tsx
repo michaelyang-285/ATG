@@ -51,6 +51,17 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
       data.subscription.unsubscribe();
     };
   }, [client]);
+  const [listingOptions,setListingOptions] = useState<{id:string;name:string}[]>([]);
+  useEffect(()=>{
+    setListingOptions([]);
+    if(!session || generalAccount) return;
+    const abort=new AbortController();
+    fetch("/api/directory/owner",{headers:{Authorization:"Bearer "+session.access_token},signal:abort.signal})
+      .then(r=>r.ok?r.json():null).then(data=>{
+        if(data && !abort.signal.aborted) setListingOptions(data.rows.filter((r:{premium_until:string;profilePath:string})=>r.profilePath && Date.parse(r.premium_until)>Date.now()).map((r:{id:string;draft:{name:string}})=>({id:r.id,name:r.draft.name})));
+      }).catch(()=>{});
+    return ()=>abort.abort();
+  },[session,generalAccount]);
   async function run(fn: () => Promise<void>) {
     setMessage("");
     setBusy(true);
@@ -206,7 +217,7 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
         </p>
         <h2>Event details</h2>
             {input("title", "Event name")}
-            {input("organizer", "Public organizer name")}
+            {input("organizer", "Public organizer name")}{listingOptions.length>0 && <label>Also show this event on a business profile<select name="directoryEntry"><option value="">Calendar only</option>{listingOptions.map(l=><option key={l.id} value={l.id}>{l.name}</option>)}</select></label>}
             <label>
               Description
               <textarea name="summary" required maxLength={3000} />

@@ -233,7 +233,7 @@ export default async function BrowsePage({
       {kind === "directory" && (
         <aside className="directory-owner-tools" aria-labelledby="business-owners">
           <h2 id="business-owners">For businesses and independent providers</h2>
-          <div><Link href="/directory/submit">Add your listing</Link><Link href="/account?mode=signin">Manage my listings</Link></div>
+          <div><Link href="/directory/submit">Free and paid listings</Link><Link href="/deals">Gwinnett Deals</Link><Link href="/account?mode=signin">Manage my listings</Link></div>
         </aside>
       )}
       {(kind === "events" || kind === "search") && (
