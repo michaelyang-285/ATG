@@ -30,20 +30,15 @@ export default async function HomePage() {
     .slice(0, 2);
   return (
     <main id="main" className="site-width homepage">
-      <a className="text-link" style={{ display: "flex", alignItems: "center", gap: ".45rem", paddingBlock: ".8rem", borderBottom: "1px solid currentColor" }} href={facebookGroup} target="_blank" rel="noopener noreferrer">
-        <strong>{groupAudience.memberCountDisplay} members</strong> in our Facebook group <DirectionIcon />
-      </a>
-      <div className="lead-layout" style={{ marginTop: "1.25rem" }}>
+      <div className="front-page">
         <section className="lead-story" aria-label="Featured story">
           {featured ? (
             <>
-              <p className="story-label">{storyLabel(featured)}</p>
-              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3.6rem)", lineHeight: 1.06, margin: ".5rem 0 1rem" }}>
+              <div className="front-copy">
+              <h1>
                 <Link href={storyHref(featured)}>{featured.title}</Link>
               </h1>
-              <Link href={storyHref(featured)} tabIndex={-1} aria-hidden="true">
-                <StoryImage story={featured} priority />
-              </Link>
+              <p className="story-label">{storyLabel(featured)}</p>
               {featured.excerpt && (
                 <p className="lead-deck">{featured.excerpt}</p>
               )}
@@ -51,6 +46,12 @@ export default async function HomePage() {
                 {isGuide(featured) ? "Read the guide" : "Read the story"}{" "}
                 <DirectionIcon />
               </Link>
+              </div>
+              {featured.image && (
+              <Link className="front-photo" href={storyHref(featured)} tabIndex={-1} aria-hidden="true">
+                <StoryImage story={featured} priority />
+              </Link>
+              )}
             </>
           ) : (
             <>
@@ -102,6 +103,9 @@ export default async function HomePage() {
           )}
         </aside>
       </div>
+      <a className="community-line" href={facebookGroup} target="_blank" rel="noopener noreferrer">
+        <strong>{groupAudience.memberCountDisplay} members</strong> in our Facebook group <DirectionIcon />
+      </a>
       <WeekendPreview />
       <CalendarHighlights />
       <Newsletter url={settings.newsletterUrl} />

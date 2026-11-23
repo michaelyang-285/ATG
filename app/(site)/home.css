@@ -8,3 +8,19 @@
 .homepage .lead-story h2{font-size:clamp(2rem,4vw,3.6rem);line-height:1.06;margin:.8rem 0}
 .home-business{border-top:2px solid currentColor;padding-top:2rem}
 @media(max-width:720px){.homepage .home-welcome{grid-template-columns:1fr}.home-community{padding:1.5rem}}
+
+.front-page { margin-top: clamp(1rem, 3vw, 2.5rem); }
+.front-page .lead-story { background: #f5f5f2; border-top: 4px solid #171717; }
+.front-copy { align-self: center; padding: clamp(1.5rem, 3vw, 3rem); max-width: 58rem; }
+.front-copy h1 { font-size: clamp(2rem, 3.6vw, 3.65rem); line-height: 1.04; letter-spacing: -.035em; text-wrap: balance; margin: 0 0 1rem; }
+.front-copy .lead-deck { margin: .8rem 0 1.25rem; }
+.front-photo { display: block; min-width: 0; }
+.homepage .front-photo .story-image { height: 100%; width: 100%; aspect-ratio: 4/3; object-fit: cover; margin: 0; }
+.front-page .latest-stories { padding: 1.5rem 0; border-bottom: 1px solid #171717; }
+.front-page .latest-stories h2 { font-size: 1.3rem; margin: 0; }
+.homepage .community-line { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; padding-block: 1rem; color: #b92f10; }
+@media (min-width: 761px) {
+  .front-page .lead-story:has(.front-photo) { display: grid; grid-template-columns: 1fr 1.1fr; }
+  .front-page .latest-stories { display: grid; grid-template-columns: minmax(9rem,.55fr); grid-auto-flow: column; grid-auto-columns: minmax(0,1fr); gap: 2rem; }
+  .front-page .latest-stories > :not(h2) { border: 0; border-left: 1px solid #d3d3ce; padding: 0 0 0 1.5rem; }
+}
