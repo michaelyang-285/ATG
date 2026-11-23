@@ -38,7 +38,7 @@ export function POST(request: Request) {
       from: "All Things Gwinnett <directory@mail.285marketing.com>",
       to: ["marketing@285marketing.com"],
       reply_to: email,
-      subject: `ATG directory correction: ${listing.name.replace(/[\r\n]+/g, " ")}`,
+      subject: `ATG directory ${body.claim===true ? "ownership claim" : "correction"}: ${listing.name.replace(/[\r\n]+/g, " ")}`,
       text: [
         listing.name,
         "https://allthingsgwinnett.com" + listingPath(listing.slug),
@@ -47,7 +47,7 @@ export function POST(request: Request) {
         `Relationship to business (self-reported): ${body.relationship}`,
         `Marketing opt-in: ${body.marketingOptIn ? "Yes. " + correctionOptIn : "No"}`,
         "",
-        "Suggested correction:",
+        body.claim===true ? "Ownership verification details:" : "Suggested correction:",
         correction,
       ].join("\n"),
     };

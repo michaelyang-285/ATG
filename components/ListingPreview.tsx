@@ -3,7 +3,8 @@ import OperatingHours from "./OperatingHours";
 import { networks } from "@/lib/directory/social";
 import { directoryThumbnail } from "@/lib/directory/thumbnail";
 
-export default function ListingPreview({ data: d }: { data: Partial<Draft> }) {
+export default function ListingPreview({ data: d }: { data: Partial<Draft> & {deal?:import("@/lib/directory/deal").DirectoryDeal} }) {
+  const deal = d.dealTitle !== undefined ? {title:d.dealTitle,terms:d.dealTerms,end:d.dealEnd} : d.deal;
   return (
     <article>
       {d.logo ? (
@@ -24,6 +25,7 @@ export default function ListingPreview({ data: d }: { data: Partial<Draft> }) {
           .join(" · ")}
       </p>
       <p>{d.summary}</p>
+      {deal?.title && <section><h4>{deal.title}</h4><p>{deal.terms}</p><p>Valid through {deal.end}</p></section>}
       {[
         d.neighborhood,
         d.hideAddress ? "" : (d.streetAddress ? [d.streetAddress, d.city, "GA " + d.zip].join(", ") : d.address),

@@ -430,6 +430,7 @@ export default function OwnerDashboard() {
                 <article key={r.id}>
                   <OwnerListingHeading data={r.draft} href={r.profilePath} status={labels[r.status]} />
                   {r.status==="unpaid"&&<Completion completed={sections.length+1}/>}
+                  {r.billing && r.premium_until && <p>Paid listing through {new Date(r.premium_until).toLocaleDateString("en-US")}</p>}
                   {r.billing && <button disabled={busy} onClick={()=>run(()=>openCheckout(r.id))}>Manage billing</button>}
                   {Date.parse(r.premium_until || "")>Date.now() && !r.deletion_due_at && <button onClick={()=>{edit(r);setStep(2)}}>Manage deal</button>}
                   {r.review_note && <p>{r.review_note}</p>}
@@ -449,7 +450,7 @@ export default function OwnerDashboard() {
                           )}
                         </div>
                         <button className="request-deletion" disabled={busy} onClick={() => {
-                          if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
+                          if (window.confirm("Request deletion of " + r.draft.name + "? The profile will be hidden now. Any annual renewal will be canceled. ATG can approve deletion sooner, or it will be deleted automatically after 14 days.")) {
                             run(async () => { await api("deletion", {id:r.id, action:"request"}); await refresh(); });
                           }
                         }}>Request profile deletion</button>

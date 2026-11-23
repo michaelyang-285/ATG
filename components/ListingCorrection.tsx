@@ -7,6 +7,7 @@ import "./listing-correction.css";
 const endpoint = "/api/directory/corrections";
 
 export default function ListingCorrection({ name, slug, sample = false }: { name: string; slug: string; sample?: boolean }) {
+  const [claim,setClaim]=useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const submissionId = useRef("");
   const [sending, setSending] = useState(false);
@@ -27,7 +28,7 @@ export default function ListingCorrection({ name, slug, sample = false }: { name
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...Object.fromEntries(fields),
-          slug,
+          slug, claim,
           submissionId: submissionId.current,
           marketingOptIn: fields.has("marketingOptIn"),
         }),
@@ -47,19 +48,20 @@ export default function ListingCorrection({ name, slug, sample = false }: { name
 
   return <>
     <p className="listing-correction-prompt">
+      <button type="button" aria-haspopup="dialog" onClick={()=>{setClaim(true);dialog.current?.showModal()}}>Claim this listing</button><br/>
       Is this information not right?{" "}
-      <button type="button" aria-haspopup="dialog" onClick={() => dialog.current?.showModal()}>Let us know.</button>
+      <button type="button" aria-haspopup="dialog" onClick={() => {setClaim(false);dialog.current?.showModal()}}>Let us know.</button>
     </p>
     <dialog className="listing-correction-dialog" ref={dialog} aria-labelledby="correction-title"
       onClose={() => { if (sent) setSent(false); }}>
       <div className="correction-sheet">
         <div className="correction-heading">
-          <h2 id="correction-title">Suggest a correction</h2>
+          <h2 id="correction-title">{claim ? "Claim this listing" : "Suggest a correction"}</h2>
           <button className="correction-close" type="button" aria-label="Close form" onClick={() => dialog.current?.close()}>×</button>
         </div>
         <p className="correction-business">{name}</p>
         {sent ? <div role="status">
-          <p>Thanks for letting us know. The ATG team will review your correction.</p>
+          <p>{claim ? "Your claim was sent. ATG will contact you to verify ownership." : "Thanks for letting us know. The ATG team will review your correction."}</p>
           <button className="button button-orange" type="button" onClick={() => dialog.current?.close()}>Done</button>
         </div> : <form onSubmit={submit}>
           <fieldset disabled={sending}>
@@ -74,14 +76,14 @@ export default function ListingCorrection({ name, slug, sample = false }: { name
                 {correctionRoles.map(role => <option key={role}>{role}</option>)}
               </select>
             </label>
-            <label>What needs correcting?
-              <textarea name="correction" rows={3} maxLength={3000} placeholder="Tell us what’s incorrect and what it should say." required />
+            <label>{claim ? "How can ATG verify you represent this business?" : "What needs correcting?"}
+              <textarea name="correction" rows={3} maxLength={3000} placeholder={claim ? "Include your business email or another way to verify your role." : "Tell us what’s incorrect and what it should say."} required />
             </label>
             <label className="correction-opt-in"><input type="checkbox" name="marketingOptIn" />{correctionOptIn}</label>
           </fieldset>
           {error && <p className="correction-error" role="alert">{error}</p>}
           {sample && <p>This sample form is for preview only.</p>}
-          <button className="button button-orange" type="submit" disabled={sending || sample}>{sending ? "Sending…" : "Send correction"}</button>
+          <button className="button button-orange" type="submit" disabled={sending || sample}>{sending ? "Sending…" : claim ? "Send claim request" : "Send correction"}</button>
         </form>}
       </div>
     </dialog>

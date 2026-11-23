@@ -58,8 +58,7 @@ export default function Submit() {
       </p>
       <p>
         Already see your business?{" "}
-        <Link href="/contact">Contact ATG to claim it</Link> and include the
-        listing URL so we can verify ownership.
+        <Link href="/directory">Find your listing</Link> and select “Claim this listing.” ATG will verify ownership.
       </p>
     </main>
   );

@@ -107,7 +107,6 @@ export default async function Page({params}:Props) {
       </div></section>}
       {socials.length>0 && <section><h3>Social profiles</h3><div className="profile-links">{socials.map(n=>
         <a key={n.key} href={n.href}><DirectorySocialIcon network={n.key}/>{n.label}</a>)}</div></section>}
-      <p>Own this business? <Link href="/contact">Request to claim this listing</Link> and include its URL for verification.</p>
       <ListingCorrection name={b.name} slug={b.slug} sample={demo} />
     </aside></div></main>;
 }

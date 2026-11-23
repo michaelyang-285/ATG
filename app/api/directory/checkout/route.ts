@@ -47,7 +47,7 @@ export function POST(req: Request) {
         409,
         "An approved, visible listing is required to upgrade.",
       );
-    if (data.checkout_session) {
+    if (data.checkout_session?.startsWith(process.env.STRIPE_SECRET_KEY?.includes("_live_") ? "cs_live_" : "cs_test_")) {
       const prior = await stripe.checkout.sessions.retrieve(
         data.checkout_session,
       );
