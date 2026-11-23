@@ -1,0 +1,113 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Private interview studio · All Things Gwinnett</title>
+<style>
+*{box-sizing:border-box}body{font:17px/1.5 system-ui,sans-serif;background:#faf9f6;color:#201c18;margin:0}main{max-width:860px;margin:auto;padding:32px 20px 100px}header{border-bottom:3px solid #211f1c;padding-bottom:18px}h1{font-size:clamp(2rem,6vw,3.6rem);letter-spacing:-.045em;line-height:1.05;margin:.5rem 0}h2{margin:2rem 0 .7rem}label{display:block;font-weight:650;margin:14px 0}input,textarea,select{display:block;width:100%;font:inherit;border:1px solid #9a958c;border-radius:5px;padding:10px;background:white}textarea{min-height:84px}button{cursor:pointer;font:600 15px system-ui;padding:10px 14px;margin:3px;border:1px solid #aaa69f;background:white;color:#221e19;border-radius:5px}button.primary{background:#ff5026;border-color:#ff5026}button:disabled{opacity:.55}article{border-top:1px solid #c6c1b9;padding:16px 0}img{width:120px;height:90px;object-fit:cover}audio{max-width:100%;display:block}#status{position:sticky;bottom:0;background:#24211f;color:white;padding:8px 18px;border-radius:5px}#status:empty{display:none}small{color:#59534d}summary{cursor:pointer;font-weight:650}button:focus-visible{outline:3px solid #b92f10}
+main{max-width:1100px}header{border-bottom:0;background:#201f1b;color:white;padding:clamp(24px,4vw,48px);border-radius:4px}header strong{color:#ff865e}header small{color:#e5dfd8}.bar{display:flex;align-items:center;justify-content:space-between;margin:2rem 0 1rem;gap:1rem}.bar h2{margin:0}.workspace{display:grid;grid-template-columns:minmax(145px,210px) minmax(0,1fr);gap:clamp(1rem,4vw,3rem);align-items:start}nav{display:grid;gap:4px}nav button{text-align:left;background:transparent;border-color:transparent}nav button[aria-current=page]{background:#e8e3da;font-weight:750}.paper{background:white;padding:clamp(16px,3vw,36px);border-top:3px solid #211f1c}.paper h3{font-size:clamp(1.35rem,3vw,2rem);line-height:1.2;margin:.45rem 0 1rem}#view>button:first-child{margin-top:1.25rem}button:hover{border-color:#211f1c}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #a83212;outline-offset:2px}button{min-height:44px}details,hr{border:0;border-top:1px solid #d9d3cb;margin-top:18px;padding-top:14px}.feedback{background:#f5f2ec;padding:1rem;margin-top:1rem}.feedback p{margin:.4em 0 0}#draftText{min-height:360px}#assignments article{display:flex;align-items:center;justify-content:space-between;gap:1rem}#assignments article button{background:none;border:0;text-align:left;font-size:1.2rem}.paper label:first-child{margin-top:0}audio{margin:12px 0}#status{z-index:2}h2{overflow-wrap:anywhere}@media(max-width:700px){main{padding:16px 12px 60px}.workspace{display:block}nav{display:flex;flex-wrap:wrap;margin-bottom:12px}nav button{font-size:14px;margin:0;padding:8px}#assignments article{display:grid;gap:.25rem}#assignments article button{padding-left:0}}
+</style><main><header><strong>All Things Gwinnett</strong><h1>Interview studio</h1><small>Private editorial workspace</small></header><section id="view"></section><p id="status" role="status"></p></main>
+<script>
+const view=document.querySelector('#view'), statusLine=document.querySelector('#status');
+let doc=null,section=0,recording=null,working=false,dirty=false;
+const edits=new Map();
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const value=id=>document.getElementById(id).value;
+function btn(label,action,id='',primary=false){return '<button class="'+(primary?'primary':'')+'" data-action="'+action+'" data-id="'+esc(id)+'">'+esc(label)+'</button>'}
+function field(label,id,text='',multi=false){return '<label>'+label+(multi?'<textarea id="'+id+'">'+esc(text)+'</textarea>':'<input id="'+id+'" value="'+esc(text)+'">')+'</label>'}
+async function api(action,extra={}){
+ const body={id:doc?.id,revision:doc?.revision,section,action,...extra};
+ if(extra.blob){
+   const {blob}=extra;
+   const mime=blob.type.split(';')[0];
+   const upload=await parent.interviewRequest({...body,action:'upload',blob:undefined,size:blob.size,mime});
+   await parent.interviewUpload(upload.file,upload.token,blob);
+   delete body.blob;body.file=upload.file;
+ }
+ const result=await parent.interviewRequest(body);
+ if(action==='record'||action==='photo')await loadMedia(result.id);
+ return result
+}
+let mediaUrls={};
+async function loadMedia(id){mediaUrls=await parent.interviewRequest({action:'mediaUrls',id})}
+async function library(){
+ edits.clear();doc=null;section=0;active=0;const list=await api('list');
+ screen='interview';
+ view.innerHTML='<div class="bar"><h2>Assignments</h2>'+btn('New assignment','new','',true)+'</div><div id="assignments"></div>';
+ showList(list);dirty=false
+}
+function showList(list){const el=document.querySelector('#assignments');if(el)el.innerHTML=list.map(d=>{
+ const qs=d.sections.flatMap(s=>s.questions);return '<article>'+btn(d.topic,'open',d.id)+' <small>'+esc(d.author)+' · '+qs.filter(q=>q.answer&&!q.skipped).length+' answered of '+qs.length+'</small></article>'
+}).join('')||'<p>No assignments yet.</p>'}
+function restoreEdits(){for(const [id,text] of edits){const el=document.getElementById(id);if(el)el.value=text}dirty=edits.size>0}
+let screen='interview', active=0;
+function newBrief(){
+ view.innerHTML=btn('Back to assignments','back')+'<h2>New assignment</h2><div class="paper">'+field('Article topic','topic')+field('Editorial guidelines','guidelines','',true)+field('Assigned writer','author')+field('Stops, one per line (optional)','stops','',true)+btn('Create assignment','create','',true)+'</div>';
+}
+function brief(){
+ return '<h3>Assignment brief</h3>'+field('Article topic','topic',doc.topic)+field('Editorial guidelines','guidelines',doc.guidelines,true)+field('Assigned writer','author',doc.author)+btn('Save brief','brief','',true)
+}
+function interview(s){
+ active=Math.min(active,Math.max(0,s.questions.length-1));
+ const q=s.questions[active];
+ const picker='<label>Reporting stop<select id="stage">'+doc.sections.map((v,i)=>'<option value="'+i+'" '+(i===section?'selected':'')+'>'+esc(v.name)+'</option>').join('')+'</select></label>';
+ const nav=q?'<label>Question<select id="questionNav">'+s.questions.map((v,i)=>'<option value="'+i+'" '+(i===active?'selected':'')+'>'+(i+1)+'. '+esc(v.text)+'</option>').join('')+'</select></label>':'';
+ const answer=q?'<article><small>Question '+(active+1)+' of '+s.questions.length+'</small><h3>'+esc(q.text)+'</h3>'+(q.skipped?'<p>Flagged as irrelevant. '+esc(q.reason)+'</p>':'')+btn(q.audio?'Record again':'Record answer','record',q.id,true)+(q.audio?'<audio controls src="'+esc(mediaUrls[q.audio])+'"></audio>'+btn('Transcribe recording','transcribe',q.id):'')+field('Written answer or transcript','a'+q.id,q.answer,true)+btn('Save answer','answer',q.id)+(q.answer&&!q.skipped?btn('Review answer','review',q.id):'')+(q.feedback?'<aside class="feedback"><strong>Editorial feedback</strong><p>'+esc(q.feedback)+'</p></aside>':'')+'<details><summary>Question is irrelevant</summary>'+field('Reason (optional)','r'+q.id,q.reason)+btn('Flag question','skip',q.id)+'</details>'+(active+1<s.questions.length?btn('Next question','next'):'')+'</article>':'<p>Generate interview questions from your brief or add a question below.</p>';
+ return picker+nav+answer+btn(q?'Generate more questions':'Generate questions from brief','generate','',!q)+'<details><summary>Add your own question</summary>'+field('Question','manual')+btn('Add question','manual')+'</details><details><summary>Field notes and photos ('+s.photos.length+')</summary>'+field('Visit notes','notes',s.notes,true)+btn('Save notes','notes')+'<label>Add a photo<input type="file" id="photo" accept="image/png,image/jpeg,image/webp"></label>'+s.photos.map(id=>'<a href="'+esc(mediaUrls[id])+'" target="_blank"><img alt="Open interview photo" src="'+esc(mediaUrls[id])+'"></a>').join('')+'</details>'
+}
+function review(){
+ const ranks=doc.ranking.map((n,i)=>'<li>'+esc(n)+' '+(i?btn('Move up','up',i):'')+(i<doc.ranking.length-1?btn('Move down','down',i):'')+'</li>').join('');
+ return (ranks?'<h3>Final ranking</h3><ol>'+ranks+'</ol>':'')+'<h3>Article draft</h3>'+btn('Generate article draft','draft','',true)+(doc.draft?field('Draft for editorial review','draftText',doc.draft,true)+btn('Save draft edits','editdraft'):'')+'<hr>'+btn('Export interview for Notion','export')
+}
+function render(){
+ const pages=[['brief','Assignment brief'],['interview','Interview'],['review','Rankings & draft']];
+ view.innerHTML=btn('Back to assignments','back')+'<h2>'+esc(doc.topic)+'</h2><div class="workspace"><nav aria-label="Assignment workflow">'+pages.map(([id,label])=>'<button data-action="screen" data-id="'+id+'" aria-current="'+(screen===id?'page':'false')+'">'+label+'</button>').join('')+'</nav><section class="paper">'+(screen==='brief'?brief():screen==='review'?review():interview(doc.sections[section]))+'</section></div>';
+ restoreEdits()
+}
+async function change(action,data){
+ doc=await api(action,data);
+ const keys={brief:['topic','guidelines','author'],notes:['notes'],manual:['manual'],answer:['a'+data.question],skip:['r'+data.question],editdraft:['draftText'],record:['a'+data.question],transcribe:['a'+data.question]};
+ if(action==='create')edits.clear();else for(const k of keys[action]||[])edits.delete(k);
+ render();statusLine.textContent='Changes saved.';
+ if(['transcribe','answer'].includes(action)&&doc.sections[section].questions.find(q=>q.id===data.question)?.answer.trim()){
+ statusLine.textContent='Answer saved. Reviewing it against the brief…';
+ try{doc=await api('review',{question:data.question});render();statusLine.textContent='Answer and editorial feedback saved.'}
+ catch(e){statusLine.textContent='Answer saved. Feedback unavailable. '+e.message}
+ }
+}
+async function mic(id,button){
+ if(recording){recording.stop();return}
+ const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+ try{
+ const mime=['audio/webm','audio/mp4','audio/ogg'].find(m=>MediaRecorder.isTypeSupported(m));if(!mime)throw Error('This browser cannot record a supported format.');
+ const rec=new MediaRecorder(stream,{mimeType:mime}),chunks=[];let size=0;
+ rec.ondataavailable=e=>{chunks.push(e.data);size+=e.data.size;if(size>22500000&&rec.state==='recording')rec.stop()};
+ rec.onstop=async()=>{working=true;stream.getTracks().forEach(t=>t.stop());try{await change('record',{question:id,blob:new Blob(chunks,{type:mime})})}catch(e){statusLine.textContent=e.message}finally{recording=null;working=false;view.inert=false;render()}};
+ rec.start(1000);recording=rec;view.querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=el!==button);button.textContent='Stop and save recording';statusLine.textContent='Recording…';
+ }catch(e){stream.getTracks().forEach(t=>t.stop());throw e}
+}
+view.addEventListener('input',e=>{if(e.target.matches('textarea,input:not([type=file])')){edits.set(e.target.id,e.target.value);dirty=true}});
+window.addEventListener('beforeunload',e=>{if(dirty||recording){e.preventDefault();e.returnValue=''}});
+view.addEventListener('change',async e=>{
+ if(e.target.id==='questionNav'){active=Number(e.target.value);render();return}
+ if(e.target.id==='stage'){if(dirty&&!confirm('Switch sections and discard unsaved field edits?')){e.target.value=section;return}edits.clear();active=0;section=Number(e.target.value);render()}
+ if(e.target.id==='photo'&&e.target.files[0]){const f=e.target.files[0];try{await change('photo',{blob:f})}catch(err){statusLine.textContent=err.message}}
+});
+view.addEventListener('click',async e=>{
+ const button=e.target.closest('button');if(!button||working)return;
+ const {action,id}=button.dataset;working=true;statusLine.textContent='Working…';
+ try{
+ if(action==='new'){newBrief();statusLine.textContent='';return}
+ if(action==='screen'||action==='next'){if(action==='next')active++;else screen=id;render();statusLine.textContent='';return}
+ if(action==='record'){if(!recording&&doc.sections[section].questions.find(q=>q.id===id)?.answer&&!confirm('Replace this answer with a new recording?'))return;await mic(id,button);return}
+ if(action==='back'){if(!dirty||confirm('Leave and discard unsaved field edits?'))await library();statusLine.textContent='';return}
+ if(action==='open'){doc=(await api('list')).find(d=>d.id===id);await loadMedia(doc.id);render();statusLine.textContent='';return}
+ if(action==='export'){const lines=[doc.topic,'Writer: '+doc.author,doc.guidelines,...doc.sections.flatMap(s=>['## '+s.name,s.notes,...s.questions.flatMap(q=>['### '+q.text,q.skipped?'Flagged: '+q.reason:q.answer,q.feedback])]),'## Ranking',...doc.ranking.map((n,i)=>(i+1)+'. '+n),'## Draft',doc.draft];const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n\n')],{type:'text/markdown'}));a.download='interview.md';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);statusLine.textContent='Markdown exported for Notion import.';return}
+ let data={question:id},op=action;
+ if(action==='create'||action==='brief'){Object.assign(data,{topic:value('topic'),guidelines:value('guidelines'),author:value('author')});if(action==='create')data.stops=value('stops')}
+ if(['answer','skip','notes','manual','editdraft'].includes(action))data.text=value(({answer:'a'+id,skip:'r'+id,notes:'notes',manual:'manual',editdraft:'draftText'})[action]);
+ if(action==='up'||action==='down'){op='rank';data.index=Number(id);data.to=data.index+(action==='up'?-1:1)}
+ if(action==='draft'&&doc.draft&&!confirm('Replace the saved article draft?'))return;
+ await change(op,data)
+ }catch(err){statusLine.textContent=err.message}finally{working=false}
+});
+setInterval(()=>{if(doc&&!working&&!dirty&&!recording)loadMedia(doc.id).then(()=>{if(doc&&!working&&!dirty&&!recording)render()}).catch(()=>{})},45*60*1000);
+library().catch(e=>statusLine.textContent=e.message);
+setInterval(async()=>{if(document.getElementById('assignments')&&!working){try{showList(await api('list'))}catch{}}},4000);
+</script></main></html>

@@ -402,6 +402,7 @@ export default function OwnerDashboard() {
             <aside className="account-tools">
               <h2>Administration</h2>
               {accountAdmin(session.user) && <a className="account-admin-action" href="/admin/people"><span>Manage people</span><span aria-hidden="true">→</span></a>}
+              {accountAdmin(session.user) && <a className="account-assignment-link" href="/admin/interviews">Interview studio</a>}
               {canOpenQueue && <ApprovalNotifications key={session.user.id} session={session} refreshKey={refreshKey} />}
             </aside>}
           <section className="account-submissions" aria-labelledby="my-submissions">
