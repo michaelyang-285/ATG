@@ -2,6 +2,7 @@
 import "./people.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { AdminListingFields } from "@/components/AdminListingFields";
 import AdminListingMediaHours from "@/components/AdminListingMediaHours";
 import { useEffect, useState } from "react";
 import { portalRequest, type Assignment } from "@/lib/portal-request";
@@ -461,7 +462,7 @@ export default function People({
               {!detail.events.length && <p>No event submissions.</p>}
               <ul>{detail.events.flatMap((e) => e.versions).map(studio)}</ul>
             </section>
-            <section hidden={section !== "Listings"}>
+            <section className="listing-panel" hidden={section !== "Listings"}>
               <h2>Directory listings</h2>
               {!detail.listings.length && <p>No directory listings.</p>}
               {detail.listings.map((l) => (
@@ -509,55 +510,27 @@ export default function People({
                       }
                     }}
                   >
-                    {Object.entries({ ...l.draft, ...l.contact })
-                      .filter(
-                        ([key]) =>
-                          ![
-                            "email",
-                            "gallery",
-                            "weeklyHours",
-                            "hours",
-                            "logo",
-                            "services",
-                          ].includes(key),
-                      )
-                      .map(([key, value]) => (
-                        <label key={key} className="capitalize">
-                          {key.replace(/([A-Z])/g, " $1")}
-                          {typeof value === "boolean" ? (
-                            <input
-                              name={key}
-                              type="checkbox"
-                              defaultChecked={value}
-                            />
-                          ) : Array.isArray(value) ? (
-                            <textarea
-                              name={key}
-                              defaultValue={JSON.stringify(value, null, 2)}
-                            />
-                          ) : key === "summary" ? (
-                            <textarea
-                              name={key}
-                              defaultValue={String(value || "")}
-                            />
-                          ) : (
-                            <input
-                              name={key}
-                              defaultValue={String(value ?? "")}
-                            />
-                          )}
-                        </label>
-                      ))}
+                    <section className="listing-group">
+                      <h3>Business details</h3>
+                      <AdminListingFields group="basics" values={l.draft} />
+                    </section>
                     <AdminListingMediaHours
                       listingId={l.id}
                       draft={l.draft}
+                      contact={l.contact}
                       onUpload={setBusy}
                     />
-                    <button disabled={busy}>
-                      {l.status === "published"
-                        ? "Update published listing"
-                        : "Save listing"}
-                    </button>
+                    <section className="listing-group">
+                      <h3>Private listing contact</h3>
+                      <AdminListingFields group="contact" values={l.contact} />
+                    </section>
+                    <footer className="listing-actions">
+                      <button className="button button-orange" disabled={busy}>
+                        {l.status === "published"
+                          ? "Update published listing"
+                          : "Save listing"}
+                      </button>
+                    </footer>
                   </form>
                 </details>
               ))}
