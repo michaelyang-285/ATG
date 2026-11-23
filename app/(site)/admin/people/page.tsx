@@ -1,4 +1,5 @@
 "use client";
+import "./people.css";
 import { useEffect, useState } from "react";
 import { portalRequest, type Assignment } from "@/lib/portal-request";
 type Person = {
@@ -54,6 +55,9 @@ function studio(doc: Doc) {
 }
 export default function People() {
   const [page, setPage] = useState(1),
+    [perPage, setPerPage] = useState(50),
+    [loading, setLoading] = useState(true),
+    [listError, setListError] = useState(""),
     [people, setPeople] = useState<Person[]>([]),
     [next, setNext] = useState(false),
     [id, setId] = useState(""),
@@ -63,18 +67,21 @@ export default function People() {
     [version, refresh] = useState(0);
   useEffect(() => {
     let active = true;
-    portalRequest("/api/admin/people?page=" + page)
+    setLoading(true);
+    setListError("");
+    portalRequest(`/api/admin/people?page=${page}&perPage=${perPage}`)
       .then((d) => {
         if (active) {
           setPeople(d.people);
           setNext(!!d.next);
         }
       })
-      .catch((e) => active && setMsg(e.message));
+      .catch((e) => active && setListError(e.message))
+      .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
-  }, [page, version]);
+  }, [page, perPage, version]);
   useEffect(() => {
     if (!id) return;
     let active = true;
@@ -120,41 +127,121 @@ export default function People() {
     }
   }
   return (
-    <main className="site-width page-content directory-owner">
+    <main className="site-width page-content directory-owner people-workspace">
       <a href="/account">My account</a>
       <h1>People</h1>
       <p role="status">{msg}</p>
-      <div className="grid gap-8 md:grid-cols-[16rem_1fr]">
-        <aside>
-          <h2>Accounts</h2>
-          <ul>
-            {people.map((p) => (
-              <li key={p.id}>
-                <button
-                  className="text-left text-link"
-                  onClick={() => {
-                    setDetail(null);
-                    setId(p.id);
-                    refresh((v) => v + 1);
-                    setMsg("");
+      <div>
+        {!id ? (
+          <section aria-label="Account directory" className="people-sheet">
+            <div className="people-controls">
+              <strong>
+                {loading
+                  ? "Loading accounts…"
+                  : listError
+                    ? "Accounts unavailable"
+                    : people.length
+                      ? `Accounts ${(page - 1) * perPage + 1}–${(page - 1) * perPage + people.length}`
+                      : "No accounts"}
+              </strong>
+              <label>
+                Rows per page{" "}
+                <select
+                  value={perPage}
+                  onChange={(e) => {
+                    setPerPage(Number(e.target.value));
+                    setPage(1);
                   }}
                 >
-                  {[p.info.firstName, p.info.lastName]
-                    .filter(Boolean)
-                    .join(" ") || p.email}
-                  <small className="block">{p.email}</small>
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button disabled={page === 1} onClick={() => setPage(page - 1)}>
-            Previous
-          </button>{" "}
-          ·{" "}
-          <button disabled={!next} onClick={() => setPage(page + 1)}>
-            Next
-          </button>
-        </aside>
+                  {[50, 100, 250, 500].map((size) => (
+                    <option key={size}>{size}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                disabled={loading || page === 1}
+                onClick={() => setPage(page - 1)}
+              >
+                Previous
+              </button>
+              <button
+                disabled={loading || !!listError || !next}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </button>
+            </div>
+            {listError && (
+              <p role="alert">
+                {listError}{" "}
+                <button onClick={() => refresh((v) => v + 1)}>Retry</button>
+              </p>
+            )}
+            <div className="people-scroll">
+              <table aria-label="People">
+                <thead>
+                  <tr>
+                    {[
+                      "Name",
+                      "Email",
+                      "Business",
+                      "City",
+                      "Author",
+                      "Joined",
+                    ].map((h) => (
+                      <th key={h} scope="col">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {!loading &&
+                    !listError &&
+                    people.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <button
+                            className="people-name"
+                            onClick={() => {
+                              setDetail(null);
+                              setId(p.id);
+                              setMsg("");
+                            }}
+                          >
+                            {[p.info.firstName, p.info.lastName]
+                              .filter(Boolean)
+                              .join(" ") || p.email}
+                          </button>
+                        </td>
+                        <td>{p.email}</td>
+                        <td>{p.info.name || "—"}</td>
+                        <td>{p.info.city || "—"}</td>
+                        <td>{p.approved ? "Approved" : "—"}</td>
+                        <td>
+                          {new Date(p.created).toLocaleDateString("en-US")}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : (
+          <>
+            <button
+              disabled={busy}
+              onClick={() => {
+                setId("");
+                setDetail(null);
+                setMsg("");
+              }}
+            >
+              ← Back to people
+            </button>
+            {!detail && !msg && <p role="status">Loading profile…</p>}
+          </>
+        )}
         {detail && (
           <article key={id}>
             <h2>{detail.person.email}</h2>
