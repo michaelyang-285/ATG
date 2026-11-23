@@ -45,7 +45,7 @@ export function POST(req: Request) {
             }
           : {}),
         emailRedirectTo: new URL(
-          generalAccount === true ? "/create-account" : eventSignup === true ? "/events/submit" : "/directory/manage",
+          generalAccount === true ? "/create-account" : eventSignup === true ? "/events/submit" : "/account",
           process.env.DIRECTORY_SITE_URL!,
         ).href,
       },

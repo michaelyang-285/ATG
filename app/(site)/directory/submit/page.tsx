@@ -1,2 +1,2 @@
 import {redirect} from "next/navigation";
-export default function Submit(){redirect("/directory/manage")}
+export default function Submit(){redirect("/account")}

@@ -31,7 +31,7 @@ export default function Assignments() {
   }
   return (
     <main className="site-width page-content directory-owner">
-      <a href="/directory/manage">My account</a>
+      <a href="/account">My account</a>
       <h1>My assignments</h1>
       <p role="status">{message}</p>
       {rows.map((row) => (

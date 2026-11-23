@@ -52,7 +52,7 @@ export default function AdvertisePage() {
         <a className="button button-orange" href={facebookGroup}>Find the group admins on Facebook</a>
         <h3>Give your business a directory listing</h3>
         <p>Help neighbors find your hours, service area, website, and directions. Listings have a one-time $3 review fee.</p>
-        <Link className="text-link" href="/directory/manage">Create a directory listing</Link>
+        <Link className="text-link" href="/account">Create a directory listing</Link>
       </section>
     </main>
   );

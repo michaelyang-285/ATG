@@ -121,7 +121,7 @@ export default function People() {
   }
   return (
     <main className="site-width page-content directory-owner">
-      <a href="/directory/manage">My account</a>
+      <a href="/account">My account</a>
       <h1>People</h1>
       <p role="status">{msg}</p>
       <div className="grid gap-8 md:grid-cols-[16rem_1fr]">

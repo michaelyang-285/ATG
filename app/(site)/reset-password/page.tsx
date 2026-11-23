@@ -23,7 +23,7 @@ export default function ResetPassword() {
       if (!client) throw Error();
       const {error} = await client.auth.updateUser({password});
       if (error) throw error;
-      location.replace("/directory/manage");
+      location.replace("/account");
     } catch {setMessage("Couldn’t save your password. Try a different password or request a fresh reset link.");}
     finally {setBusy(false);}
   }
