@@ -499,8 +499,9 @@ img {
 .article header {
   margin-bottom: 32px;
 }
-.article h1 {
-  font-size: clamp(34px, 4vw, 52px);
+.article header h1 {
+  font-size: clamp(34px, 3.5vw, 44px);
+  text-wrap: wrap;
 }
 .article .story-image {
   margin-block: 24px;
