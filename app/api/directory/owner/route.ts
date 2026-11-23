@@ -2,6 +2,7 @@ import { notifySubmission } from "@/lib/submission-alerts";
 import { subscribeEmail } from "@/lib/newsletter";
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
+import {eligibleLocation, areaError} from "@/lib/directory/business-location";
 import { directoryWebLink } from "@/lib/directory/web-link";
 import { listing } from "@/lib/directory/validate";
 import { listingPath } from "@/lib/directory/profile";
@@ -32,9 +33,24 @@ export function POST(req: Request) {
     await human();
     const user = await owner(req),
       body = await req.json();
+    if (body.action === "reserve") {
+      if (!user.email_confirmed_at) throw new Failure(403,"Confirm your email before checkout.");
+      const {id, name, firstName, lastName, city, zip} = body;
+      if (!/^[0-9a-f-]{36}$/i.test(id) || [name, firstName, lastName, city, zip].some(v => typeof v !== "string" || !v.trim() || v.length > 240) || name.trim().length > 100)
+        throw new Failure(400,"Enter your name, business name, city and ZIP.");
+      if (!eligibleLocation(city,zip)) throw new Failure(400,areaError);
+      const table = db().from("directory_entries");
+      const result = await table.insert({id, owner_id:user.id, status:"unpaid", draft:{name:name.trim()},
+        contact:{tier:"paid", onboarding:true, firstName:firstName.trim(), lastName:lastName.trim(), email:user.email, city:city.trim(), zip:zip.trim()}});
+      if (result.error) {
+        const prior = await table.select("id").eq("owner_id",user.id).eq("id",id).eq("contact->>onboarding","true").maybeSingle();
+        if (!prior.data) throw new Failure(409,"Check your saved listings before starting another checkout.");
+      }
+      return {id};
+    }
     if (body.action === "saveDeal") {
       const table = db().from("directory_entries");
-      const { data: row, error } = await table.select("draft,status,revision")
+      const { data: row, error } = await table.select("draft,status,revision").is("contact->>onboarding",null)
         .eq("id", body.id).eq("owner_id", user.id).gt("premium_until", new Date().toISOString())
         .is("deletion_due_at", null).maybeSingle();
       if (error) throw error;
@@ -90,7 +106,8 @@ export function POST(req: Request) {
     const current = body.id ? await table.select("paid_session,premium_until,status,contact,draft").eq("id",body.id).eq("owner_id",user.id).single() : null;
     if (current?.error) throw new Failure(404,"Listing unavailable.");
     const premium = Date.parse(current?.data?.premium_until || "") > Date.now();
-    const paidSignup=body.id ? current?.data?.status==="unpaid" && current.data.contact?.tier==="paid" : body.tier==="paid";
+    if (current?.data?.contact?.onboarding && !premium) throw new Failure(409,"Complete checkout before submitting this listing.");
+    const paidSignup=!premium && (body.id ? current?.data?.status==="unpaid" && current.data.contact?.tier==="paid" : body.tier==="paid");
     Object.assign(values.contact,{tier:paidSignup ? "paid" : current?.data?.contact?.tier || "free",url:values.draft.url});
     if (!paidSignup && !premium && !current?.data?.paid_session && values.draft.gallery.length)
       throw new Failure(400,"Choose a paid listing to add gallery photos.");
@@ -120,7 +137,7 @@ export function POST(req: Request) {
     if (!result.data)
       throw new Failure(409, "This listing changed. Reload before editing.");
     if (!paidSignup && (!body.id || body.status==="unpaid")) await notifySubmission("profile",result.data.id);
-    if (!body.id && body.newsletter === true) await subscribeEmail(user.email!, "directory");
+    if ((!body.id || current?.data?.contact?.onboarding) && body.newsletter === true) await subscribeEmail(user.email!, "directory");
     if(body.listingId)await db().from("directory_progress").delete().eq("owner_id",user.id).eq("listing_id",body.listingId);
     if (result.data.profile_slug) revalidatePath(listingPath(result.data.profile_slug));
     revalidatePath("/directory");

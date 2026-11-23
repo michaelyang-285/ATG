@@ -82,7 +82,7 @@ export function POST(req: Request) {
           metadata: { directory_entry: id, plan: "atg_annual" },
         },
         customer_email: user.email,
-        success_url: home + "?payment=returned",
+        success_url: home + "?payment=returned&listing=" + encodeURIComponent(id),
         cancel_url: home,
       },
       {

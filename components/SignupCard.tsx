@@ -98,7 +98,7 @@ export default function SignupCard({
         <p className="fee-note">
           {event
             ? "Create your free account, then add your event details for review."
-            : tier==="paid" ? "Create your account, build your paid listing, then check out for $12 per year." : "Create your account and basic listing for free."}
+            : tier==="paid" ? "Advertise for $1/month, billed at $12 per year. After checkout, finish your business listing." : "Create your account and basic listing for free."}
         </p>
       </aside>}
       <div className="signup-card">
@@ -232,7 +232,7 @@ export default function SignupCard({
                   .filter(([k]) =>
                     signin
                       ? k === "email"
-                      : !event ||
+                      : tier === "paid" && !event && !generalAccount ? k !== "phone" : !event ||
                         ["firstName", "lastName", "email", "phone"].includes(k),
                   )
                   .map(([k, label, auto, type]) => (

@@ -10,14 +10,14 @@ export function POST(req: Request) {
         throw new Failure(400, "Shorten your business name to 100 characters or fewer.");
       for (const k of eventSignup === true
         ? ["firstName", "lastName", "phone"]
-        : ["firstName", "lastName", "phone", "name"])
+        : tier==="paid" && !generalAccount ? ["firstName","lastName","name"] : ["firstName", "lastName", "phone", "name"])
         if (
           typeof account[k] !== "string" ||
           !account[k].trim() ||
           account[k].length > 240
         )
           throw new Failure(400, "Complete all account fields.");
-      if (account.phone.replace(/\D/g, "").length < 7)
+      if ((tier!=="paid" || eventSignup || generalAccount || account.phone) && String(account.phone || "").replace(/\D/g, "").length < 7)
         throw new Failure(400, "Enter a valid phone number.");
     }
     if (
@@ -36,7 +36,7 @@ export function POST(req: Request) {
               data: {
                 firstName: account.firstName.trim(),
                 lastName: account.lastName.trim(),
-                phone: account.phone.trim(),
+                phone: typeof account.phone === "string" ? account.phone.trim() : "",
                 ...(eventSignup === true
                   ? {}
                   : { name: account.name.trim(), businessName: account.name.trim() }),
