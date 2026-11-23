@@ -1,3 +1,4 @@
+import {accountAdmin} from "@/lib/account-admin";
 import { db, human, owner, respond, Failure } from "@/lib/directory/server";
 import { directoryImageType, storedImageLimit, thumbnailLimit } from "@/lib/directory/gallery";
 
@@ -20,7 +21,14 @@ export function POST(req: Request) {
     if (preview && preview.ext !== "jpg") throw new Failure(400, "The thumbnail must be a JPEG.");
 
     const bucket = db().storage.from("directory-media");
-    const base = user.id + "/" + crypto.randomUUID();
+    let ownerId = user.id;
+    if (data.has("listingId")) {
+      if (!accountAdmin(user)) throw new Failure(403,"Administrator access required.");
+      const listing = await db().from("directory_entries").select("owner_id").eq("id",data.get("listingId")).single();
+      if (!listing.data) throw new Failure(404,"Listing unavailable.");
+      ownerId = listing.data.owner_id;
+    }
+    const base = ownerId + "/" + crypto.randomUUID();
     const key = base + (preview ? ".gallery." : ".") + display.ext;
     const previewKey = base + ".thumb.jpg";
     if (preview) {

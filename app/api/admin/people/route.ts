@@ -16,6 +16,11 @@ const fields = [
   "phone",
   "city",
   "zip",
+  "personalStreet",
+  "personalUnit",
+  "personalCity",
+  "personalState",
+  "personalZip",
 ] as const;
 function profile(user: User) {
   return {
@@ -43,11 +48,18 @@ export function GET(req: Request) {
       const perPage = Number(url.searchParams.get("perPage") ?? 50);
       if (![50, 100, 250, 500].includes(perPage))
         throw new Failure(400, "Choose 50, 100, 250, or 500 rows per page.");
-      const result = await client.auth.admin.listUsers({ page, perPage });
+      const filter = url.searchParams.get("filter") || "all";
+      if (!["all", "accounts", "newsletter"].includes(filter))
+        throw new Failure(400, "Unknown People filter.");
+      const result = await client.rpc("admin_filtered_people_page", {
+        page_number: page,
+        page_size: perPage,
+        contact_filter: filter,
+      });
       if (result.error) throw result.error;
       return {
-        people: result.data.users.map(profile),
-        next: "nextPage" in result.data && !!result.data.nextPage,
+        people: result.data.slice(0, perPage),
+        next: result.data.length > perPage,
       };
     }
     const assignments = await client

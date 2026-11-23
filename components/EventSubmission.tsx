@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { shift, validDay } from "@/lib/event-time";
+import CompleteAccount from "./CompleteAccount";
+import {hasAccountContact} from "@/lib/account-contact";
 import SignupCard from "./SignupCard";
 import { cities } from "@/lib/gwinnett";
 import { browserClient } from "@/lib/browser-client";
@@ -129,6 +131,7 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
                     account: {
                       firstName: account.firstName,
                       lastName: account.lastName,
+                      phone: account.phone,
                     },
                   }),
             }),
@@ -140,6 +143,7 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
         }}
       />
     );
+  if (!hasAccountContact(session.user.user_metadata)) return <CompleteAccount user={session.user} client={client}/>;
   if (generalAccount) return <section className="signup-card"><h2>You’re signed in</h2><p>What would you like to do?</p><p><a className="text-link" href="/events/submit">Submit an event</a></p><p><a className="text-link" href="/account">Manage or create a directory listing</a></p></section>;
   if (done)
     return (
