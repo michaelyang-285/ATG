@@ -140,11 +140,11 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
         }}
       />
     );
-  if (generalAccount) return <section className="signup-card"><h2>You’re signed in</h2><p>What would you like to do?</p><p><a className="text-link" href="/events/submit">Submit an event</a></p><p><a className="text-link" href="/directory/manage">Manage or create a directory listing</a></p></section>;
+  if (generalAccount) return <section className="signup-card"><h2>You’re signed in</h2><p>What would you like to do?</p><p><a className="text-link" href="/events/submit">Submit an event</a></p><p><a className="text-link" href="/account">Manage or create a directory listing</a></p></section>;
   if (done)
     return (
       <>
-        <a className="text-link" href="/directory/manage">View my submissions</a>
+        <a className="text-link" href="/account">View my submissions</a>
         <h1>Event sent for review</h1>
         <p>
           ATG will review your details before the event appears on the calendar.
@@ -167,7 +167,7 @@ export default function EventSubmission({ generalAccount = false }: { generalAcc
   }
   return (
     <>
-    <a className="text-link" href="/directory/manage">View my submissions</a>
+    <a className="text-link" href="/account">View my submissions</a>
     <form
       className="event-form"
       key={session.user.id}

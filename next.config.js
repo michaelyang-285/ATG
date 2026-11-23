@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async redirects() {
-    return [{ source: "/stories/gwinnett-schools-since-2004", destination: "/stories/were-gwinnett-county-public-schools-better-in-the-2000s", permanent: true }];
+    return [{ source: "/directory/manage", destination: "/account", permanent: true },
+      { source: "/stories/gwinnett-schools-since-2004", destination: "/stories/were-gwinnett-county-public-schools-better-in-the-2000s", permanent: true }];
   },
   images: {
     remotePatterns: [

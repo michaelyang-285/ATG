@@ -37,11 +37,11 @@ To update the existing Studio, run `sanity deploy --yes --schema-required` from 
 
 ### Owner directory
 
-Use /directory/manage for owner sign-in, listing edits and moderator review. Apply
+Use /account for owner sign-in, listing edits and moderator review. Apply
 supabase/migrations/20261118_directory.sql to the directory Supabase project.
 Set the directory variables in .env.local.example before building. Enable email
 magic links, configure the signup email sender, and allow the exact
-DIRECTORY_SITE_URL/directory/manage redirect in Supabase Auth. Assign trusted
+DIRECTORY_SITE_URL/account redirect in Supabase Auth. Assign trusted
 reviewers the directory_admin boolean in their server-managed Auth app_metadata.
 Register /api/directory/webhook for checkout.session.completed in the same
 Stripe account and mode as STRIPE_SECRET_KEY. Store its signing secret in

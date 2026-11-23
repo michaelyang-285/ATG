@@ -9,6 +9,7 @@ import OperatingHoursFields from "./OperatingHoursFields";
 import ListingPreview from "./ListingPreview";
 import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
 import MySubmissions from "./MySubmissions";
+import {accountAdmin} from "@/lib/account-admin";
 import ApprovalNotifications from "./ApprovalNotifications";
 import SignupCard,{Completion} from "./SignupCard";
 import {ServiceAreas} from "./ServiceAreas";
@@ -396,6 +397,8 @@ export default function OwnerDashboard() {
         </section>
       ) : !form ? (
         <>
+          {accountAdmin(session.user) && <p><a className="text-link" href="/admin/people">Manage people and assignments</a></p>}
+          {session.user.app_metadata.approved_author && <p><a className="text-link" href="/assignments">My assignments</a></p>}
           {canOpenQueue && <ApprovalNotifications key={session.user.id} session={session} refreshKey={refreshKey} />}
           <section aria-labelledby="my-submissions">
             <h2 id="my-submissions">My submissions</h2>

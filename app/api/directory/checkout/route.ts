@@ -53,7 +53,7 @@ export function POST(req: Request) {
     if (data.paid_session)
       throw new Failure(409, "This listing is already paid.");
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!),
-      home = new URL("/directory/manage", process.env.DIRECTORY_SITE_URL!).href;
+      home = new URL("/account", process.env.DIRECTORY_SITE_URL!).href;
     const liveMode = process.env.STRIPE_SECRET_KEY.includes("_live_");
     let attempt = data.checkout_attempt;
     if (data.checkout_session) {

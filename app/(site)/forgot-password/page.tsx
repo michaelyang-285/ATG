@@ -18,5 +18,5 @@ export default function ForgotPassword() {
     } catch { setMessage("Couldn’t request a reset. Please wait a moment and try again."); }
     finally { setBusy(false); }
   }
-  return <main id="main" className="site-width page-content directory-owner"><section className="signup-card"><h1>Set or reset your password</h1><p>Enter your ATG account email. You can also use this to set your first password if you previously signed in by email link.</p><form onSubmit={submit}><label>Email address<input required name="email" type="email" autoComplete="email"/></label><button className="primary-action" disabled={busy}>Send reset link</button></form><p role="status">{message}</p><a href="/directory/manage?mode=signin">Back to sign in</a></section></main>;
+  return <main id="main" className="site-width page-content directory-owner"><section className="signup-card"><h1>Set or reset your password</h1><p>Enter your ATG account email. You can also use this to set your first password if you previously signed in by email link.</p><form onSubmit={submit}><label>Email address<input required name="email" type="email" autoComplete="email"/></label><button className="primary-action" disabled={busy}>Send reset link</button></form><p role="status">{message}</p><a href="/account?mode=signin">Back to sign in</a></section></main>;
 }

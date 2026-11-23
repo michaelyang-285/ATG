@@ -21,7 +21,7 @@ const desks = {
     ],
     actions: [
       ["Ask about advertising", facebookGroup],
-      ["Create a directory listing", "/directory/manage"],
+      ["Create a directory listing", "/account"],
     ],
   },
   contribute: {
@@ -65,7 +65,7 @@ const desks = {
     ],
     actions: [
       ["Find the ATG group admins", facebookGroup],
-      ["Manage my listing", "/directory/manage?mode=signin"],
+      ["Manage my listing", "/account?mode=signin"],
     ],
   },
   about: {

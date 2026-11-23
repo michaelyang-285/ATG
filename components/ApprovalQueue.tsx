@@ -38,7 +38,7 @@ export default function ApprovalQueue() {
     return () => data.subscription.unsubscribe();
   }, [client]);
   if (session === undefined) return <p role="status">Checking your account…</p>;
-  if (!session) return <a className="text-link" href="/directory/manage?mode=signin&next=approvals">Sign in to review submissions</a>;
+  if (!session) return <a className="text-link" href="/account?mode=signin&next=approvals">Sign in to review submissions</a>;
   return <ReviewerQueue key={session.user.id} session={session} />;
 }
 
@@ -77,7 +77,7 @@ function ReviewerQueue({ session }: { session: Session }) {
   }
 
   return <>
-    <div className="owner-session"><a className="text-link" href="/directory/manage">My account</a>
+    <div className="owner-session"><a className="text-link" href="/account">My account</a>
       <button disabled={busy} onClick={() => refresh(v => v + 1)}>Refresh queue</button></div>
     {receipt && <p className="submission-status" role="status">{receipt}</p>}
     {message && <p role="alert">{message}</p>}

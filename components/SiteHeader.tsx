@@ -81,10 +81,10 @@ export default function SiteHeader({ items }: { items: NavItem[] }) {
     setExpanded(null);
   };
   const accountLinks = signedIn === null ? null : signedIn ? (
-    <Link className="text-link" href="/directory/manage" onClick={collapse}>My account</Link>
+    <Link className="text-link" href="/account" onClick={collapse}>My account</Link>
   ) : (
     <>
-      <a className="text-link" href="/directory/manage?mode=signin">Sign in</a>
+      <a className="text-link" href="/account?mode=signin">Sign in</a>
       <a className="text-link" href="/create-account">Create an account</a>
     </>
   );
