@@ -1,65 +1,42 @@
-import groupAudience from "@/lib/facebook-group.json";
 import Link from "next/link";
-import "../directory.css";
+import group from "@/lib/facebook-group.json";
+import { DirectionIcon } from "@/components/DirectionIcon";
+import "./plans.css";
+
 export const metadata = {
-  title: "List your business in Gwinnett | Free and paid directory listings",
+  title: "List your business in Gwinnett | Compare free and paid listings",
+  description: "Create a free Gwinnett business listing, or upgrade for $9 a year to share a local deal, show your work and take bookings.",
 };
+
+const features = [
+  ["Business profile", "Logo, hours, phone & service area", "Everything in Free"],
+  ["Customer links", "None", "Website, socials & booking"],
+  ["Photos of your work", "Logo only", "Logo + 10 photos"],
+  ["Deals & events", "None on profile", "One active deal + approved events"],
+];
+
 export default function Submit() {
-  return (
-    <main id="main" className="site-width page-content">
-      <h1>List your Gwinnett business</h1>
-      <p>
-        Help neighbors find your business and the cities you serve. Start free
-        and upgrade from your account whenever you’re ready.
-      </p>
-      <div className="listing-plans">
-        <section>
-          <h2>Free listing</h2>
-          <p>
-            <strong>$0</strong>
-          </p>
-          <ul>
-            <li>Business name, logo and description</li>
-            <li>Hours, service area and optional public phone number</li>
-            <li>Directions when you show your address</li>
-            <li>Appear in directory search after approval</li>
-          </ul>
-          <Link className="button button-orange" href="/account">
-            Create a free listing
-          </Link>
-        </section>
-        <section>
-          <h2>Paid listing</h2>
-          <p>
-            <strong>$9 per year, per listing</strong>
-          </p>
-          <p>Everything in Free, plus</p>
-          <ul>
-            <li>Website, social and booking links</li>
-            <li>Up to 10 photos of your work</li>
-            <li>One active Gwinnett Deal</li>
-            <li>Upcoming approved events on your profile</li>
-          </ul>
-          <p>
-            Every week, we’ll share the Gwinnett Deals page with the{" "}
-            {groupAudience.memberCountDisplay} members of the All Things
-            Gwinnett Facebook group. We’ll also include it in our welcome post
-            so new members can find current offers when they join.
-          </p>
-          <p>Renews annually. Manage your subscription from your account.</p>
-          <Link className="text-link" href="/account">
-            Manage or upgrade a listing →
-          </Link>
-        </section>
-      </div>
-      <p>
-        ATG reviews submissions before publication. Free listings do not require
-        a credit card.
-      </p>
-      <p>
-        Already see your business?{" "}
-        <Link href="/directory">Find your listing</Link> and select “Claim this listing.” ATG will verify ownership.
-      </p>
-    </main>
-  );
+  return <main id="main" className="site-width directory-pricing">
+    <header className="pricing-intro"><h1>List your business in Gwinnett.</h1>
+      <p>Start free so neighbors can find you. For $9 a year, show them your work, give them a deal and send them straight to your booking page.</p>
+    </header>
+    <table className="pricing-matrix">
+      <caption className="sr-only">Compare free and paid directory listings</caption>
+      <colgroup><col className="feature-column"/><col/><col/></colgroup>
+      <thead><tr><th scope="col" className="matrix-label">Compare listings</th>
+        <th scope="col"><span>Free listing</span><strong>$0</strong></th>
+        <th scope="col" className="paid-heading"><span>Paid listing</span><strong>$9<small> / year</small></strong></th>
+      </tr></thead>
+      <tbody>{features.map(([label,free,paid])=><tr key={label}><th scope="row">{label}</th><td>{free}</td><td>{paid}</td></tr>)}</tbody>
+    </table>
+    <div className="pricing-actions">
+      <Link className="button button-orange" href="/account?mode=signin">Upgrade my listing <DirectionIcon/></Link>
+      <Link className="text-link" href="/account?mode=signup">Create a free listing</Link>
+      <p>New listings start free and go through review. Upgrade after approval. Paid listings renew annually.</p>
+    </div>
+    <section className="pricing-deals"><div><h2>Give Gwinnett a reason to stop by.</h2><Link href="/deals">Explore Gwinnett Deals <DirectionIcon/></Link></div>
+      <p>Publish an offer on <strong>Gwinnett Deals</strong> with your paid listing. Every week, we share the deals page with our <strong>{group.memberCountDisplay} Facebook group members</strong>. We also link to it in our welcome post for new members.</p>
+    </section>
+    <p className="pricing-claim">Already see your business? <Link href="/directory">Find and claim your listing.</Link></p>
+  </main>;
 }
