@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { readFile } from "fs/promises";
 import path from "path";
+import { credential, saveCredential } from "@/lib/interviews/credentials";
 import { accountAdmin } from "@/lib/account-admin";
 import { db, owner, respond, Failure } from "@/lib/directory/server";
 
@@ -18,8 +19,8 @@ async function authenticate(req: Request) {
 }
 export function GET(req: Request) {
  return respond(async()=>{
-  await authenticate(req);
-  return {html:await readFile(path.join(process.cwd(),"lib/interviews/studio.html"),"utf8"),configured:Boolean(process.env.OPENAI_API_KEY)};
+  const uid=await authenticate(req);
+  return {html:await readFile(path.join(process.cwd(),"lib/interviews/studio.html"),"utf8"),configured:Boolean(await credential(uid))};
  });
 }
 async function provider(key:string, endpoint:string, body:FormData|string) {
@@ -40,7 +41,12 @@ const mediaTypes:Record<string,string>={"image/jpeg":"jpg","image/png":"png","im
 export function POST(req:Request) {
  return respond(async()=>{
   const uid=await authenticate(req), b=await req.json(), client=db(), table=client.from("admin_interviews"), media=client.storage.from(bucket);
-  const key=process.env.OPENAI_API_KEY || req.headers.get("x-interview-ai-key") || "";
+  if(b.action==="saveCredential"){
+   check(typeof b.key==="string" && /^sk-[A-Za-z0-9_-]{12,1020}$/.test(b.key),"Enter a valid OpenAI secret key.");
+   await saveCredential(uid,b.key);return {configured:true};
+  }
+  const key=["generate","draft","transcribe","review"].includes(b.action)?await credential(uid)||req.headers.get("x-interview-ai-key")||"":"";
+
   if(b.action==="list"){
    const {data,error}=await table.select("document").eq("owner_id",uid).order("updated_at",{ascending:false});
    if(error)throw error;return data.map(row=>row.document);
