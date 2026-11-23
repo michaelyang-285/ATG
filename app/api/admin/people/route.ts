@@ -43,12 +43,9 @@ export function GET(req: Request) {
       const perPage = Number(url.searchParams.get("perPage") ?? 50);
       if (![50, 100, 250, 500].includes(perPage))
         throw new Failure(400, "Choose 50, 100, 250, or 500 rows per page.");
-      const result = await client.auth.admin.listUsers({ page, perPage });
+      const result = await client.rpc("admin_people_page", {page_number: page, page_size: perPage});
       if (result.error) throw result.error;
-      return {
-        people: result.data.users.map(profile),
-        next: "nextPage" in result.data && !!result.data.nextPage,
-      };
+      return { people: result.data.slice(0, perPage), next: result.data.length > perPage };
     }
     const assignments = await client
       .from("author_assignments")

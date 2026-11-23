@@ -9,6 +9,7 @@ type Person = {
   created: string;
   lastSignIn?: string;
   info: Record<string, string>;
+  newsletter?: boolean;
   approved: boolean;
   authorId: string;
 };
@@ -60,6 +61,7 @@ export default function People() {
     [loading, setLoading] = useState(true),
     [listError, setListError] = useState(""),
     [people, setPeople] = useState<Person[]>([]),
+    [selected, setSelected] = useState<Person|null>(null),
     [next, setNext] = useState(false),
     [id, setId] = useState(""),
     [detail, setDetail] = useState<Detail | null>(null),
@@ -84,7 +86,7 @@ export default function People() {
     };
   }, [page, perPage, version]);
   useEffect(() => {
-    if (!id) return;
+    if (!id || id.startsWith("newsletter:")) return;
     let active = true;
     const path = "/api/admin/people?id=" + id;
     portalRequest(path)
@@ -138,12 +140,12 @@ export default function People() {
             <div className="people-controls">
               <strong>
                 {loading
-                  ? "Loading accounts…"
+                  ? "Loading people…"
                   : listError
-                    ? "Accounts unavailable"
+                    ? "People unavailable"
                     : people.length
-                      ? `Accounts ${(page - 1) * perPage + 1}–${(page - 1) * perPage + people.length}`
-                      : "No accounts"}
+                      ? `People ${(page - 1) * perPage + 1}–${(page - 1) * perPage + people.length}`
+                      : "No people yet"}
               </strong>
               <label>
                 Rows per page{" "}
@@ -187,6 +189,7 @@ export default function People() {
                       "Email",
                       "Business",
                       "City",
+                      "Newsletter signup",
                       "Author",
                       "Joined",
                     ].map((h) => (
@@ -206,6 +209,7 @@ export default function People() {
                             className="people-name"
                             onClick={() => {
                               setDetail(null);
+                              setSelected(p);
                               setId(p.id);
                               setMsg("");
                             }}
@@ -218,6 +222,7 @@ export default function People() {
                         <td>{p.email}</td>
                         <td>{p.info.name || "—"}</td>
                         <td>{p.info.city || "—"}</td>
+                        <td>{p.newsletter ? "Yes" : "—"}</td>
                         <td>{p.approved ? "Approved" : "—"}</td>
                         <td>
                           {new Date(p.created).toLocaleDateString("en-US")}
@@ -240,12 +245,13 @@ export default function People() {
             >
               ← Back to people
             </button>
-            {!detail && !msg && <p role="status">Loading profile…</p>}
+            {id.startsWith("newsletter:") && selected ? <article><h2>{selected.email}</h2><p>Newsletter signup · {new Date(selected.created).toLocaleDateString("en-US")}</p><p>This contact will appear with their ATG account once they verify the same email address.</p></article> : !detail && !msg && <p role="status">Loading profile…</p>}
           </>
         )}
         {detail && (
           <article key={id}>
             <h2>{detail.person.email}</h2>
+            {selected?.newsletter && <p>Newsletter signup on file</p>}
             <p>Joined {new Date(detail.person.created).toLocaleDateString()}</p>
             <form
               className="signup-card"
