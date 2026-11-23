@@ -369,7 +369,14 @@ export default function OwnerDashboard() {
   return (
     <>
       {!form && !checkout && status}
-      <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My account"}</h1>
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1>{checkout ? "Listing checkout" : form ? "Build your listing" : "My account"}</h1>
+        {!checkout && !form && accountAdmin(session.user) && (
+          <a className="button button-orange w-full justify-center sm:w-auto" href="/admin/people">
+            Manage people and assignments <span aria-hidden="true">→</span>
+          </a>
+        )}
+      </div>
       <div className="owner-session">
         <span>Signed in as {session.user.email}</span>
         <button
@@ -397,7 +404,6 @@ export default function OwnerDashboard() {
         </section>
       ) : !form ? (
         <>
-          {accountAdmin(session.user) && <p><a className="text-link" href="/admin/people">Manage people and assignments</a></p>}
           {session.user.app_metadata.approved_author && <p><a className="text-link" href="/assignments">My assignments</a></p>}
           {canOpenQueue && <ApprovalNotifications key={session.user.id} session={session} refreshKey={refreshKey} />}
           <section aria-labelledby="my-submissions">
