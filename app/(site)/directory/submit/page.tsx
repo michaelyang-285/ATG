@@ -1,5 +1,5 @@
 import Link from "next/link";
-import group from "@/lib/facebook-group.json";
+import { dealPromotions } from "@/lib/directory/promotions";
 import { DirectionIcon } from "@/components/DirectionIcon";
 import "./plans.css";
 
@@ -15,7 +15,8 @@ const features = [
   ["Directory placement", "Standard", "Priority in matching results"],
   ["Profile flair", "Standard profile", "ATG Verified blue check"],
   ["Search optimization", "Business details for search engines", "Additional SEO markup for gallery photos and active offers"],
-  ["Deal promotion", "None", `One active deal appears on Gwinnett Deals, shared weekly with our ${group.memberCountDisplay} Facebook group members and in our new-member welcome post. We also share deals in our weekly newsletter.`],
+  ["Gwinnett Deals", "None", "One active deal"],
+  ...dealPromotions.map(label => [label, "Not included", "Included"]),
   ["Events on your profile", "None", "Approved upcoming events"],
 ];
 
@@ -36,7 +37,7 @@ export default function Submit() {
     </table>
     <p className="pricing-claim"><Link href="/account?mode=signin">Already listed? Sign in</Link></p>
     <section className="pricing-deals"><div><h2>Give Gwinnett a reason to stop by.</h2><Link href="/deals">Explore Gwinnett Deals <DirectionIcon/></Link></div>
-      <p>Publish an offer on <strong>Gwinnett Deals</strong> with your paid listing. Every week, we share the deals page with our <strong>{group.memberCountDisplay} Facebook group members</strong>. We also share deals in our weekly newsletter and link to the deals page in our welcome post for new members.</p>
+      <p>Publish one offer at a time on <strong>Gwinnett Deals</strong>. Neighbors can visit your listing for details and redemption instructions.</p>
     </section>
     <p className="pricing-claim">Already see your business? <Link href="/directory">Find and claim your listing.</Link></p>
   </main>;

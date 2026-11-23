@@ -1,4 +1,4 @@
-import groupAudience from "@/lib/facebook-group.json";
+import { dealPromotions } from "@/lib/directory/promotions";
 import Link from "next/link";
 import { directoryPublic } from "@/lib/directory/public";
 import { activeDeal } from "@/lib/directory/deal";
@@ -12,12 +12,8 @@ export default async function Deals() {
   return (
     <main id="main" className="site-width page-content">
       <h1>Gwinnett Deals</h1>
-      <p>
-        Every week, we’ll share the Gwinnett Deals page with the{" "}
-        {groupAudience.memberCountDisplay} members of the All Things Gwinnett
-        Facebook group. We also share deals in our weekly newsletter. We’ll include the deals page in our welcome post so new members
-        can find current offers when they join.
-      </p>
+      <p>Find Gwinnett Deals in these ATG updates.</p>
+    <ul className="list-disc pl-6">{dealPromotions.map(label => <li key={label}>{label}</li>)}</ul>
       {offers.length ? (
         offers.map((row) => (
           <article key={row._id}>
