@@ -39,12 +39,12 @@ export function POST(req: Request) {
                 phone: account.phone.trim(),
                 ...(eventSignup === true
                   ? {}
-                  : { name: account.name.trim() }),
+                  : { name: account.name.trim(), businessName: account.name.trim() }),
               },
             }
           : {}),
         emailRedirectTo: new URL(
-          generalAccount === true ? "/create-account" : eventSignup === true ? "/events/submit" : tier==="paid" || tier==="free" ? "/account?tier="+tier : "/account",
+          generalAccount === true ? "/create-account" : eventSignup === true ? "/events/submit" : tier==="paid" ? "/account?tier=paid" : "/account?tier=free",
           process.env.DIRECTORY_SITE_URL!,
         ).href,
       },

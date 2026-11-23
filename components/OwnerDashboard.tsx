@@ -6,6 +6,7 @@ import { galleryLimit, sourceImageLimit } from "@/lib/directory/gallery";
 import { prepareDirectoryImage } from "@/lib/directory/prepare-image";
 import { directoryThumbnail } from "@/lib/directory/thumbnail";
 import OperatingHoursFields from "./OperatingHoursFields";
+import { dealPromotions } from "@/lib/directory/promotions";
 import DirectoryUpgradeNotice from "./DirectoryUpgradeNotice";
 import ListingPreview from "./ListingPreview";
 import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
@@ -108,6 +109,7 @@ export default function OwnerDashboard() {
   useEffect(() => {
     const tier=new URLSearchParams(location.search).get("tier");
     if(tier==="free" || tier==="paid") setSignupTier(tier);
+    else if(new URLSearchParams(location.search).get("mode")==="signup") setSignupTier("free");
     setSignin(new URLSearchParams(location.search).get("mode")==="signin");
     if (new URLSearchParams(window.location.search).get("mode") === "signin") setSignin(true);
     if (!client) return;
@@ -233,7 +235,7 @@ export default function OwnerDashboard() {
     setMsg(overLimit ? additionalCategoryError : "");
   }
   useEffect(()=>{
-    if(!loaded || !session || !signupTier || !hasAccountContact(session.user.user_metadata)) return;
+    if(!loaded || !session || !signupTier) return;
     const saved=progress.find(p=>!p.fields.id && p.fields.tier===signupTier);
     if(saved) resume(saved); else edit(undefined,signupTier);
     setSignupTier("");
@@ -257,7 +259,7 @@ export default function OwnerDashboard() {
             revision: row.revision,
             status: row.status,
           })
-        : { ...blank,tier,listingId:crypto.randomUUID(),firstName:m.firstName||m.given_name||"",lastName:m.lastName||m.family_name||"",phone:m.phone||"",name:m.businessName||"",city:m.city||locationHint.city||"",zip:m.zip||locationHint.zip||"" },
+        : { ...blank,tier,listingId:crypto.randomUUID(),firstName:m.firstName||m.given_name||"",lastName:m.lastName||m.family_name||"",phone:m.phone||"",name:m.businessName||(session?.user.app_metadata.provider==="email" ? m.name : "")||"",city:m.city||locationHint.city||"",zip:m.zip||locationHint.zip||"" },
     );
     setStep(0);
     setMsg("");
@@ -364,6 +366,12 @@ export default function OwnerDashboard() {
         if (error) { setStep(1); throw Error(error); }
       }
       if(step===1 && !form.neighborhood?.trim()) throw Error("Select at least one city you serve.");
+      if ((step===0 || step===4) && session && !hasAccountContact(session.user.user_metadata)) {
+        const data={firstName:form.firstName.trim(),lastName:form.lastName.trim(),phone:form.phone.trim()};
+        if(!hasAccountContact(data)){setStep(0);throw Error("Enter your name and phone number under Private listing contact.");}
+        const result=await client.auth.updateUser({data});
+        if(result.error) throw Error("Your contact details could not be saved. Please try again.");
+      }
       if(step<4){await checkpoint(step+1);setStep(step+1);window.scrollTo({top:0,behavior:"smooth"});return}
       const saved=await api("owner", {...form, ...(!media ? {gallery:[]} : {}), newsletter});
       setForm(null);
@@ -372,9 +380,9 @@ export default function OwnerDashboard() {
       setMsg("Listing submitted for review.");
     });
   }
-  async function checkpoint(next:number){
-    await api("progress",{listingId:form.listingId,step:next,fields:form});
-    setProgress(old=>[{listing_id:form.listingId,step:next,fields:form},...old.filter(p=>p.listing_id!==form.listingId)]);
+  async function checkpoint(next:number, fields=form){
+    await api("progress",{listingId:form.listingId,step:next,fields});
+    setProgress(old=>[{listing_id:form.listingId,step:next,fields},...old.filter(p=>p.listing_id!==form.listingId)]);
   }
   const status = <p aria-live="polite">{msg}</p>;
   if (!client)
@@ -382,10 +390,10 @@ export default function OwnerDashboard() {
   if (!session)
     return (
       <SignupCard tier={signupTier} {...{client,signin,setSignin,sent,setSent,email,setEmail,googleEnabled,busy,account,setAccount,status,setMsg,run}}
-        register={password=>api("login",{email,account,password,tier:signupTier})}/>
+        register={password=>api("login",{email,account,password,tier:signupTier || "free"})}/>
     );
-  if (!hasAccountContact(session.user.user_metadata)) return <CompleteAccount user={session.user} client={client}/>;
-  if(!loaded)return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
+  if (!form && !signupTier && !hasAccountContact(session.user.user_metadata)) return <CompleteAccount user={session.user} client={client}/>;
+  if(!loaded || (signupTier && !form))return <>{status}<p>Loading your listings…</p><button onClick={()=>location.reload()}>Reload</button></>;
   return (
     <>
       {!form && !checkout && status}
@@ -486,6 +494,18 @@ export default function OwnerDashboard() {
               <>
                 <p className="quiet">Here’s what neighbors will see in the directory.</p>
                 <ListingPreview data={media ? form : {...form,gallery:[]}} />
+                {!form.id && !paidSignup && <aside className="directory-upgrade-note" aria-labelledby="final-plan-choice">
+                  <h3 id="final-plan-choice">Want to promote a deal for $9 a year?</h3>
+                  <p>Add up to 10 photos, get priority placement and the ATG Verified check, and promote one active deal through:</p>
+                  <ul className="list-disc pl-6">{dealPromotions.map(label=><li key={label}>{label}</li>)}</ul>
+                  <button type="button" disabled={busy} onClick={()=>run(async()=>{
+                    const paid={...form,tier:"paid"};
+                    await checkpoint(2,paid);
+                    setForm(paid);setStep(2);
+                    window.scrollTo({top:0,behavior:"smooth"});
+                  })}>Switch to paid · $9/year</button>
+                  <p>Prefer the free listing? Submit it below.</p>
+                </aside>}
                 {descriptionOver && <p className="description-count" data-over="true">
                   Your description exceeds 1,000 characters.{" "}
                   <button type="button" onClick={() => setStep(0)}>Edit description</button>

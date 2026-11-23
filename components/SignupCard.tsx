@@ -160,7 +160,7 @@ export default function SignupCard({
                         options: {
                           redirectTo: new URL(
                             generalAccount ? "/create-account" : event ? "/events/submit" :
-                              new URLSearchParams(location.search).get("next") === "approvals" ? "/account?next=approvals" : tier ? "/account?tier="+tier : "/account",
+                              new URLSearchParams(location.search).get("next") === "approvals" ? "/account?next=approvals" : tier || !signin ? "/account?tier="+(tier || "free") : "/account",
                             window.location.origin,
                           ).href,
                           queryParams: { prompt: "select_account" },
