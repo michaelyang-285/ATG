@@ -38,6 +38,35 @@ type Detail = {
   assignments: Assignment[] | null;
   assignmentError: boolean;
 };
+const contactGroups = [
+  {
+    title: "Contact",
+    fields: [
+      ["firstName", "First name"],
+      ["lastName", "Last name"],
+      ["email", "Email address"],
+      ["phone", "Phone number"],
+    ],
+  },
+  {
+    title: "Business",
+    fields: [
+      ["name", "Business name"],
+      ["city", "City"],
+      ["zip", "ZIP code"],
+    ],
+  },
+  {
+    title: "Private address",
+    fields: [
+      ["personalStreet", "Street address"],
+      ["personalUnit", "Apartment or suite"],
+      ["personalCity", "City"],
+      ["personalState", "State"],
+      ["personalZip", "ZIP code"],
+    ],
+  },
+];
 function studio(doc: Doc) {
   const id = doc._id.replace(/^drafts\./, "");
   return (
@@ -147,6 +176,7 @@ export default function People({
       clearInterval(timer);
     };
   }, [id, version]);
+  const [editing, setEditing] = useState(false);
   async function act(body: object) {
     setBusy(true);
     try {
@@ -156,6 +186,7 @@ export default function People({
           ? "Password reset email requested."
           : "Saved.",
       );
+      if ((body as { action?: string }).action === "profile") setEditing(false);
       refresh((v) => v + 1);
     } catch (e) {
       setMsg((e as Error).message);
@@ -180,10 +211,90 @@ export default function People({
             "Person profile"
           : "People"}
       </h1>
-      <p role="status">{msg}</p>
+      {msg && (
+        <p className="people-feedback" role="status">
+          {msg}
+        </p>
+      )}
       <div>
         {!id ? (
           <section aria-label="Account directory" className="people-sheet">
+            <nav className="people-filters" aria-label="Filter people">
+              {[
+                ["all", "All people"],
+                ["accounts", "ATG accounts"],
+                ["newsletter", "Newsletter subscribers"],
+              ].map(([value, label]) => (
+                <Link
+                  key={value}
+                  href={"/admin/people?" + listQuery(1, perPage, value)}
+                  scroll={false}
+                  aria-current={filter === value ? "page" : undefined}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+            {listError && (
+              <p role="alert">
+                {listError}{" "}
+                <button onClick={() => refresh((v) => v + 1)}>Retry</button>
+              </p>
+            )}
+            <div className="people-scroll">
+              <table aria-label="People">
+                <thead>
+                  <tr>
+                    {[
+                      "Person",
+                      "Business",
+                      "City",
+                      "Newsletter signup",
+                      "Author",
+                      "Joined",
+                    ].map((h) => (
+                      <th key={h} scope="col">
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {!loading &&
+                    !listError &&
+                    people.map((p) => (
+                      <tr key={p.id}>
+                        <td>
+                          <Link
+                            prefetch={false}
+                            className="people-name"
+                            href={
+                              "/admin/people/" +
+                              encodeURIComponent(p.id) +
+                              "?" +
+                              listQuery()
+                            }
+                          >
+                            {[p.info.firstName, p.info.lastName]
+                              .filter(Boolean)
+                              .join(" ") || p.email}
+                            {(p.info.firstName || p.info.lastName) && (
+                              <small>{p.email}</small>
+                            )}
+                          </Link>
+                        </td>
+                        <td>{p.info.name || "—"}</td>
+                        <td>{p.info.city || "—"}</td>
+                        <td>{p.newsletter ? "Yes" : "—"}</td>
+                        <td>{p.approved ? "Approved" : "—"}</td>
+                        <td>
+                          {new Date(p.created).toLocaleDateString("en-US")}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
             <div className="people-controls">
               <strong>
                 {loading
@@ -194,22 +305,6 @@ export default function People({
                       ? `People ${(page - 1) * perPage + 1}–${(page - 1) * perPage + people.length}`
                       : "No people yet"}
               </strong>
-              <label>
-                Show{" "}
-                <select
-                  value={filter}
-                  onChange={(e) => {
-                    router.replace(
-                      "/admin/people?" + listQuery(1, perPage, e.target.value),
-                      { scroll: false },
-                    );
-                  }}
-                >
-                  <option value="all">All people</option>
-                  <option value="accounts">ATG accounts</option>
-                  <option value="newsletter">Newsletter subscribers</option>
-                </select>
-              </label>
               <label>
                 Rows per page{" "}
                 <select
@@ -247,65 +342,6 @@ export default function People({
                 Next
               </button>
             </div>
-            {listError && (
-              <p role="alert">
-                {listError}{" "}
-                <button onClick={() => refresh((v) => v + 1)}>Retry</button>
-              </p>
-            )}
-            <div className="people-scroll">
-              <table aria-label="People">
-                <thead>
-                  <tr>
-                    {[
-                      "Name",
-                      "Email",
-                      "Business",
-                      "City",
-                      "Newsletter signup",
-                      "Author",
-                      "Joined",
-                    ].map((h) => (
-                      <th key={h} scope="col">
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {!loading &&
-                    !listError &&
-                    people.map((p) => (
-                      <tr key={p.id}>
-                        <td>
-                          <Link
-                            prefetch={false}
-                            className="people-name"
-                            href={
-                              "/admin/people/" +
-                              encodeURIComponent(p.id) +
-                              "?" +
-                              listQuery()
-                            }
-                          >
-                            {[p.info.firstName, p.info.lastName]
-                              .filter(Boolean)
-                              .join(" ") || p.email}
-                          </Link>
-                        </td>
-                        <td>{p.email}</td>
-                        <td>{p.info.name || "—"}</td>
-                        <td>{p.info.city || "—"}</td>
-                        <td>{p.newsletter ? "Yes" : "—"}</td>
-                        <td>{p.approved ? "Approved" : "—"}</td>
-                        <td>
-                          {new Date(p.created).toLocaleDateString("en-US")}
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
           </section>
         ) : (
           <>
@@ -327,7 +363,7 @@ export default function People({
           </>
         )}
         {detail && (
-          <article key={id}>
+          <article key={id} className="contact-record">
             <div className="profile-summary">
               <strong>{detail.person.email}</strong>
               <span>
@@ -360,76 +396,130 @@ export default function People({
               ))}
             </nav>
             <section hidden={section !== "Overview"}>
-              <h2>Contact and account details</h2>
-              <form
-                className="signup-card"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  const f = new FormData(e.currentTarget);
-                  act({
-                    action: "profile",
-                    email: f.get("email"),
-                    info: Object.fromEntries(
-                      Object.keys(detail.person.info).map((k) => [k, f.get(k)]),
-                    ),
-                    approved: f.has("approved"),
-                    authorId: f.get("authorId"),
-                  });
-                }}
-              >
-                <label>
-                  Account email
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    defaultValue={detail.person.email}
-                  />
-                </label>
-                {Object.entries(detail.person.info).map(([k, v]) => (
-                  <label key={k}>
-                    {
-                      {
-                        firstName: "First name",
-                        lastName: "Last name",
-                        name: "Business name",
-                        phone: "Phone",
-                        city: "City",
-                        zip: "Business ZIP",
-                        personalStreet: "Private street address",
-                        personalUnit: "Apartment or suite",
-                        personalCity: "Private city",
-                        personalState: "Private state",
-                        personalZip: "Private ZIP",
-                      }[k]
-                    }
-                    <input name={k} defaultValue={v} />
-                  </label>
-                ))}
-                <label>
-                  <input
-                    type="checkbox"
-                    name="approved"
-                    defaultChecked={detail.person.approved}
-                  />{" "}
-                  Approved author
-                </label>
-                <label>
-                  Author profile
-                  <select name="authorId" defaultValue={detail.person.authorId}>
-                    <option value="">Unlinked</option>
-                    {detail.authors
-                      .filter((a) => !a._id.startsWith("drafts."))
-                      .map((a) => (
-                        <option value={a._id} key={a._id}>
-                          {a.firstName} {a.lastName}
-                        </option>
+              <div className="contact-title">
+                <h2>Contact details</h2>
+                {!editing && (
+                  <button
+                    type="button"
+                    className="primary-action"
+                    onClick={() => setEditing(true)}
+                  >
+                    Edit profile
+                  </button>
+                )}
+              </div>
+              {!editing && (
+                <div className="record-read">
+                  {contactGroups.map((group) => (
+                    <section key={group.title}>
+                      <h3>{group.title}</h3>
+                      <dl>
+                        {group.fields.map(([key, label]) => {
+                          const value =
+                            key === "email"
+                              ? detail.person.email
+                              : detail.person.info[key];
+                          return (
+                            <div key={key}>
+                              <dt>{label}</dt>
+                              <dd>{value || "—"}</dd>
+                            </div>
+                          );
+                        })}
+                      </dl>
+                    </section>
+                  ))}
+                </div>
+              )}
+              {editing && (
+                <form
+                  className="signup-card"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const f = new FormData(e.currentTarget);
+                    act({
+                      action: "profile",
+                      email: f.get("email"),
+                      info: Object.fromEntries(
+                        Object.keys(detail.person.info).map((k) => [
+                          k,
+                          f.get(k),
+                        ]),
+                      ),
+                      approved: f.has("approved"),
+                      authorId: f.get("authorId"),
+                    });
+                  }}
+                >
+                  {contactGroups.map((group) => (
+                    <fieldset className="record-fields" key={group.title}>
+                      <legend>{group.title}</legend>
+                      {group.fields.map(([key, label]) => (
+                        <label key={key}>
+                          {label}
+                          <input
+                            name={key}
+                            type={
+                              key === "email"
+                                ? "email"
+                                : key === "phone"
+                                  ? "tel"
+                                  : "text"
+                            }
+                            required={key === "email"}
+                            defaultValue={
+                              key === "email"
+                                ? detail.person.email
+                                : detail.person.info[key]
+                            }
+                          />
+                        </label>
                       ))}
-                  </select>
-                </label>
-                <button disabled={busy}>Save profile</button>
-              </form>
+                    </fieldset>
+                  ))}
+                  <fieldset className="record-fields">
+                    <legend>Author access</legend>
+                    <label>
+                      <input
+                        type="checkbox"
+                        name="approved"
+                        defaultChecked={detail.person.approved}
+                      />{" "}
+                      Approved author
+                    </label>
+                    <label>
+                      Author profile
+                      <select
+                        name="authorId"
+                        defaultValue={detail.person.authorId}
+                      >
+                        <option value="">Unlinked</option>
+                        {detail.authors
+                          .filter((a) => !a._id.startsWith("drafts."))
+                          .map((a) => (
+                            <option value={a._id} key={a._id}>
+                              {a.firstName} {a.lastName}
+                            </option>
+                          ))}
+                      </select>
+                    </label>
+                  </fieldset>
+                  <div className="contact-actions">
+                    <button className="primary-action" disabled={busy}>
+                      Save profile
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setEditing(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              )}
               <button
+                className="record-reset"
                 disabled={busy}
                 onClick={() => {
                   if (
