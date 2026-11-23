@@ -73,6 +73,16 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const hasCalendar = topics.length > 0 && story.body?.some(block => block._type === "upcomingGameEvents");
   const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];
   const canonical = "https://allthingsgwinnett.com/stories/" + encodeURIComponent(story.slug);
+  let inSources = false;
+  const articleBody = (story.body || []).map((block: any) => {
+    if (block._type !== "block") return block;
+    if (/^h[1-6]$/.test(block.style)) {
+      const heading = (block.children || []).map((span: any) => span.text || "").join("").trim();
+      inSources = /^(sources?|references|methods and sources|sources and methodology)[:.]?$/i.test(heading);
+    }
+    if ((!inSources && !/^source-\d+$/.test(block._key)) || !block.markDefs?.length) return block;
+    return { ...block, markDefs: block.markDefs.map((mark: any) => ({ ...mark, sourceEntry: true })) };
+  });
   const figureMetadata: Record<string, { description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
   "cityPop": {
     "description": "July 2025 population estimates for each municipality’s Gwinnett residents and unincorporated Gwinnett.",
@@ -187,7 +197,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </header>
         <div className="article-body">
           <PortableText
-            value={story.body || []}
+            value={articleBody}
             components={{
               block: {
                 normal: ({children,value}) => <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
@@ -196,11 +206,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 link: ({ children, value }) => {
                   const anchor = (value?.href || "").replace(canonical, "");
                   if (/^#source-\d+$/.test(anchor)) return <sup><a href={anchor}>{children}</a></sup>;
-                  if (/^#[\w-]+$/.test(anchor)) return <a href={anchor}>{children}</a>;
+                  if (/^#[\w-]+$/.test(anchor)) return <a style={value?.sourceEntry ? { fontSize: "0.875rem" } : undefined} href={anchor}>{children}</a>;
                   const href = value?.internalSlug
                     ? `/stories/${encodeURIComponent(value.internalSlug)}`
                     : safeUrl(value?.href);
-                  return href ? <a href={href} target={/^https?:/.test(href) ? "_blank" : undefined} rel="noopener noreferrer">{children}</a> : <>{children}</>;
+                  return href ? <a style={value?.sourceEntry ? { fontSize: "0.875rem", overflowWrap: "anywhere" } : undefined} href={href} target={/^https?:/.test(href) ? "_blank" : undefined} rel="noopener noreferrer">{children}</a> : <>{children}</>;
                 },
               },
               types: {
