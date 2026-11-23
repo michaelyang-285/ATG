@@ -30,8 +30,8 @@ export default function Submit() {
       <tbody>{features.map(([label,free,paid])=><tr key={label}><th scope="row">{label}</th><td>{free}</td><td>{paid}</td></tr>)}</tbody>
     </table>
     <div className="pricing-actions">
-      <Link className="button button-orange" href="/account?mode=signin">Upgrade my listing <DirectionIcon/></Link>
-      <Link className="text-link" href="/account?mode=signup">Create a free listing</Link>
+      <Link className="button button-orange" href="/account?mode=signup">Create my free listing <DirectionIcon/></Link>
+      <Link className="text-link" href="/account?mode=signin">Already listed? Sign in</Link>
     </div>
     <section className="pricing-deals"><div><h2>Give Gwinnett a reason to stop by.</h2><Link href="/deals">Explore Gwinnett Deals <DirectionIcon/></Link></div>
       <p>Publish an offer on <strong>Gwinnett Deals</strong> with your paid listing. Every week, we share the deals page with our <strong>{group.memberCountDisplay} Facebook group members</strong>. We also link to it in our welcome post for new members.</p>
