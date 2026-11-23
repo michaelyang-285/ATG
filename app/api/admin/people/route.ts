@@ -40,7 +40,10 @@ export function GET(req: Request) {
       const page = Number(url.searchParams.get("page") || 1);
       if (!Number.isSafeInteger(page) || page < 1)
         throw new Failure(400, "Invalid page.");
-      const result = await client.auth.admin.listUsers({ page, perPage: 50 });
+      const perPage = Number(url.searchParams.get("perPage") ?? 50);
+      if (![50, 100, 250, 500].includes(perPage))
+        throw new Failure(400, "Choose 50, 100, 250, or 500 rows per page.");
+      const result = await client.auth.admin.listUsers({ page, perPage });
       if (result.error) throw result.error;
       return {
         people: result.data.users.map(profile),
@@ -171,13 +174,11 @@ export function POST(req: Request) {
         )
       )
         throw new Failure(400, "Add an assignment title and questions.");
-      const saved = await client
-        .from("author_assignments")
-        .insert({
-          owner_id: user.id,
-          title: body.title.trim(),
-          questions: body.questions,
-        });
+      const saved = await client.from("author_assignments").insert({
+        owner_id: user.id,
+        title: body.title.trim(),
+        questions: body.questions,
+      });
       if (saved.error) throw saved.error;
     } else throw new Failure(400, "Unknown action.");
     return { ok: true };
