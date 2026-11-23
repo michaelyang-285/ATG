@@ -6,6 +6,7 @@ import { galleryLimit, sourceImageLimit } from "@/lib/directory/gallery";
 import { prepareDirectoryImage } from "@/lib/directory/prepare-image";
 import { directoryThumbnail } from "@/lib/directory/thumbnail";
 import OperatingHoursFields from "./OperatingHoursFields";
+import DirectoryUpgradeNotice from "./DirectoryUpgradeNotice";
 import ListingPreview from "./ListingPreview";
 import { defaultWeek, isWeek, hoursError, type DayHours } from "@/lib/directory/hours";
 import MySubmissions from "./MySubmissions";
@@ -413,6 +414,7 @@ export default function OwnerDashboard() {
               <h2 id="my-submissions">My submissions</h2>
               {session.user.app_metadata.approved_author && <a className="account-assignment-link" href="/assignments">My assignments</a>}
             </div>
+            <DirectoryUpgradeNotice listings={rows} busy={busy} onUpgrade={id=>run(()=>openCheckout(id))}/>
             <section className="owner-submissions-section" aria-labelledby="directory-submissions">
               <div className="owner-section-heading">
                 <h3 id="directory-submissions">Directory listings</h3>

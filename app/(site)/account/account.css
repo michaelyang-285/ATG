@@ -31,3 +31,11 @@
  .account-tools{padding:1rem;}
  .account-tools .account-admin-action{gap:.75rem;}
 }
+
+.directory-upgrade-note {padding:clamp(1rem,3vw,1.6rem);margin:1.25rem 0;background:#fff1e8;border:1px solid #dfb29d}
+.directory-upgrade-note h3 {font-size:1.5rem}
+.directory-upgrade-note p {margin:.5rem 0 1rem;max-width:64ch;line-height:1.5}
+.directory-upgrade-note div {display:flex;align-items:center;flex-wrap:wrap;gap:.65rem 1.1rem}
+.directory-upgrade-note label {display:grid;gap:.25rem;margin-bottom:1rem;max-width:22rem}
+.directory-upgrade-note select,.directory-upgrade-note button {max-width:100%;overflow-wrap:anywhere}
+.directory-upgrade-note a {color:var(--text-orange);text-decoration:underline}
