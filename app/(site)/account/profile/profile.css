@@ -83,8 +83,8 @@
 .profile-saved span {
   display: grid;
   place-items: center;
-  background: #197340;
-  color: white;
+  background: #d5efdc;
+  color: #126336;
   border-radius: 50%;
   width: 1.75rem;
   height: 1.75rem;
