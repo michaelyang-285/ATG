@@ -15,7 +15,8 @@ const features = [
   ["Directory placement", "Standard", "Priority in matching results"],
   ["Profile flair", "Standard profile", "ATG Verified blue check"],
   ["Search optimization", "Business details for search engines", "Additional SEO markup for gallery photos and active offers"],
-  ["Deals & events", "None on profile", "One active deal + approved events"],
+  ["Deal promotion", "None", `One active deal appears on Gwinnett Deals, shared weekly with our ${group.memberCountDisplay} Facebook group members and in our new-member welcome post.`],
+  ["Events on your profile", "None", "Approved upcoming events"],
 ];
 
 export default function Submit() {
