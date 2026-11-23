@@ -1,0 +1,115 @@
+.directory-owner.private-profile {
+  max-width: 63rem;
+}
+.private-profile-header {
+  padding-bottom: 1.4rem;
+  border-bottom: 2px solid #242421;
+}
+.private-profile-header a {
+  color: #a83212;
+  font-weight: 650;
+  font-size: 0.92rem;
+}
+.private-profile .private-profile-header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0.9rem 0 0.25rem;
+  line-height: 1.1;
+}
+.private-profile-header p,
+.profile-form-section p {
+  color: #565650;
+  overflow-wrap: anywhere;
+}
+.profile-form-section {
+  display: grid;
+  grid-template-columns: minmax(11rem, 1fr) minmax(0, 2fr);
+  gap: 2.5rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.private-profile .profile-form-section h2 {
+  font-size: 1.3rem;
+  margin: 0 0 0.5rem;
+}
+.profile-form-section p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.private-profile .profile-inputs {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.private-profile .profile-inputs label {
+  margin: 0;
+  min-width: 0;
+}
+.private-profile .profile-inputs input {
+  width: 100%;
+  min-width: 0;
+}
+.profile-wide {
+  grid-column: 1/-1;
+}
+.profile-editor footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1.25rem 0;
+}
+.profile-signin {
+  max-width: 30rem;
+  padding: 1.5rem 0;
+}
+.private-profile .profile-saved {
+  position: fixed;
+  z-index: 99;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f0fbf3;
+  color: #164d2c;
+  border: 1px solid #84b797;
+  border-radius: 0.6rem;
+  padding: 0.4rem 0.5rem 0.4rem 0.8rem;
+  box-shadow: 0 4px 16px #15321e24;
+}
+.profile-saved span {
+  display: grid;
+  place-items: center;
+  background: #197340;
+  color: white;
+  border-radius: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  font-weight: bold;
+}
+.private-profile .profile-saved button {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-size: 1.3rem;
+}
+@media (max-width: 640px) {
+  .profile-form-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.4rem 0;
+  }
+  .profile-editor footer button {
+    width: 100%;
+  }
+}
+@media (max-width: 400px) {
+  .private-profile .profile-inputs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
