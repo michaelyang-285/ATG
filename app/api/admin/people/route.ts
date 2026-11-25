@@ -35,6 +35,13 @@ function profile(user: User) {
     authorId: user.app_metadata.author_profile_id || "",
   };
 }
+async function paidDirectoryOwners(client: ReturnType<typeof db>, ids: string[]) {
+  if (!ids.length) return new Set<string>();
+  const { data, error } = await client.rpc("admin_paid_directory_owners", { account_ids: ids });
+  if (error) throw error;
+  return new Set<string>(data);
+}
+
 export function GET(req: Request) {
   return respond(async () => {
     await authorize(req);
@@ -57,8 +64,14 @@ export function GET(req: Request) {
         contact_filter: filter,
       });
       if (result.error) throw result.error;
+      const pageRows = result.data.slice(0, perPage);
+      const accountIds = pageRows.map(p => p.id).filter(id => !id.startsWith("newsletter:"));
+      const paid = await paidDirectoryOwners(client, accountIds);
       return {
-        people: result.data.slice(0, perPage),
+        people: pageRows.map(p => ({
+          ...p,
+          directoryTier: p.id.startsWith("newsletter:") ? null : paid.has(p.id) ? "Paid" : "Free",
+        })),
         next: result.data.length > perPage,
       };
     }
@@ -90,7 +103,8 @@ export function GET(req: Request) {
     if (result.error || !result.data.user)
       throw new Failure(404, "Account unavailable.");
     const person = profile(result.data.user);
-    const [subscription, listings, content] = await Promise.all([
+    const [paid, subscription, listings, content] = await Promise.all([
+      paidDirectoryOwners(client, [id]),
       client
         .from("newsletter_subscribers")
         .select("email")
@@ -114,6 +128,7 @@ export function GET(req: Request) {
     return {
       person: {
         ...person,
+        directoryTier: paid.has(id) ? "Paid" : "Free",
         newsletter:
           !!result.data.user.email_confirmed_at && !!subscription.data,
       },

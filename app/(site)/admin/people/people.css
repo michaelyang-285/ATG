@@ -281,3 +281,12 @@
 }
 .people-workspace article.contact-record {margin:0;border:0;border-radius:0;padding:0;}
 .contact-record .contact-actions .primary-action {width:auto;}
+
+.people-paid-tier {
+  display: inline-block;
+  padding: .1rem .5rem;
+  border-radius: .25rem;
+  color: #185033;
+  background: #e5f2e9;
+  font-weight: 700;
+}

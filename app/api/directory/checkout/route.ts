@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { syncDirectorySubscription } from "@/lib/directory/subscription";
 import { db, owner, human, respond, Failure } from "@/lib/directory/server";
 
 export function GET(req: Request) {
@@ -6,12 +7,26 @@ export function GET(req: Request) {
     const user = await owner(req);
     const { data, error } = await db()
       .from("directory_entries")
-      .select("premium_until")
+      .select("id,premium_until,checkout_session")
       .eq("owner_id", user.id)
       .eq("id", new URL(req.url).searchParams.get("id"))
       .single();
     if (error) throw new Failure(404, "Listing unavailable.");
-    return { completed: Date.parse(data.premium_until) > Date.now() };
+    if (Date.parse(data.premium_until) > Date.now()) return { completed: true };
+    if (!data.checkout_session) return { completed: false };
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+    const session = await stripe.checkout.sessions.retrieve(data.checkout_session, {
+      expand: ["subscription.latest_invoice"],
+    });
+    if (session.mode !== "subscription" || session.status !== "complete" || session.payment_status !== "paid" ||
+        session.client_reference_id !== data.id || !session.subscription || typeof session.subscription === "string")
+      return { completed: false };
+
+    const completed = await syncDirectorySubscription(session.subscription, {
+      id: session.id, listingId: data.id, ownerId: user.id,
+    });
+    return { completed };
   });
 }
 export function POST(req: Request) {
