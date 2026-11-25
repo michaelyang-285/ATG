@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { correctionOptIn, correctionRoles } from "@/lib/directory/correction";
+import { correctionOptIn, correctionRoles, type DirectoryRequest } from "@/lib/directory/correction";
 import { getListing, listingPath } from "@/lib/directory/profile";
 import { Failure, human, respond } from "@/lib/directory/server";
 import { subscribeEmail } from "@/lib/newsletter";
@@ -10,6 +10,12 @@ function required(value: unknown, label: string, maxLength: number) {
   }
   return value.trim();
 }
+
+const requestLabels: Record<DirectoryRequest, { subject: string; details: string }> = {
+  correction: { subject: "correction", details: "Suggested correction" },
+  claim: { subject: "ownership claim", details: "Ownership verification details" },
+  dispute: { subject: "ownership review ticket", details: "Reason for ownership review and verification details" },
+};
 
 export function POST(request: Request) {
   return respond(async () => {
@@ -31,14 +37,26 @@ export function POST(request: Request) {
 
     const listing = await getListing(slug);
     if (!listing) throw new Failure(404, "This listing is no longer available.");
+    // Older profiles submitted a boolean before ownership reviews had their own form.
+    const kind = body.kind ?? (body.claim === true ? "claim" : "correction");
+    if (kind !== "correction" && kind !== "claim" && kind !== "dispute")
+      throw new Failure(400, "Choose a valid request type.");
+    const claimed = listing.source === "local";
+    if (kind === "claim" && claimed)
+      throw new Failure(409, "This listing is already claimed. Refresh the profile and choose Request ownership review.");
+    if (kind === "dispute" && !claimed)
+      throw new Failure(409, "This listing is unclaimed. Refresh the profile and choose Claim this listing.");
+
+    const label = requestLabels[kind as DirectoryRequest];
+    const ticket = kind === "dispute" ? `ATG-${body.submissionId}` : undefined;
     const key = process.env.DIRECTORY_CORRECTION_RESEND_KEY;
-    if (!key) throw new Failure(503, "We couldn’t send your correction. Please try again later.");
+    if (!key) throw new Failure(503, "We couldn’t send your request. Please try again later.");
 
     const message = {
       from: "All Things Gwinnett <directory@mail.285marketing.com>",
       to: ["marketing@285marketing.com"],
       reply_to: email,
-      subject: `ATG directory ${body.claim===true ? "ownership claim" : "correction"}: ${listing.name.replace(/[\r\n]+/g, " ")}`,
+      subject: `ATG directory ${label.subject}${ticket ? " " + ticket : ""}: ${listing.name.replace(/[\r\n]+/g, " ")}`,
       text: [
         listing.name,
         "https://allthingsgwinnett.com" + listingPath(listing.slug),
@@ -47,7 +65,7 @@ export function POST(request: Request) {
         `Relationship to business (self-reported): ${body.relationship}`,
         `Marketing opt-in: ${body.marketingOptIn ? "Yes. " + correctionOptIn : "No"}`,
         "",
-        body.claim===true ? "Ownership verification details:" : "Suggested correction:",
+        label.details + ":",
         correction,
       ].join("\n"),
     };
@@ -63,14 +81,14 @@ export function POST(request: Request) {
       body: payload,
       cache: "no-store",
     });
-    if (!delivery.ok) throw new Failure(503, "We couldn’t send your correction. Please try again.");
+    if (!delivery.ok) throw new Failure(503, "We couldn’t send your request. Please try again.");
     if (body.marketingOptIn) {
       try {
         await subscribeEmail(email);
       } catch {
-        throw new Failure(503, "Your correction was sent. Please retry to finish signing up for emails.");
+        throw new Failure(503, "Your request was sent. Please retry to finish signing up for emails.");
       }
     }
-    return { ok: true };
+    return { ok: true, ticket };
   });
 }

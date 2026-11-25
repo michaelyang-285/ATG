@@ -109,6 +109,6 @@ export default async function Page({params}:Props) {
       </div></section>}
       {socials.length>0 && <section><h3>Social profiles</h3><div className="profile-links">{socials.map(n=>
         <a key={n.key} href={n.href}><DirectorySocialIcon network={n.key}/>{n.label}</a>)}</div></section>}
-      <ListingCorrection name={b.name} slug={b.slug} sample={demo} />
+      <ListingCorrection name={b.name} slug={b.slug} claimed={b.source === "local"} sample={demo} />
     </aside></div></main>;
 }

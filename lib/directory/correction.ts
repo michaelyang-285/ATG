@@ -6,3 +6,5 @@ export const correctionRoles = [
 
 export const correctionOptIn =
   "Yes, email me All Things Gwinnett news and offers.";
+
+export type DirectoryRequest = "correction" | "claim" | "dispute";
