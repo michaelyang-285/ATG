@@ -1,5 +1,6 @@
 import { notifySubmission } from "@/lib/submission-alerts";
 import Stripe from "stripe";
+import { syncDirectorySubscription } from "@/lib/directory/subscription";
 import { db, respond, Failure } from "@/lib/directory/server";
 export function POST(req: Request) {
   return respond(async () => {
@@ -45,22 +46,7 @@ export function POST(req: Request) {
     }
     if(subscriptionId) {
       const sub=await stripe.subscriptions.retrieve(subscriptionId,{expand:["latest_invoice"]});
-      const item=sub.items.data.find(i=>sub.metadata.plan==="atg_annual" && i.price.currency==="usd" && (i.price.unit_amount===1200 || i.price.unit_amount===900) && i.price.recurring?.interval==="year");
-      const id=sub.metadata.directory_entry;
-      if(item && id) {
-        const table=db().from("directory_entries");
-        const ended=["canceled","incomplete_expired","unpaid"].includes(sub.status);
-        if(ended) {
-          const cleared=await table.update({subscription_id:null,billing_customer:null,premium_until:null,checkout_session:null}).eq("id",id).eq("subscription_id",sub.id);
-          if(cleared.error) throw cleared.error;
-        } else if(sub.status==="active" && typeof sub.latest_invoice==="object" && sub.latest_invoice?.status==="paid") {
-          const saved=await table.update({subscription_id:sub.id,billing_customer:sub.customer,premium_until:new Date(item.current_period_end*1000).toISOString()}).eq("id",id).or("subscription_id.is.null,subscription_id.eq."+sub.id);
-          if(saved.error) throw saved.error;
-          const queued=await table.update({status:"review"}).eq("id",id).eq("subscription_id",sub.id).eq("status","unpaid").eq("contact->>tier","paid").is("contact->>onboarding",null).select("id").maybeSingle();
-          if(queued.error) throw queued.error;
-          if(queued.data) await notifySubmission("profile",id);
-        }
-      }
+      await syncDirectorySubscription(sub);
     }
     return { ok: true };
   });

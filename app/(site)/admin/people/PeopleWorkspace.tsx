@@ -10,6 +10,7 @@ type Person = {
   email: string;
   created: string;
   lastSignIn?: string;
+  directoryTier: "Free" | "Paid" | null;
   info: Record<string, string>;
   newsletter?: boolean;
   approved: boolean;
@@ -247,6 +248,7 @@ export default function People({
                   <tr>
                     {[
                       "Person",
+                      "Directory tier",
                       "Business",
                       "City",
                       "Newsletter signup",
@@ -283,6 +285,7 @@ export default function People({
                             )}
                           </Link>
                         </td>
+                        <td>{p.directoryTier === "Paid" ? <strong className="people-paid-tier">Paid</strong> : p.directoryTier ?? "No account"}</td>
                         <td>{p.info.name || "—"}</td>
                         <td>{p.info.city || "—"}</td>
                         <td>{p.newsletter ? "Yes" : "—"}</td>
@@ -369,6 +372,7 @@ export default function People({
               <span>
                 {detail.person.approved ? "Approved author" : "ATG account"}
               </span>
+              <span>Directory tier <strong className={detail.person.directoryTier === "Paid" ? "people-paid-tier" : undefined}>{detail.person.directoryTier}</strong></span>
               {detail.person.newsletter && <span>Newsletter subscriber</span>}
               <span>
                 Joined {new Date(detail.person.created).toLocaleDateString()}
