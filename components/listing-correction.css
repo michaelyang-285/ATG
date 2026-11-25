@@ -3,6 +3,9 @@
   margin: 1.25rem 0 0;
   padding-top: 1rem;
 }
+.listing-correction-prompt p { margin: .4rem 0; }
+.listing-correction-prompt p:last-child { margin: .8rem 0 0; }
+.listing-claimed { display: block; font-size: 1.1rem; }
 .listing-correction-prompt button {
   background: none;
   border: 0;

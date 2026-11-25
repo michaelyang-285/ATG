@@ -8,6 +8,8 @@ import { listing } from "@/lib/directory/validate";
 import { listingPath } from "@/lib/directory/profile";
 import { revalidatePath } from "next/cache";
 export const dynamic = "force-dynamic";
+const reviewStatuses = ["review", "published", "changes", "declined"];
+
 export function GET(req: Request) {
   return respond(async () => {
     const user = await owner(req);
@@ -103,6 +105,8 @@ export function POST(req: Request) {
     const values = listing(body, user.email!, user.id),
       table = db().from("directory_entries");
     if (!user.email_confirmed_at) throw new Failure(403,"Verify your email before submitting a listing.");
+    if (body.id && (!Number.isSafeInteger(body.revision) || (body.status !== "unpaid" && !reviewStatuses.includes(body.status))))
+      throw new Failure(400, "Reopen your listing from My account before submitting edits.");
     const current = body.id ? await table.select("paid_session,premium_until,status,contact,draft").eq("id",body.id).eq("owner_id",user.id).single() : null;
     if (current?.error) throw new Failure(404,"Listing unavailable.");
     const premium = Date.parse(current?.data?.premium_until || "") > Date.now();
@@ -124,7 +128,8 @@ export function POST(req: Request) {
           .eq("id", body.id)
           .is("deletion_due_at", null)
           .eq("revision", body.revision)
-          .eq("status", body.status)
+          // A reviewer can decide this revision while its owner has an edit open.
+          .in("status", body.status === "review" ? reviewStatuses : [body.status])
           .select("id,profile_slug")
           .maybeSingle()
       : await table
