@@ -67,17 +67,27 @@ function listingCopy(b: Business, card: DirectoryCard, place: string) {
   const first = lines[0] || "";
   const second = lines[1] || "";
   const excerpt = first && second && (first + " " + second).length <= 160 ? first + " " + second : first;
-  const description = excerpt || [intro, serviceDetail || localDetail].filter(Boolean).join(" ");
+  // With just one useful sentence, give social the original wording and search the listing context.
+  const singleDetail = first && !second && !serviceDetail && !localDetail;
+  const description = singleDetail && (intro + " " + first).length <= 165
+    ? intro + " " + first : excerpt || [intro, serviceDetail || localDetail].filter(Boolean).join(" ");
   const ogTitle = `${card.name} | ${card.location}`;
   const ogDescription = [second, serviceDetail, localDetail, first].find(s => s && s !== description)
-    || `Find ${card.name} in the All Things Gwinnett business directory.`;
+    || first || `Find ${card.name} in the All Things Gwinnett business directory.`;
   return {seoTitle: title, seoDescription: description, ogTitle, ogDescription};
 }
 
-export function directoryMetadata(b: Business): Metadata {
+export function directoryPreview(b: Business) {
   const entry = readHighlight(b);
   const card = directoryCard(b);
-  const location = locationFor(b);
+  const copy = entry?.seoTitle && entry.seoDescription && entry.ogTitle && entry.ogDescription
+    ? entry : {...listingCopy(b, card, locationFor(b).phrase), ...entry};
+  return {card, seoTitle: copy.seoTitle, seoDescription: copy.seoDescription,
+    ogTitle: copy.ogTitle, ogDescription: copy.ogDescription};
+}
+
+export function directoryMetadata(b: Business): Metadata {
+  const {card, seoTitle: title, seoDescription: description, ogTitle, ogDescription} = directoryPreview(b);
   const path = "/directory/" + encodeURIComponent(b.slug);
   const production = "https://allthingsgwinnett.com";
   const origin = process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
@@ -85,9 +95,6 @@ export function directoryMetadata(b: Business): Metadata {
   const key = createHash("sha256").update("snes-directory-v1:" + JSON.stringify(card)).digest("hex").slice(0, 16);
   const image = {url: origin + path + "/share-image?v=" + key, width: 1200, height: 630, type: "image/png",
     alt: `${card.name}, ${card.location}. ${card.label} in SNES-style pixel art. All Things Gwinnett.`};
-  const copy = entry?.seoTitle && entry.seoDescription && entry.ogTitle && entry.ogDescription
-    ? entry : {...listingCopy(b, card, location.phrase), ...entry};
-  const {seoTitle: title, seoDescription: description, ogTitle, ogDescription} = copy;
   return {title: {absolute: title}, description, alternates: {canonical: production + path},
     openGraph: {type: "website", siteName: "All Things Gwinnett", locale: "en_US",
       url: origin + path, title: ogTitle, description: ogDescription, images: [image]},

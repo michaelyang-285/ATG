@@ -42,12 +42,12 @@ export async function generateMetadata({
   const socialTitle = seo?.ogTitle || seo?.title || s.title;
   const socialDescription = seo?.ogDescription || description;
   const socialImage = imageUrl(seo?.ogImage, 1200, 630, "jpg");
-  const image = socialImage || imageUrl(s.image);
+  const image = socialImage || imageUrl(s.image, 1200, 630, "jpg");
   const images = image ? [{
     url: image,
     alt: socialImage ? seo?.ogImage?.alt : s.image?.alt,
     width: 1200,
-    height: socialImage ? 630 : 675,
+    height: 630,
   }] : undefined;
   const path = `/stories/${encodeURIComponent(s.slug)}`;
   return {

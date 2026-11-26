@@ -1,3 +1,4 @@
+import * as React from "react";
 import {readFile} from "node:fs/promises";
 import path from "node:path";
 import {ImageResponse} from "next/og";
@@ -54,4 +55,12 @@ export async function directoryImage(card: DirectoryCard) {
       {name:"Be Vietnam Pro",data:vietnameseMedium,weight:500,style:"normal"},
     ],headers:{"Cache-Control":"public, max-age=0, s-maxage=300, stale-while-revalidate=30"}},
   );
+}
+
+export async function checkedDirectoryPng(card: DirectoryCard) {
+  const png = Buffer.from(await (await directoryImage(card)).arrayBuffer());
+  if (png.length < 24 || png.toString("hex", 0, 8) !== "89504e470d0a1a0a" ||
+      png.readUInt32BE(16) !== 1200 || png.readUInt32BE(20) !== 630)
+    throw Error("The directory card must be a 1200 × 630 PNG.");
+  return png;
 }
