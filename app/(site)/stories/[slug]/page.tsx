@@ -74,7 +74,17 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];
   const canonical = "https://allthingsgwinnett.com/stories/" + encodeURIComponent(story.slug);
   let inSources = false;
-  const articleBody = (story.body || []).map((block: any) => {
+  const headingLogos = new Map<string, string>();
+  const body = (story.body || []).filter((block, index, blocks) => {
+    const heading = blocks[index - 1];
+    if (block._type === "image" && block.besideHeading && block.imageUrl && !block.caption &&
+        heading?._type === "block" && heading.style === "h3") {
+      headingLogos.set(heading._key, block.imageUrl);
+      return false;
+    }
+    return true;
+  });
+  const articleBody = body.map((block: any) => {
     if (block._type !== "block") return block;
     if (/^h[1-6]$/.test(block.style)) {
       const heading = (block.children || []).map((span: any) => span.text || "").join("").trim();
@@ -200,6 +210,15 @@ export default async function Page({ params }: { params: { slug: string } }) {
             value={articleBody}
             components={{
               block: {
+                h3: ({ children, value }) => {
+                  const logo = headingLogos.get(value._key);
+                  return logo ? (
+                    <h3 className="story-business-heading">
+                      <img src={logo} alt="" loading="lazy" decoding="async" />
+                      <span>{children}</span>
+                    </h3>
+                  ) : <h3>{children}</h3>;
+                },
                 normal: ({children,value}) => <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
               },
               marks: {
