@@ -13,121 +13,201 @@
     "primary": "Food",
     "evidence": "Korean bakery",
     "style": "Bakers",
-    "line": "Korean pastries, cakes & coffee"
+    "line": "Korean pastries, cakes & coffee",
+    "seoTitle": "Vincent Bakery Cafe | Korean Bakery Inside Duluth’s Nam Dae Mun",
+    "seoDescription": "Vincent Bakery Cafe is a Korean bakery counter inside Nam Dae Mun Farmers Market on Shackleford Road in Duluth, serving pastries, cakes, and coffee.",
+    "ogTitle": "There’s a Korean bakery inside the Duluth Nam Dae Mun",
+    "ogDescription": "Vincent Bakery Cafe serves pastries, cakes, and coffee from a counter inside the Shackleford Road market."
   },
   "canton-house-duluth": {
     "primary": "Food",
     "evidence": "dim sum",
     "style": "Dim sum",
-    "line": "Steamed buns & dumplings on Pleasant Hill Road"
+    "line": "Steamed buns & dumplings on Pleasant Hill Road",
+    "seoTitle": "Canton House | Cantonese Dim Sum in Duluth, GA",
+    "seoDescription": "Canton House serves steamed buns, dumplings, and other Cantonese dim sum at 2255 Pleasant Hill Road in Duluth. Find the restaurant in Suite 250.",
+    "ogTitle": "Steamed buns and dumplings for the table at Canton House",
+    "ogDescription": "Find this Cantonese dim sum spot on Pleasant Hill Road in Duluth, where you can share a spread of small dishes."
   },
   "china-cafe-grayson": {
     "primary": "Food",
     "evidence": "takeout",
     "style": "Chinese restaurant",
-    "line": "Chinese takeout on Grayson Highway"
+    "line": "Chinese takeout on Grayson Highway",
+    "seoTitle": "China Cafe | Chinese Takeout on Grayson Highway in Grayson",
+    "seoDescription": "China Cafe serves Chinese takeout at 1911 Grayson Highway in Grayson. The menu includes egg rolls, lo mein, and fried rice.",
+    "ogTitle": "Picking up dinner in Grayson? China Cafe has lo mein and egg rolls",
+    "ogDescription": "This neighborhood takeout spot is on Grayson Highway. Add fried rice to the order if you’re bringing dinner home to share."
   },
   "cuts-steakhouse-sugarloaf-suwanee": {
     "primary": "Food",
     "evidence": "hand-cut",
     "style": "Steakhouse",
-    "line": "Hand-cut steaks & seafood"
+    "line": "Hand-cut steaks & seafood",
+    "seoTitle": "Cuts Steakhouse Sugarloaf | Hand-Cut Steaks in Suwanee",
+    "seoDescription": "Cuts Steakhouse Sugarloaf is Muzo Saritas’s family-run steakhouse at 1500 Satellite Boulevard in Suwanee, serving hand-cut steaks and seafood.",
+    "ogTitle": "Hand-cut steaks at Suwanee’s family-run Cuts Steakhouse",
+    "ogDescription": "Muzo Saritas’s family-run restaurant on Satellite Boulevard serves hand-cut steaks alongside seafood."
   },
   "east-pearl-seafood-restaurant-duluth": {
     "primary": "Food",
     "evidence": "dim sum",
     "style": "Dim sum",
-    "line": "Dim sum carts & shrimp dumplings"
+    "line": "Dim sum carts & shrimp dumplings",
+    "seoTitle": "East Pearl Seafood Restaurant | Dim Sum Carts in Duluth",
+    "seoDescription": "East Pearl Seafood Restaurant serves Cantonese seafood and cart-style dim sum on Liddell Lane in Duluth, including shrimp dumplings and rice noodle rolls.",
+    "ogTitle": "What’s on the dim sum carts at East Pearl in Duluth?",
+    "ogDescription": "Shrimp dumplings and rice noodle rolls are two dishes to look for at this Cantonese seafood restaurant on Liddell Lane."
   },
   "fung-mei-suwanee": {
     "primary": "Food",
     "evidence": "wonton",
     "style": "Chinese restaurant",
-    "line": "Wonton soup & black bean noodles"
+    "line": "Wonton soup & black bean noodles",
+    "seoTitle": "Fung Mei | Chinese Noodles & Carryout in Suwanee, GA",
+    "seoDescription": "Fung Mei serves black bean noodles, wonton soup, and fried rice on Lawrenceville-Suwanee Road. The Suwanee restaurant takes carryout orders.",
+    "ogTitle": "Black bean noodles and wonton soup at Fung Mei in Suwanee",
+    "ogDescription": "If you’re picking up dinner on Lawrenceville-Suwanee Road, this Chinese kitchen also has fried rice for carryout."
   },
   "honey-pig-duluth": {
     "primary": "Food",
     "evidence": "pork belly",
     "style": "Korean barbecue",
-    "line": "Pork belly & kimchi on a tabletop grill"
+    "line": "Pork belly & kimchi on a tabletop grill",
+    "seoTitle": "Honey Pig | Tabletop Korean BBQ in Duluth, GA",
+    "seoDescription": "At Honey Pig on Old Norcross Road in Duluth, pork belly, kimchi, and bean sprouts cook together over a domed tabletop grill.",
+    "ogTitle": "Pork belly and kimchi share the grill at Honey Pig in Duluth",
+    "ogDescription": "The domed grill sits right on the table at this Korean barbecue spot on Old Norcross Road. Bean sprouts cook alongside the pork."
   },
   "hong-kong-supermarket-norcross": {
     "primary": "Food",
     "evidence": "Vietnamese",
     "style": "Grocery market",
-    "line": "Vietnamese groceries & a food court"
+    "line": "Vietnamese groceries & a food court",
+    "seoTitle": "Hong Kong Supermarket | Groceries & Food Court in Norcross",
+    "seoDescription": "Hong Kong Supermarket is a Vietnamese-owned market on Jimmy Carter Boulevard in Norcross with fresh herbs, produce, noodles, rice, and a food court.",
+    "ogTitle": "Shop for fresh herbs and stay for lunch at Hong Kong Supermarket",
+    "ogDescription": "Pick up rice, noodles, and produce at this Vietnamese-owned market on Jimmy Carter Boulevard in Norcross. The food court is at the same address."
   },
   "hot-and-cold-buffet-snellville": {
     "primary": "Food",
     "evidence": "buffet",
     "style": "Buffet",
-    "line": "Hot dishes & sushi on Main Street East"
+    "line": "Hot dishes & sushi on Main Street East",
+    "seoTitle": "Hot & Cold Buffet | Chinese Buffet & Sushi in Snellville",
+    "seoDescription": "Find Chinese hot dishes and sushi at Hot & Cold Buffet, located at 2302 Main Street East in Snellville.",
+    "ogTitle": "Sushi and hot Chinese dishes at Hot & Cold Buffet in Snellville",
+    "ogDescription": "If your group wants both, you’ll find them at the buffet at 2302 Main Street East."
   },
   "kurts-euro-bistro-duluth": {
     "primary": "Food",
     "evidence": "schnitzel",
     "style": "Bistro",
-    "line": "German schnitzel & European dishes"
+    "line": "German schnitzel & European dishes",
+    "seoTitle": "Kurt’s Euro Bistro | German Schnitzel in Duluth, GA",
+    "seoDescription": "Kurt’s Euro Bistro is a family-run restaurant on Peachtree Industrial Boulevard in Duluth serving schnitzel, steaks, seafood, and other European dishes.",
+    "ogTitle": "German schnitzel at Kurt’s Euro Bistro in Duluth",
+    "ogDescription": "This family-run bistro on Peachtree Industrial Boulevard puts German and other European dishes on the menu alongside steaks and seafood."
   },
   "mccrays-tavern-on-the-square-lawrenceville": {
     "primary": "Food",
     "evidence": "rooftop",
     "style": "Tavern",
-    "line": "A rooftop bar on the historic square"
+    "line": "A rooftop bar on the historic square",
+    "seoTitle": "McCray’s Tavern on the Square | Rooftop Bar in Lawrenceville",
+    "seoDescription": "McCray’s Tavern on the Square serves burgers, sandwiches, and draft beer at 100 North Perry Street, with a rooftop bar overlooking Lawrenceville’s historic square.",
+    "ogTitle": "Draft beer above the Lawrenceville square at McCray’s Tavern",
+    "ogDescription": "Head to North Perry Street for the rooftop bar, or sit down for burgers and sandwiches at this downtown neighborhood tavern."
   },
   "perry-street-chophouse-lawrenceville": {
     "primary": "Food",
     "evidence": "prime cuts",
     "style": "Steakhouse",
-    "line": "Prime cuts & seafood on North Perry Street"
+    "line": "Prime cuts & seafood on North Perry Street",
+    "seoTitle": "Perry Street Chophouse | Steak & Seafood in Lawrenceville",
+    "seoDescription": "Perry Street Chophouse serves prime cuts and seafood at 125 North Perry Street in downtown Lawrenceville.",
+    "ogTitle": "Prime cuts at Perry Street Chophouse in downtown Lawrenceville",
+    "ogDescription": "In the mood for seafood instead? It’s on the menu at this steakhouse at 125 North Perry Street."
   },
   "pho-dai-loi-3-duluth": {
     "primary": "Food",
     "evidence": "beef phở",
     "style": "Noodle shop",
-    "line": "Beef phở & rice plates on Pleasant Hill Road"
+    "line": "Beef phở & rice plates on Pleasant Hill Road",
+    "seoTitle": "Phở Đại Lợi #3 | Vietnamese Beef Phở in Duluth, GA",
+    "seoDescription": "Phở Đại Lợi #3 specializes in Vietnamese beef phở on Pleasant Hill Road in Duluth. Rice plates and vermicelli bowls round out the menu.",
+    "ogTitle": "Beef phở on Pleasant Hill Road at Phở Đại Lợi #3",
+    "ogDescription": "This Duluth noodle shop specializes in Vietnamese beef noodle soup. If you’re in the mood for something else, it also serves vermicelli bowls and rice plates."
   },
   "pho-van-loi-norcross": {
     "primary": "Food",
     "evidence": "Vietnamese noodle",
     "style": "Noodle shop",
-    "line": "Vietnamese noodle soup at Hong Kong Supermarket"
+    "line": "Vietnamese noodle soup at Hong Kong Supermarket",
+    "seoTitle": "Phở Vạn Lợi | Vietnamese Noodle Soup in Norcross, GA",
+    "seoDescription": "Phở Vạn Lợi serves Vietnamese noodle soup inside the Hong Kong Supermarket food court on Jimmy Carter Boulevard in Norcross. Look for Suite F113.",
+    "ogTitle": "Find Phở Vạn Lợi in the Hong Kong Supermarket food court",
+    "ogDescription": "This Norcross stall specializes in Vietnamese noodle soup. It’s in Suite F113 at 5495 Jimmy Carter Boulevard."
   },
   "pinokio-suwanee": {
     "primary": "Food",
     "evidence": "Korean food",
     "style": "Restaurants",
-    "line": "Korean dishes at the ASSI Market food court"
+    "line": "Korean dishes at the ASSI Market food court",
+    "seoTitle": "Pinokio | Korean Food at the ASSI Market in Suwanee",
+    "seoDescription": "Pinokio serves rice cake and dumpling soup, kimchi fried rice, and pork cutlets in the ASSI Market food court on Old Peachtree Road in Suwanee.",
+    "ogTitle": "Rice cake and dumpling soup at Suwanee’s ASSI Market",
+    "ogDescription": "Look for the Pinokio counter in the food court on Old Peachtree Road. The Korean menu also includes kimchi fried rice and pork cutlets."
   },
   "royal-china-restaurant-duluth": {
     "primary": "Food",
     "evidence": "dim sum",
     "style": "Dim sum",
-    "line": "Dim sum carts, steamed pork buns & shumai"
+    "line": "Dim sum carts, steamed pork buns & shumai",
+    "seoTitle": "Royal China Restaurant | Cantonese Dim Sum in Duluth, GA",
+    "seoDescription": "Royal China Restaurant is a Cantonese restaurant and banquet hall on Venture Drive in Duluth, with dim sum carts serving steamed pork buns and shumai.",
+    "ogTitle": "Steamed pork buns and shumai from Royal China’s dim sum carts",
+    "ogDescription": "Shumai and pork buns make the rounds on carts at this Cantonese restaurant and banquet hall on Venture Drive in Duluth."
   },
   "the-diner-at-sugar-hill": {
     "primary": "Food",
     "evidence": "breakfast",
     "style": "Diner",
-    "line": "Breakfast plates on Nelson Brogdon Boulevard"
+    "line": "Breakfast plates on Nelson Brogdon Boulevard",
+    "seoTitle": "The Diner at Sugar Hill | Breakfast, Dinner & Desserts",
+    "seoDescription": "The Diner at Sugar Hill serves breakfast plates, sandwiches, dinner entrées, and desserts at 4500 Nelson Brogdon Boulevard in Sugar Hill.",
+    "ogTitle": "From breakfast plates to dessert at The Diner at Sugar Hill",
+    "ogDescription": "Start with a breakfast plate or stop in later for a sandwich and something sweet. The diner is on Nelson Brogdon Boulevard."
   },
   "the-diner-at-webb-gin-snellville": {
     "primary": "Food",
     "evidence": "brunch",
     "style": "Diner",
-    "line": "Breakfast & brunch at the Shoppes at Webb Gin"
+    "line": "Breakfast & brunch at the Shoppes at Webb Gin",
+    "seoTitle": "The Diner at Webb Gin | Breakfast & Brunch in Snellville",
+    "seoDescription": "The Diner at Webb Gin is an independent Snellville diner serving breakfast, brunch, and American comfort food at the Shoppes at Webb Gin on Scenic Highway North.",
+    "ogTitle": "Brunch at The Diner at Webb Gin in Snellville",
+    "ogDescription": "Find this independent diner at the Shoppes at Webb Gin. Its menu includes breakfast and American comfort food, just off Scenic Highway North."
   },
   "the-sanctum-at-sugar-hill": {
     "primary": "Food",
     "evidence": "steak and seafood",
     "style": "Steakhouse",
-    "line": "Steak & seafood in downtown Sugar Hill"
+    "line": "Steak & seafood in downtown Sugar Hill",
+    "seoTitle": "The Sanctum at Sugar Hill | Downtown Steak & Seafood",
+    "seoDescription": "The Sanctum at Sugar Hill is an independently owned steak and seafood restaurant with a bar at 1166 Church Street in downtown Sugar Hill.",
+    "ogTitle": "Steak, seafood, and a bar on Church Street at The Sanctum",
+    "ogDescription": "You’ll find this independently owned restaurant at 1166 Church Street in downtown Sugar Hill."
   },
   "vegreen-noodle-buford": {
     "primary": "Food",
     "evidence": "plant-based",
     "style": "Restaurants",
-    "line": "Plant-based noodles, sushi & stir-fries"
+    "line": "Plant-based noodles, sushi & stir-fries",
+    "seoTitle": "VeGreen Noodle | Vegan Sushi & Noodle Soups in Buford",
+    "seoDescription": "VeGreen Noodle serves vegan sushi, noodle soups, and plant-based stir-fries on Mall of Georgia Boulevard in Buford, near the Mall of Georgia.",
+    "ogTitle": "Vegan sushi near the Mall of Georgia at VeGreen Noodle",
+    "ogDescription": "This Buford kitchen’s plant-based menu also includes noodle soups and stir-fries. Find it in Suite 100A on Mall of Georgia Boulevard."
   },
   "basemarks-dexa-vo2-max-rmr": {
     "primary": "Fitness",
@@ -154,64 +234,104 @@
     "primary": "Brows",
     "evidence": "Microblading",
     "style": "Brows",
-    "line": "Microblading, powder brows & combination brows"
+    "line": "Microblading, powder brows & combination brows",
+    "seoTitle": "Browvana Studio | Microblading & Powder Brows in Johns Creek",
+    "seoDescription": "Browvana Studio offers microblading, microshading, powder brows, and combination brows in Johns Creek, with each treatment tailored to your features and skin type.",
+    "ogTitle": "Microblading or powder brows at Browvana Studio in Johns Creek",
+    "ogDescription": "This permanent makeup studio customizes the shape and finish to your features and the look you want, from soft shading to a combination brow."
   },
   "forge-electric-co-llc": {
     "primary": "Electrical",
     "evidence": "EV chargers",
     "style": "Electrical",
-    "line": "Panel upgrades, lighting & EV chargers"
+    "line": "Panel upgrades, lighting & EV chargers",
+    "seoTitle": "Forge Electric Co. | Lilburn Electrician Serving Gwinnett",
+    "seoDescription": "Lilburn-based Forge Electric handles electrical repairs, panel upgrades, lighting, and EV charger installation across Gwinnett. Service is available in English and Spanish.",
+    "ogTitle": "Meet the Lilburn electricians who install EV chargers and upgrade panels",
+    "ogDescription": "Forge Electric also troubleshoots electrical issues and installs lights and ceiling fans for Gwinnett homeowners, businesses, and property managers."
   },
   "freedom-equity-group-ga": {
     "primary": "Insurance",
     "evidence": "annuity",
     "style": "Insurance",
-    "line": "Life insurance & annuities"
+    "line": "Life insurance & annuities",
+    "seoTitle": "Freedom Equity Group GA | Life Insurance & Annuities in Gwinnett",
+    "seoDescription": "Freedom Equity Group serves Gwinnett individuals and families looking into life insurance with living benefits, income replacement, final expenses, and annuities.",
+    "ogTitle": "Exploring life insurance with living benefits in Gwinnett?",
+    "ogDescription": "Freedom Equity Group works with individuals and families on coverage questions, from replacing income and covering final expenses to exploring annuity options."
   },
   "medicalofficemarketing-org-an-initiative-of-supportedsuccess-llc": {
     "primary": "Marketing",
     "evidence": "healthcare marketing",
     "style": "Marketing",
-    "line": "Healthcare marketing & patient experience"
+    "line": "Healthcare marketing & patient experience",
+    "seoTitle": "MedicalOfficeMarketing.org | Healthcare Marketing in Gwinnett",
+    "seoDescription": "MedicalOfficeMarketing.org helps independent clinicians and small practices with patient interviews, market research, referral partnerships, and launch strategy.",
+    "ogTitle": "How a Gwinnett consultancy helps small practices learn from patients",
+    "ogDescription": "At MedicalOfficeMarketing.org, Marion Abigail Davis works with clinicians to understand patient needs, shape new services, and build referral partnerships."
   },
   "new-hair-boutique-salon": {
     "primary": "Hair Salons",
     "evidence": "balayage",
     "style": "Hair Salons",
-    "line": "Lived-in color, gray blending & balayage"
+    "line": "Lived-in color, gray blending & balayage",
+    "seoTitle": "New Hair Boutique Salon | Balayage & Gray Blending in Duluth",
+    "seoDescription": "New Hair Boutique Salon in Duluth offers balayage, gray blending, vivid color, curly haircuts, and digital perms.",
+    "ogTitle": "Gray blending or vivid color? New Hair Boutique Salon in Duluth",
+    "ogDescription": "Pair lived-in balayage with soft butterfly layers, or go for a vivid shade and a wolf cut. The salon also offers curly cuts and digital perms."
   },
   "shine-lab-headlight-restoration": {
     "primary": "Detailing",
     "evidence": "headlight restoration",
     "style": "Detailing",
-    "line": "Mobile headlight restoration"
+    "line": "Mobile headlight restoration",
+    "seoTitle": "Shine Lab | Mobile Headlight Restoration in Buford, GA",
+    "seoDescription": "Shine Lab restores cloudy or yellowed headlights in Buford and surrounding areas. Its mobile service includes UV-protective ceramic coatings.",
+    "ogTitle": "Cloudy headlights? Buford’s Shine Lab comes to you",
+    "ogDescription": "Shine Lab removes yellowing and oxidation and applies a UV-protective ceramic coating. The mobile service covers Buford and nearby communities."
   },
   "nam-dae-mun-farmers-market-duluth": {
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",
     "evidence": "grocer",
-    "showStreet": true
+    "showStreet": true,
+    "seoTitle": "Nam Dae Mun Farmers Market | Original Duluth Grocery Store",
+    "seoDescription": "Yong Kim opened the original Nam Dae Mun Farmers Market in Duluth in 2005. The Shackleford Road store carries international groceries, produce, meat, and seafood.",
+    "ogTitle": "The Gwinnett grocery chain that started on Shackleford Road",
+    "ogDescription": "Yong Kim opened the first Nam Dae Mun in Duluth in 2005. You can still shop that location for produce, seafood, and international groceries."
   },
   "nam-dae-mun-farmers-market-lawrenceville": {
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",
-    "evidence": "grocer",
-    "showStreet": true
+    "evidence": "international pantry",
+    "showStreet": true,
+    "seoTitle": "Nam Dae Mun Farmers Market | Dogwood Road in Lawrenceville",
+    "seoDescription": "The Lawrenceville Nam Dae Mun Farmers Market at 850 Dogwood Road carries international pantry staples alongside fresh produce, meat, and seafood.",
+    "ogTitle": "Shopping for international pantry staples on Dogwood Road",
+    "ogDescription": "Shopping on Dogwood Road? The Gwinnett-founded market stocks international pantry staples, with produce, meat, and seafood in the same store."
   },
   "nam-dae-mun-farmers-market-lilburn": {
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",
     "evidence": "grocer",
-    "showStreet": true
+    "showStreet": true,
+    "seoTitle": "Nam Dae Mun Farmers Market | International Groceries in Lilburn",
+    "seoDescription": "Shop for fresh produce, meat, and international pantry staples at the Lilburn Nam Dae Mun Farmers Market, 4805 Lawrenceville Highway, Suite 320B.",
+    "ogTitle": "Where to find Nam Dae Mun’s international grocery in Lilburn",
+    "ogDescription": "Look for Suite 320B on Lawrenceville Highway. The Lilburn store stocks fresh produce and meat alongside pantry staples."
   },
   "nam-dae-mun-farmers-market-norcross": {
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",
     "evidence": "grocer",
-    "showStreet": true
+    "showStreet": true,
+    "seoTitle": "Nam Dae Mun Farmers Market | International Groceries in Norcross",
+    "seoDescription": "The Norcross Nam Dae Mun Farmers Market at 6131 South Norcross Tucker Road sells international groceries, fresh produce, and household supplies.",
+    "ogTitle": "A Norcross stop for international groceries and household supplies",
+    "ogDescription": "The Norcross branch of Gwinnett-founded Nam Dae Mun also carries fresh produce. Find it on South Norcross Tucker Road."
   }
 }
