@@ -11,7 +11,7 @@ import re
 import sys
 import time
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
@@ -24,6 +24,7 @@ BASE = "https://allthingsgwinnett.com"
 BOT = "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)"
 TEXT_FIELDS = ("title", "description", "og:title", "og:description")
 FIELDS = (*TEXT_FIELDS, "og:image")
+STORY_COPY = {"title": "title", "description": "description", "ogTitle": "og:title", "ogDescription": "og:description"}
 MAX_BYTES = 16 * 1024 * 1024
 
 
@@ -121,6 +122,18 @@ def inspect(url):
                 values[key] = found[0].strip()
                 if key in TEXT_FIELDS and placeholder(values[key]):
                     issues.append(f"{key}: placeholder copy")
+        if urlsplit(url).path.startswith("/stories/"):
+            slug = unquote(urlsplit(url).path.rsplit("/", 1)[1])
+            query = '*[_type == "post" && slug.current == $slug][0]{_type,seo}'
+            params = urlencode({"query": query, "$slug": json.dumps(slug), "perspective": "published"})
+            raw = fetch("https://xnm5c645.api.sanity.io/v2026-02-01/data/query/production?" + params)[0]
+            source, asset_url, source_issues = story_fields(json.loads(raw)["result"])
+            issues.extend(source_issues)
+            for key, value in source.items():
+                if key in values and values[key] != value:
+                    issues.append(f"{key}: live copy differs from the published Sanity field")
+            if asset_url and urlsplit(values.get("og:image", "")).path != urlsplit(asset_url).path:
+                issues.append("og:image: live image differs from the published Sanity share asset")
         image = values.get("og:image")
         if image:
             if "/directory/" in url and urlsplit(image)._replace(query="").geturl() != url + "/share-image":
@@ -133,28 +146,37 @@ def inspect(url):
     return url, values, issues
 
 
-def story_draft(path):
-    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+def story_fields(doc):
     if not isinstance(doc, dict) or doc.get("_type") != "post":
-        return ["Expected a single Sanity post document"]
+        return {}, None, ["Expected a single Sanity post document"]
     seo = doc.get("seo") or {}
     if not isinstance(seo, dict):
-        return ["Invalid seo object"]
-    issues = []
-    for name in ("title", "description", "ogTitle", "ogDescription"):
-        if not isinstance(seo.get(name), str) or not seo[name].strip():
+        return {}, None, ["Invalid seo object"]
+    copy, issues = {}, []
+    for name, tag in STORY_COPY.items():
+        field = seo.get(name)
+        if not isinstance(field, str) or not field.strip():
             issues.append("Missing seo." + name)
-        elif placeholder(seo[name]):
+        elif placeholder(field):
             issues.append("Placeholder seo." + name)
         else:
-            print(f"  {name}: {seo[name].strip()}")
-    ref = ((seo.get("ogImage") or {}).get("asset") or {}).get("_ref", "")
-    asset = re.fullmatch(r"image-([a-zA-Z0-9]+)-(\d+x\d+)-([a-zA-Z0-9]+)", ref)
-    if not asset:
-        issues.append("Missing or invalid seo.ogImage.asset._ref")
-    else:
-        filename = "{}-{}.{}".format(*asset.groups())
-        url = "https://cdn.sanity.io/images/xnm5c645/production/" + filename + "?w=1200&h=630&fit=crop&fm=jpg"
+            copy[tag] = field.strip()
+    image = seo.get("ogImage")
+    asset = image.get("asset") if isinstance(image, dict) else None
+    ref = asset.get("_ref") if isinstance(asset, dict) else None
+    match = re.fullmatch(r"image-([a-zA-Z0-9]+)-(\d+x\d+)-([a-zA-Z0-9]+)", ref or "")
+    if not match:
+        return copy, None, issues + ["Missing or invalid seo.ogImage.asset._ref"]
+    filename = "{}-{}.{}".format(*match.groups())
+    return copy, "https://cdn.sanity.io/images/xnm5c645/production/" + filename, issues
+
+
+def story_draft(path):
+    copy, asset_url, issues = story_fields(json.loads(Path(path).read_text(encoding="utf-8")))
+    for key, value in copy.items():
+        print(f"  {key}: {value}")
+    if asset_url:
+        url = asset_url + "?w=1200&h=630&fit=crop&fm=jpg"
         print("  og:image:", url)
         verify_image(url)
     return issues
