@@ -9,7 +9,7 @@ type Highlight = {
   seoTitle?: string; seoDescription?: string; ogTitle?: string; ogDescription?: string;
 };
 const curated: Record<string,Highlight> = highlights;
-const compact = (s: string = "") => s.replace(/\s+/g, " ").trim();
+const compact = (s?: string | null) => (s || "").replace(/\s+/g, " ").trim();
 
 function locationFor(b: Business) {
   const addressCity = b.address?.match(/,\s*([^,]+),\s*(?:GA|Georgia)\b(?:\s+\d{5}(?:-\d{4})?)?\s*$/i)?.[1].trim();
@@ -52,12 +52,26 @@ export function directoryCard(b: Business) {
 
 export type DirectoryCard = ReturnType<typeof directoryCard>;
 
-function searchSummary(b: Business, fallback: string) {
-  const summary = compact(b.summary);
-  if (!summary) return fallback;
-  if (summary.length <= 165) return summary;
-  const sentence = summary.match(/^.{12,165}?[.!?](?=\s|$)/)?.[0];
-  return sentence || fallback;
+const sentences = new Intl.Segmenter("en", {granularity: "sentence"});
+
+function listingCopy(b: Business, card: DirectoryCard, place: string) {
+  const title = !b.category || card.name.toLowerCase().includes(card.label.toLowerCase())
+    ? `${card.name} ${place}` : `${card.name} | ${card.label} ${place}`;
+  const intro = `Find ${card.name} ${place}.`;
+  const details = Array.from(new Set([...(b.services || []), ...(b.categories || [])]))
+    .map(s => compact(s)).filter(s => s && s !== b.category && s !== card.label).slice(0, 3);
+  const localDetail = b.address ? `The listed address is ${compact(b.address)}.` : "";
+  const serviceDetail = details.length ? `Listed specialties include ${details.join(", ")}.` : "";
+  const lines = Array.from(sentences.segment(compact(b.summary)), part => part.segment.trim())
+    .filter(s => s.length >= 12 && s.length <= 160 && !/^(?:call|text|tel)\b/i.test(s));
+  const first = lines[0] || "";
+  const second = lines[1] || "";
+  const excerpt = first && second && (first + " " + second).length <= 160 ? first + " " + second : first;
+  const description = excerpt || [intro, serviceDetail || localDetail].filter(Boolean).join(" ");
+  const ogTitle = `${card.name} | ${card.location}`;
+  const ogDescription = [second, serviceDetail, localDetail, first].find(s => s && s !== description)
+    || `Find ${card.name} in the All Things Gwinnett business directory.`;
+  return {seoTitle: title, seoDescription: description, ogTitle, ogDescription};
 }
 
 export function directoryMetadata(b: Business): Metadata {
@@ -71,13 +85,9 @@ export function directoryMetadata(b: Business): Metadata {
   const key = createHash("sha256").update("snes-directory-v1:" + JSON.stringify(card)).digest("hex").slice(0, 16);
   const image = {url: origin + path + "/share-image?v=" + key, width: 1200, height: 630, type: "image/png",
     alt: `${card.name}, ${card.location}. ${card.label} in SNES-style pixel art. All Things Gwinnett.`};
-  const categoryInName = b.name.toLowerCase().includes(card.label.toLowerCase());
-  const title = entry?.seoTitle || (categoryInName ? b.name : b.name + " | " + card.label) + " " + location.phrase;
-  const short = card.detail ? `${card.name} ${location.phrase}. ${card.detail}.`
-    : `Find ${card.name} ${location.phrase} in the All Things Gwinnett directory.`;
-  const description = entry?.seoDescription || searchSummary(b, short);
-  const ogTitle = entry?.ogTitle || card.name + " " + location.phrase;
-  const ogDescription = entry?.ogDescription || searchSummary(b, short);
+  const copy = entry?.seoTitle && entry.seoDescription && entry.ogTitle && entry.ogDescription
+    ? entry : {...listingCopy(b, card, location.phrase), ...entry};
+  const {seoTitle: title, seoDescription: description, ogTitle, ogDescription} = copy;
   return {title: {absolute: title}, description, alternates: {canonical: production + path},
     openGraph: {type: "website", siteName: "All Things Gwinnett", locale: "en_US",
       url: origin + path, title: ogTitle, description: ogDescription, images: [image]},
