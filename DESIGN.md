@@ -213,6 +213,12 @@ Story previews are open editorial rows with no enclosing card surface, radius, o
 
 Empty-content panels use surface fill, 36px padding (24px on mobile), an explanatory heading, and readable copy. Their current messages are content states, not permanent campaign text.
 
+### Section fronts and Gwinnett Deals
+
+The three editorial sections open with a title and short introduction. The lead pairs a story photo with a tinted panel for the headline, byline, date, and excerpt when available. At 700px and below, the photo sits above the text. A story without a photo uses a full-width text panel. Food & drink uses a warm sand tint and links food coverage to restaurants and markets. Things to do uses pale green for outing guides, upcoming events, and places to visit. Local life uses blue-gray for neighborhood coverage, school dates, and library programs.
+
+Gwinnett Deals pairs a shop-counter photo with an offer summary. When no offers are active, the summary points readers to the newsletter. When offers are active, it links to the list with each business, offer terms, and redemption details. In both states, a separate ink panel presents the paid business listing at $1 per month, billed at $12 per year, with an orange signup button. The listing supports one active deal at a time.
+
 ### Inputs / Fields
 
 Search is a white, thin-stroked rounded shell. Its text input uses 16px type, 10px 12px padding, a 210px desktop width (180px at 950px), and a muted placeholder. The adjacent submit button is 44px square with a real SVG search icon. Mobile search fills its container. A separate page text field uses the same stroke and radius with 10px 14px padding, a width of `min(550px, 100%)`, and `min-width: 0`. Both retain the shared visible keyboard outline and text-orange caret. No custom error-color system is implemented.

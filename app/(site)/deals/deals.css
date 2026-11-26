@@ -1,0 +1,34 @@
+.deals-front { padding-block: clamp(24px, 3.2vw, 48px) 56px; }
+.deals-hero { display: grid; grid-template-columns: 1fr 1fr; background: #f4ede3; }
+.deals-intro { padding: clamp(25px, 3.8vw, 52px); align-self: center; }
+.deals-intro h1 { font-size: clamp(3rem, 5.6vw, 5.4rem); line-height: .98; letter-spacing: -.04em; }
+.deals-intro h2 { font-size: clamp(1.35rem, 2.2vw, 1.95rem); margin-top: 23px; }
+.deals-intro p, .deals-pitch p { max-width: 58ch; margin-top: 12px; font-size: clamp(1rem, 1.3vw, 1.125rem); line-height: 1.5; }
+.deals-photo { display: block; width: 100%; height: 100%; object-fit: cover; }
+.deals-text-link { font-weight: 700; display: inline-flex; gap: 8px; align-items: center; color: var(--text-orange); }
+.deals-intro .deals-text-link { margin-top: 23px; font-size: 1rem; }
+.deals-membership { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(30px, 6vw, 92px); margin: clamp(32px, 4vw, 58px) 0 24px; align-items: start; }
+.deals-pitch { padding-top: 13px; border-top: 3px solid var(--ink); }
+.deals-pitch h2, .deals-offers > h2 { max-width: 24ch; font-size: clamp(1.9rem, 3.3vw, 3rem); line-height: 1.05; }
+.deals-pitch h3 { font-size: 1.15rem; margin-top: 22px; }
+.deals-pitch ul { list-style: disc; margin: 9px 0 0; padding-left: 1.35em; font-size: 1rem; }
+.deals-pitch li + li { margin-top: 5px; }
+.deals-pitch li::marker { color: var(--text-orange); }
+.deals-plan { background: var(--ink); color: white; padding: clamp(23px, 2.6vw, 34px); }
+.deals-plan h3 { font-size: 1.15rem; }
+.deals-price { display: flex; align-items: baseline; gap: 5px; margin: 13px 0 2px; line-height: 1; }
+.deals-price strong { font-size: clamp(3.3rem, 5vw, 4.4rem); letter-spacing: -.04em; }
+.deals-billing { font-size: 1rem; color: #e6e3dd; }
+.deals-plan .button { display: flex; width: fit-content; align-items: center; gap: 10px; margin-top: 19px; min-height: 46px; padding: 10px 19px; font-size: 1rem; border-radius: 4px; }
+.deals-compare { display: inline-block; margin-top: 12px; text-decoration: underline; font-size: .94rem; }
+.deals-plan :focus-visible { outline-color: white; }
+.deals-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-top: 1px solid var(--rule); padding-top: 18px; font-size: 1rem; }
+.deals-footer p a, .deals-business { text-decoration: underline; }
+.deals-offers { padding-top: 34px; }
+.deals-offers article { border-top: 1px solid var(--rule); padding: 20px 0; margin-top: 18px; max-width: 75ch; }
+.deals-offers article > * + * { margin-top: 10px; }
+@media(max-width: 700px) {
+  .deals-hero, .deals-membership { grid-template-columns: 1fr; }
+  .deals-photo { aspect-ratio: 2.15; }
+  .deals-membership { gap: 21px; }
+}
