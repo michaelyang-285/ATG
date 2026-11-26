@@ -1,7 +1,6 @@
 import AtgVerified from "./AtgVerified";
 import IndependentProBadge from "@/components/IndependentProBadge";
-import LocalLife from "./LocalLife";
-import ThingsToDo from "./ThingsToDo";
+import SectionFront from "./SectionFront";
 import { places, resolveArea, zipAreas } from "@/lib/directory/locations";
 import {directoryPublic, searchDirectory} from "@/lib/directory/public";
 import { DirectionIcon } from "@/components/DirectionIcon";
@@ -66,11 +65,9 @@ export default async function BrowsePage({
   if (filters.topic) stories = stories.filter((s) => s.topic === filters.topic);
   if (filters.area)
     stories = stories.filter((s) => s.location === filters.area);
-  if (kind === "local-life") {
-    return <LocalLife stories={stories} filtered={Boolean(filters.format || filters.topic || filters.area)} />;
-  }
-  if (kind === "things-to-do") {
-    return <ThingsToDo stories={stories} filtered={Boolean(filters.format || filters.topic || filters.area)} />;
+  if (kind === "food-drink" || kind === "local-life" || kind === "things-to-do") {
+    return <SectionFront section={kind} stories={stories} businesses={data.businesses}
+      filtered={Boolean(filters.format || filters.topic || filters.area)} />;
   }
   const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>Number(!!b.premium)-Number(!!a.premium) || a.name.localeCompare(b.name)) : data.businesses;
   const rawArea = kind !== "directory" && typeof filters.area === "string" ? filters.area : "";
