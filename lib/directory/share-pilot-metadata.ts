@@ -4,9 +4,12 @@ import examples from "./share-pilot.json";
 export const pilotEnabled = process.env.VERCEL_ENV === "preview" || process.env.NODE_ENV === "development";
 export const pilotCard = (slug: string) => `/directory-share-cards/${encodeURIComponent(slug)}.jpg`;
 
+export function pilotExample(slug: string) {
+  return pilotEnabled ? examples.find(example => example.slug === slug) : undefined;
+}
+
 export function pilotMetadata(slug: string): Metadata | undefined {
-  if (!pilotEnabled) return;
-  const entry = examples.find(example => example.slug === slug);
+  const entry = pilotExample(slug);
   if (!entry) return;
 
   const previewOrigin = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000";
