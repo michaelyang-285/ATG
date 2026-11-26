@@ -66,6 +66,12 @@ const bodyBlocks = [
     fields: [
       { name: "alt", type: "string" },
       { name: "caption", type: "string" },
+      {
+        name: "besideHeading",
+        type: "boolean",
+        title: "Place logo beside business name",
+        description: "Put this uncaptioned logo immediately after a Heading 3 business name.",
+      },
     ],
   },
   ...[
