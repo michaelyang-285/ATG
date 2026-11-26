@@ -2,7 +2,7 @@ import type {Metadata} from "next";
 import examples from "./share-pilot.json";
 
 export const pilotEnabled = process.env.VERCEL_ENV === "preview" || process.env.NODE_ENV === "development";
-export const pilotCard = (slug: string) => `/directory-share-cards/${encodeURIComponent(slug)}.jpg`;
+export const pilotCard = (slug: string) => `/directory-share-cards/${encodeURIComponent(slug)}.jpg?v=snes-1`;
 
 export function pilotExample(slug: string) {
   return pilotEnabled ? examples.find(example => example.slug === slug) : undefined;
@@ -17,7 +17,7 @@ export function pilotMetadata(slug: string): Metadata | undefined {
   const image = {
     url: new URL(pilotCard(slug), previewOrigin).href,
     width: 1200, height: 630, type: "image/jpeg",
-    alt: `${entry.name}, ${entry.specialty}, ${entry.location}. All Things Gwinnett directory.`,
+    alt: `${entry.name}, ${entry.specialty}, ${entry.location}. ${entry.artDescription}`,
   };
   return {
     title: {absolute: entry.seoTitle}, description: entry.seoDescription,

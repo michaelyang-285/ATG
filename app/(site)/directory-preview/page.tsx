@@ -19,7 +19,7 @@ export default function DirectoryPreview() {
         <div>
           <h3>Social preview</h3>
           <figure><a href={pilotCard(entry.slug)} aria-label={`Open the full-size card for ${entry.name}`}>
-            <img src={pilotCard(entry.slug)} width="1200" height="630" alt={`${entry.name}, ${entry.specialty}, ${entry.location}`}/>
+            <img src={pilotCard(entry.slug)} width="1200" height="630" alt={`${entry.name}, ${entry.specialty}, ${entry.location}. ${entry.artDescription}`}/>
           </a><figcaption><small>All Things Gwinnett</small><strong>{entry.ogTitle}</strong><p>{entry.ogDescription}</p></figcaption></figure>
         </div>
         <div>
