@@ -172,7 +172,12 @@ export const schemaTypes = [
         type: "datetime",
         validation: (R) => R.required(),
       }),
-      defineField({ name: "updatedAt", type: "datetime" }),
+      defineField({
+        name: "updatedAt",
+        title: "Last substantive update",
+        type: "datetime",
+        description: "Set this when new reporting changes the story, such as confirmed holiday hours. The article displays this time beside the byline.",
+      }),
       defineField({ name: "estimatedReadingTime", type: "number" }),
       defineField({
         name: "hideFromSearch",

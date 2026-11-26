@@ -27,6 +27,7 @@ export type Story = {
   gameTopics?: string[];
   location?: string;
   publishedAt?: string;
+  updatedAt?: string;
   image?: any;
   categories?: { title: string; slug: string }[];
   author?: { name: string; slug?: string };
@@ -68,7 +69,7 @@ export type Settings = {
   newsletterUrl?: string;
 };
 export const BUSINESS_FIELDS = `_id,name,"slug":slug.current,category,neighborhood,summary,address,url,image,"logo":image.asset->url + "?w=320&h=320&fit=max&auto=format"`;
-export const STORY_FIELDS = `_id,title,"slug":slug.current,excerpt,section,format,topic,gameTopics,location,publishedAt,"image":mainImage,"categories":categories[]->{title,"slug":slug.current},"author":author->{name,"slug":slug.current}`;
+export const STORY_FIELDS = `_id,title,"slug":slug.current,excerpt,section,format,topic,gameTopics,location,publishedAt,"updatedAt":select(dateTime(updatedAt) > dateTime(publishedAt) && dateTime(updatedAt) <= dateTime(now()) => updatedAt),"image":mainImage,"categories":categories[]->{title,"slug":slug.current},"author":author->{name,"slug":slug.current}`;
 export const PUBLISHED = `_type == "post" && defined(slug.current) && !(_id in path("drafts.**")) && hideFromSearch != true && defined(publishedAt) && publishedAt <= now()`;
 export const getPublication = cache(async () => {
   const result = await publication.fetch<{
@@ -138,6 +139,15 @@ export function safeUrl(value?: string) {
     return null;
   }
 }
+export function storyAuthor(author: Story["author"]) {
+  if (!author?.name) return undefined;
+  return {
+    "@type": "Person",
+    name: author.name,
+    url: author.slug ? "https://allthingsgwinnett.com/authors/" + encodeURIComponent(author.slug) : undefined,
+  };
+}
+
 export function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
