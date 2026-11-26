@@ -107,7 +107,7 @@ export default function SectionFront({ section, stories, businesses, filtered }:
         <ul>{desk.links.map(([label, href]) => <li key={href}><Link href={href}>{label}<DirectionIcon /></Link></li>)}</ul>
       </nav>
     </div>
-    {section !== "food-drink" && <CalendarHighlights sectionFront />}
+    {section === "things-to-do" && <CalendarHighlights sectionFront />}
     <aside className="sf-community"><div><h2>{desk.community}</h2><p>{desk.prompt}</p></div>
       <a href={facebookGroup} target="_blank" rel="noopener noreferrer">Join {group.memberCountDisplay} neighbors <DirectionIcon external /></a>
     </aside>
