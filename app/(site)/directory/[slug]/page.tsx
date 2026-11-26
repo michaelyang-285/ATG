@@ -14,6 +14,7 @@ import {directoryThumbnail} from "@/lib/directory/thumbnail";
 import Link from "next/link";
 import {publication,PUBLISHED,isGuide,storyHref,type Story,safeUrl} from "@/lib/publication";
 import {getListing, listingPhoto, listingPath, listingSchema} from "@/lib/directory/profile";
+import {pilotMetadata} from "@/lib/directory/share-pilot-metadata";
 import "../directory.css";
 export const revalidate = 60;
 type Props = {params:{slug:string}};
@@ -39,6 +40,8 @@ export async function generateMetadata({params}:Props) {
   if (isSample(params.slug)) return {title:"Sample coffee shop profile",robots:{index:false,follow:false}};
   const b = await getListing(params.slug);
   if (!b) notFound();
+  const pilot = pilotMetadata(b.slug);
+  if (pilot) return pilot;
   const title = [b.name,b.category,b.neighborhood || "Gwinnett County"].filter(Boolean).join(" · ");
   const description = b.summary?.slice(0,160) || "Explore "+b.name+" in the Gwinnett directory.";
   const path = listingPath(b.slug);

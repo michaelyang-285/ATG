@@ -1,0 +1,16 @@
+.preview-sheet { max-width: 75rem; margin-inline: auto; padding: clamp(2rem, 5vw, 4.5rem) max(1.25rem, 3vw); }
+.preview-sheet h1 { margin: 0 0 2rem; font-size: clamp(2.5rem, 6vw, 4.5rem); letter-spacing: -.06em; line-height: 1; }
+.preview-sheet section { padding-block: 2rem 3rem; border-top: 1px solid #aca9a3; }
+.preview-sheet h2 { margin: 0 0 1.25rem; font-size: clamp(1.6rem, 3vw, 2.25rem); letter-spacing: -.04em; }
+.preview-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); gap: clamp(2rem, 5vw, 5rem); }
+.preview-pair h3 { font-size: .9rem; margin: 0 0 .75rem; }
+.preview-pair figure { border: 1px solid #d6d3ce; margin: 0; }
+.preview-pair figure img { display: block; width: 100%; height: auto; }
+.preview-pair figcaption { padding: 1rem; background: #f6f5f2; }
+.preview-pair small { color: #575650; font-size: .82rem; }
+.preview-pair figcaption strong { display: block; font-size: 1.15rem; margin-block: .2rem; line-height: 1.25; }
+.preview-pair p { color: #393832; font-size: 1rem; margin: .3rem 0 0; line-height: 1.45; }
+.preview-search { padding-block: 1rem; }
+.preview-search a { display: block; color: #1a0dab; text-decoration: none; font-size: 1.3rem; line-height: 1.25; margin-block: .45rem; }
+.preview-link { display: inline-block; margin-top: .75rem; text-underline-offset: .25em; }
+@media (max-width: 46rem) { .preview-pair { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; } }
