@@ -1,0 +1,44 @@
+[
+  {
+    "slug": "angel-bakery-norcross",
+    "name": "Angel Bakery",
+    "specialty": "Sesame pastries and cakes",
+    "location": "Norcross, GA",
+    "place": "Hong Kong Supermarket",
+    "seoTitle": "Angel Bakery at Hong Kong Supermarket in Norcross, GA",
+    "seoDescription": "Find sesame pastries and cakes at Angel Bakery inside the Hong Kong Supermarket food court on Jimmy Carter Boulevard in Norcross.",
+    "ogTitle": "Sesame pastries at Angel Bakery in Norcross",
+    "ogDescription": "Look for the bakery counter inside the Hong Kong Supermarket food court on Jimmy Carter Boulevard.",
+    "artCategory": "bakery",
+    "categoryLabel": "Bakery",
+    "artDescription": "Pixel art of pastries and a cake in a bakery display case."
+  },
+  {
+    "slug": "basemarks-dexa-vo2-max-rmr",
+    "name": "Basemarks",
+    "specialty": "DEXA scans & metabolic testing",
+    "location": "Duluth, GA",
+    "place": "Pleasant Hill Road",
+    "seoTitle": "Basemarks DEXA Scans & Metabolic Testing in Duluth, GA",
+    "seoDescription": "Basemarks offers DEXA body composition scans, VO₂ max tests, and resting metabolic rate testing on Pleasant Hill Road in Duluth. View hours and booking details.",
+    "ogTitle": "Where to get a DEXA scan in Duluth",
+    "ogDescription": "Basemarks on Pleasant Hill Road offers body composition scans, VO₂ max tests, and resting metabolic rate testing by appointment.",
+    "artCategory": "fitness-testing",
+    "categoryLabel": "Fitness testing",
+    "artDescription": "Pixel art of a treadmill, respiratory mask, and testing monitor."
+  },
+  {
+    "slug": "285-marketing",
+    "name": "285 Marketing",
+    "specialty": "Local SEO & web design",
+    "location": "Serving Gwinnett County",
+    "place": null,
+    "seoTitle": "285 Marketing | SEO & Web Design for Gwinnett Businesses",
+    "seoDescription": "285 Marketing helps Gwinnett small businesses with local SEO, website design, photography, and video. Explore the agency’s services and contact details.",
+    "ogTitle": "Meet 285 Marketing, serving Gwinnett small businesses",
+    "ogDescription": "From local search to website design, photography, and video, see how this agency helps Gwinnett businesses reach customers.",
+    "artCategory": "marketing",
+    "categoryLabel": "Marketing",
+    "artDescription": "Pixel art of a design workstation with a camera and website mockup."
+  }
+]

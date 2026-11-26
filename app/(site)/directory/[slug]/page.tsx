@@ -14,6 +14,7 @@ import {directoryThumbnail} from "@/lib/directory/thumbnail";
 import Link from "next/link";
 import {publication,PUBLISHED,isGuide,storyHref,type Story,safeUrl} from "@/lib/publication";
 import {getListing, listingPhoto, listingPath, listingSchema} from "@/lib/directory/profile";
+import {pilotExample, pilotMetadata} from "@/lib/directory/share-pilot-metadata";
 import "../directory.css";
 export const revalidate = 60;
 type Props = {params:{slug:string}};
@@ -37,6 +38,8 @@ function isSample(slug:string) {
 }
 export async function generateMetadata({params}:Props) {
   if (isSample(params.slug)) return {title:"Sample coffee shop profile",robots:{index:false,follow:false}};
+  const pilot = pilotMetadata(params.slug);
+  if (pilot) return pilot;
   const b = await getListing(params.slug);
   if (!b) notFound();
   const title = [b.name,b.category,b.neighborhood || "Gwinnett County"].filter(Boolean).join(" · ");
@@ -47,7 +50,16 @@ export async function generateMetadata({params}:Props) {
 export default async function Page({params}:Props) {
   const demo = isSample(params.slug);
   const b: Awaited<ReturnType<typeof getListing>> = demo ? sample : await getListing(params.slug);
-  if (!b) notFound();
+  if (!b) {
+    const entry = pilotExample(params.slug);
+    if (!entry) notFound();
+    return <main id="main" className="site-width page-content atg-profile">
+      <Link className="text-link" href="/directory-preview">Back to directory previews</Link>
+      <p className="story-label">Directory preview</p>
+      <h1>{entry.name}</h1><p>{entry.location}</p><p>{entry.seoDescription}</p>
+      <a className="text-link" href={`https://allthingsgwinnett.com${listingPath(entry.slug)}`}>View full listing on All Things Gwinnett</a>
+    </main>;
+  }
   if (b.slug !== params.slug) permanentRedirect(listingPath(b.slug));
   const photo = demo ? sample.logo : listingPhoto(b);
   const listingKey = (b.source === "local" ? "local:" : "sanity:") + b._id;
