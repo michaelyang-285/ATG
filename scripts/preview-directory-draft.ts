@@ -1,5 +1,6 @@
 import {readFile, writeFile} from "node:fs/promises";
 import type {Business} from "../lib/publication";
+import {indexBranchRecords, resolveBranch} from "../lib/directory/branch";
 import {directoryPreview} from "../lib/directory/share";
 import {checkedDirectoryPng} from "../lib/directory/share-image";
 
@@ -10,7 +11,9 @@ async function main() {
   const draft = doc.draft || doc;
   if (!draft.name?.trim()) throw Error("The directory draft needs a business name.");
   const slug = typeof draft.slug === "string" ? draft.slug : draft.slug?.current || draft.profileSlug || "";
-  const preview = directoryPreview({...draft, slug, _id: doc._id || doc.id || ""} as Business);
+  const listing = {...draft, slug, _id: doc._id || doc.id || ""} as Business;
+  const {branch} = resolveBranch(listing, indexBranchRecords(doc.peers || []));
+  const preview = directoryPreview({...listing, branch: branch || listing.branch});
   const {card, ...copy} = preview;
   if (Object.values(copy).some(value => !value?.trim())) throw Error("Incomplete directory preview copy.");
   await writeFile(output, await checkedDirectoryPng(card));

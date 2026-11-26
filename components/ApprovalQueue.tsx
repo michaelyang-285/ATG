@@ -7,14 +7,14 @@ import type { Draft } from "./OwnerDashboard";
 
 import type { directoryPreview } from "@/lib/directory/share";
 
-type Listing = { id: string; revision: number; draft: Partial<Draft>; preview: ReturnType<typeof directoryPreview> };
+type Listing = { possibleDuplicates?: string[]; id: string; revision: number; draft: Partial<Draft>; preview: ReturnType<typeof directoryPreview> };
 type Removal = { id: string; name: string; deletion_due_at: string };
 type EventDraft = {
   _id: string; _rev: string; title: string; summary?: string; startsAt: string; endsAt?: string;
   weeklyUntil?: string; venue: string; street?: string; city: string; organizer?: string;
   priceLabel?: string; url?: string; ticketUrl?: string;
 };
-type Overview = { moderator: boolean; deletions: Removal[] | null; events: EventDraft[] | null };
+type Overview = { duplicates?: {name: string; address: string; slugs: string[]}[] | null; moderator: boolean; deletions: Removal[] | null; events: EventDraft[] | null };
 type Queue = Overview & { listings: Listing[] | null };
 const localDate = (date: string) => new Date(date).toLocaleString("en-US", {
   timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short",
@@ -85,11 +85,22 @@ function ReviewerQueue({ session }: { session: Session }) {
     {message && <p role="alert">{message}</p>}
     {!queue && !message && <p role="status">Loading submissions…</p>}
     {queue?.moderator && <>
+      {queue.duplicates === null && <p role="status">Duplicate profile check unavailable.</p>}
+      {!!queue.duplicates?.length && <section><h2>Possible duplicate profiles</h2>
+        {queue.duplicates.map(group => <article key={group.slugs.join("|")}>
+          <strong>{group.name}</strong><p>{group.address}</p>
+          <ul>{group.slugs.map(slug => <li key={slug}><a className="text-link" href={`/directory/${encodeURIComponent(slug)}`}>{slug}</a></li>)}</ul>
+        </article>)}
+      </section>}
       <section><h2>Directory profiles</h2>
         {!queue.listings ? <p role="alert">Couldn’t load profiles. Refresh to try again.</p> :
           queue.listings.length === 0 && <p>No profiles awaiting review.</p>}
         {queue.listings?.map(row => <article key={row.id}>
           <ListingPreview data={row.draft} />
+          {!!row.possibleDuplicates?.length && <div><strong>Possible duplicate</strong>
+            <p>A published profile has this name and address.</p>
+            <ul>{row.possibleDuplicates.map(slug => <li key={slug}><a className="text-link" href={`/directory/${encodeURIComponent(slug)}`}>{slug}</a></li>)}</ul>
+          </div>}
           <details className="my-4">
             <summary className="cursor-pointer font-bold">Search and social previews</summary>
             <dl className="mt-3 grid gap-2">

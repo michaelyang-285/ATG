@@ -31,6 +31,7 @@
 }
 .atg-directory .business-card-heading img { flex: none; border-radius: .35rem; }
 .atg-directory .business-list :is(h2, p) { margin: 0; }
+.business-branch { display: block; margin-top: .25rem; font-size: 1rem; line-height: 1.4; font-weight: 600; letter-spacing: normal; }
 .atg-directory .business-excerpt {
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
 }

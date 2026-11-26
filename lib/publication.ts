@@ -34,6 +34,7 @@ export type Story = {
   body?: any[];
 };
 export type Business = {
+  branch?: import("./directory/branch").Branch;
   premium?:boolean;
   deal?:import("./directory/deal").DirectoryDeal;
   providerType?: "independent" | "organization";

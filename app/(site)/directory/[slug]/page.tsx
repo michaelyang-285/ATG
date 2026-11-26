@@ -14,6 +14,7 @@ import {directoryThumbnail} from "@/lib/directory/thumbnail";
 import Link from "next/link";
 import {publication,PUBLISHED,isGuide,storyHref,type Story,safeUrl} from "@/lib/publication";
 import {getListing, listingPhoto, listingPath, listingSchema} from "@/lib/directory/profile";
+import {branchName} from "@/lib/directory/branch";
 import {directoryMetadata} from "@/lib/directory/share";
 import "../directory.css";
 export const revalidate = 60;
@@ -72,8 +73,8 @@ export default async function Page({params}:Props) {
     <Link className="text-link" href="/directory">← Gwinnett directory</Link>
     <header className="listing-heading">
       {photo && <img src={photo === b.gallery?.[0] ? directoryThumbnail(photo) : photo} width="112" height="112" alt=""/>}
-      <div><p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}<h1>{b.name}</h1>{b.premium && <AtgVerified/>}
-      {b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>{instagramWebsite ? "Go to Instagram" : "Visit website"} <span aria-hidden="true">↗</span></a>}</div>
+      <div><p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}<h1>{branchName(b)}</h1>{b.premium && <AtgVerified/>}
+      {!b.branch && b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>{instagramWebsite ? "Go to Instagram" : "Visit website"} <span aria-hidden="true">↗</span></a>}</div>
     </header>
     <div className="listing-columns"><section><h2>About {b.name}</h2><p className="listing-summary">{b.summary}</p>
       <div className="listing-tags">{tags.map(tag=><span key={tag}>{tag}</span>)}</div>
@@ -107,6 +108,6 @@ export default async function Page({params}:Props) {
       </div></section>}
       {socials.length>0 && <section><h3>Social profiles</h3><div className="profile-links">{socials.map(n=>
         <a key={n.key} href={n.href}><DirectorySocialIcon network={n.key}/>{n.label}</a>)}</div></section>}
-      <ListingCorrection name={b.name} slug={b.slug} claimed={b.source === "local"} sample={demo} />
+      <ListingCorrection name={branchName(b)} slug={b.slug} claimed={b.source === "local"} sample={demo} />
     </aside></div></main>;
 }

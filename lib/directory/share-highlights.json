@@ -291,6 +291,7 @@
     "ogDescription": "Shine Lab removes yellowing and oxidation and applies a UV-protective ceramic coating. The mobile service covers Buford and nearby communities."
   },
   "nam-dae-mun-farmers-market-duluth": {
+    "branchHook": "The original store on Shackleford Road",
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",
@@ -302,6 +303,7 @@
     "ogDescription": "Yong Kim opened the first Nam Dae Mun in Duluth in 2005. You can still shop that location for produce, seafood, and international groceries."
   },
   "nam-dae-mun-farmers-market-lawrenceville": {
+    "branchHook": "International groceries on Dogwood Road",
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",
@@ -310,9 +312,10 @@
     "seoTitle": "Nam Dae Mun Farmers Market | Dogwood Road in Lawrenceville",
     "seoDescription": "The Lawrenceville Nam Dae Mun Farmers Market at 850 Dogwood Road carries international pantry staples alongside fresh produce, meat, and seafood.",
     "ogTitle": "Shopping for international pantry staples on Dogwood Road",
-    "ogDescription": "Shopping on Dogwood Road? The Gwinnett-founded market stocks international pantry staples, with produce, meat, and seafood in the same store."
+    "ogDescription": "The Lawrenceville store on Dogwood Road stocks international pantry staples, with produce, meat, and seafood in the same store."
   },
   "nam-dae-mun-farmers-market-lilburn": {
+    "branchHook": "Inside the Lawrenceville Highway store",
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",
@@ -324,6 +327,7 @@
     "ogDescription": "Look for Suite 320B on Lawrenceville Highway. The Lilburn store stocks fresh produce and meat alongside pantry staples."
   },
   "nam-dae-mun-farmers-market-norcross": {
+    "branchHook": "Groceries on South Norcross Tucker Road",
     "primary": "Food",
     "style": "Grocery market",
     "line": "International groceries",

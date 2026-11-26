@@ -1,3 +1,5 @@
+import {getBranchIndex} from "./branch-records";
+import {branchName, resolveBranch} from "./branch";
 import {activeDeal} from "./deal";
 import type { DayHours } from "./hours";
 import {networks,type SocialFields} from "./social";
@@ -14,9 +16,11 @@ type Listing = Business & SocialFields & {
 export const getListing = cache(async (slug: string): Promise<Listing | null> => {
   const legacy = /^local-([a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i.exec(slug);
   const [local] = await directoryPublic(legacy ? {id: legacy[1]} : {path: slug});
-  if (local) return {...local, source: "local"};
-  if (legacy) return null;
-  return publication.fetch(`*[_type=="business" && slug.current==$slug][0]{${BUSINESS_FIELDS}}`, {slug}, {next:{revalidate:60}});
+  const listing: Listing | null = local ? {...local, source: "local"} : legacy ? null :
+    await publication.fetch(`*[_type=="business" && slug.current==$slug][0]{${BUSINESS_FIELDS}}`, {slug}, {next:{revalidate:60}});
+  if (!listing) return null;
+  const {branch} = resolveBranch(listing, await getBranchIndex(listing.name));
+  return {...listing, branch};
 });
 const types: Record<string,string> = {
   Coffee:"CafeOrCoffeeShop", "Cafés":"CafeOrCoffeeShop", Restaurants:"Restaurant", Bakers:"Bakery",
@@ -35,7 +39,7 @@ export function listingSchema(b:Listing) {
   const type = types[category] || (categories.Community.includes(category) ? "Organization" :
     categories["Beauty & Personal Care"].includes(category) ? "HealthAndBeautyBusiness" : "LocalBusiness");
   const areas = b.neighborhood?.split(",").map(v=>v.trim()).filter(Boolean);
-  return {"@context":"https://schema.org","@type":"WebPage","@id":url,url,name:b.name,
+  return {"@context":"https://schema.org","@type":"WebPage","@id":url,url,name:branchName(b),
     mainEntity:{"@type":type,"@id":url+"#listing",name:b.name,description:b.summary||undefined,
       url:safeUrl(b.url)||url,image:photos.length ? photos : listingPhoto(b)||undefined,logo:safeUrl(b.logo)||undefined,
       ...(offer ? {makesOffer:{"@type":"Offer",name:offer.title,description:offer.terms,validThrough:offer.end,url}} : {}),

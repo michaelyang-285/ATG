@@ -3,6 +3,8 @@ import { revalidatePath } from "next/cache";
 import type { Business } from "@/lib/publication";
 import { directoryPreview } from "@/lib/directory/share";
 import { checkedDirectoryPng } from "@/lib/directory/share-image";
+import {getBranchIndex} from "@/lib/directory/branch-records";
+import {resolveBranch} from "@/lib/directory/branch";
 import { listingPath } from "@/lib/directory/profile";
 export const dynamic = "force-dynamic";
 async function reviewer(req: Request) {
@@ -10,9 +12,11 @@ async function reviewer(req: Request) {
     throw new Failure(403, "Reviewer access required.");
 }
 // The database assigns the final slug on first publication or rename.
-function previewDraft(id: string, row: {draft: Omit<Business, "_id" | "slug">; profile_slug?: string; publishedName?: string}) {
+function previewDraft(id: string, row: {draft: Omit<Business, "_id" | "slug">; profile_slug?: string; publishedName?: string}, index: Awaited<ReturnType<typeof getBranchIndex>>) {
   const slug = row.publishedName === row.draft.name ? row.profile_slug || "" : "";
-  return directoryPreview({...row.draft, _id: id, slug});
+  const listing = {...row.draft, _id: id, slug};
+  const {branch, matches} = resolveBranch(listing, index);
+  return {preview: directoryPreview({...listing, branch}), possibleDuplicates: matches.map(p => p.slug)};
 }
 
 export function GET(req: Request) {
@@ -24,10 +28,9 @@ export function GET(req: Request) {
       .is("deletion_due_at", null)
       .eq("status", "review");
     if (error) throw error;
-    return data.map(row => {
-      const {card, ...copy} = previewDraft(row.id, row);
-      return {id: row.id, draft: row.draft, revision: row.revision, preview: {...copy, card}};
-    });
+    if (!data.length) return [];
+    const index = await getBranchIndex();
+    return data.map(row => ({id: row.id, draft: row.draft, revision: row.revision, ...previewDraft(row.id, row, index)}));
   });
 }
 export function POST(req: Request) {
@@ -50,7 +53,7 @@ export function POST(req: Request) {
       .single();
     if (!data) throw new Failure(409, "Refresh the review queue.");
     if (status === "published") {
-      const {card, ...copy} = previewDraft(id, data);
+      const {preview: {card, ...copy}} = previewDraft(id, data, await getBranchIndex(data.draft.name));
       if (!card.name || Object.values(copy).some(value => !value?.trim()))
         throw new Failure(422, "Review the business name and search and social copy before approving.");
       // Render the real card before committing the revision. Missing art or fonts must be retryable.
