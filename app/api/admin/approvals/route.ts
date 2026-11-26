@@ -1,3 +1,5 @@
+import {getBranchIndex} from "@/lib/directory/branch-records";
+import {publishedDuplicateGroups} from "@/lib/directory/branch";
 import { canReviewDeletions } from "@/lib/directory/deletion-review";
 import { db, Failure, owner, respond } from "@/lib/directory/server";
 import { eventStore } from "@/lib/community-event-store";
@@ -39,7 +41,9 @@ export function GET(request: Request) {
       {}, { cache: "no-store" }
     ).then(rows => rows.map(row => ({ ...row, url: safeUrl(row.url), ticketUrl: safeUrl(row.ticketUrl) })))
       .catch(() => null) : [];
-    const [removals, drafts] = await Promise.all([deletions, events]);
-    return { moderator, deletions: removals.error ? null : removals.data, events: drafts };
+    const [removals, drafts, duplicates] = await Promise.all([deletions, events,
+      moderator ? getBranchIndex().then(publishedDuplicateGroups).catch(() => null) : [],
+    ]);
+    return { moderator, deletions: removals.error ? null : removals.data, events: drafts, duplicates };
   });
 }

@@ -1,3 +1,5 @@
+import {branchName, resolveBranch} from "@/lib/directory/branch";
+import {getBranchIndex} from "@/lib/directory/branch-records";
 import AtgVerified from "./AtgVerified";
 import IndependentProBadge from "@/components/IndependentProBadge";
 import SectionFront from "./SectionFront";
@@ -46,6 +48,12 @@ export type Filters = {
   provider?: string;
   area?: string;
 };
+async function labelBranches(businesses: Awaited<ReturnType<typeof getPublication>>["businesses"]) {
+  if (!businesses.length) return businesses;
+  const index = await getBranchIndex();
+  return businesses.map(b => ({...b, branch: resolveBranch(b, index).branch}));
+}
+
 export default async function BrowsePage({
   kind,
   filters = {},
@@ -66,7 +74,7 @@ export default async function BrowsePage({
   if (filters.area)
     stories = stories.filter((s) => s.location === filters.area);
   if (kind === "food-drink" || kind === "local-life" || kind === "things-to-do") {
-    return <SectionFront section={kind} stories={stories} businesses={data.businesses}
+    return <SectionFront section={kind} stories={stories} businesses={kind === "food-drink" ? await labelBranches(data.businesses) : data.businesses}
       filtered={Boolean(filters.format || filters.topic || filters.area)} />;
   }
   const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>Number(!!b.premium)-Number(!!a.premium) || a.name.localeCompare(b.name)) : data.businesses;
@@ -98,6 +106,7 @@ export default async function BrowsePage({
     businesses = await searchDirectory(terms, searchAreas, filters.category || "", mobile ? "Mobile" : filters.service || "", data.businesses);
     if (filters.provider === "independent") businesses = businesses.filter(b => b.providerType === "independent");
   }
+  if (["directory", "search", "areas"].includes(kind)) businesses = await labelBranches(businesses);
   let events = data.events;
   if (kind === "search") {
     const term = query.toLocaleLowerCase();
@@ -116,7 +125,7 @@ export default async function BrowsePage({
       : [];
     businesses = query
       ? businesses.filter((b) =>
-          [b.name, b.summary, b.neighborhood, b.category,...(b.categories||[]),...(b.services||[])]
+          [branchName(b), b.name, b.branch?.label, b.address, b.summary, b.neighborhood, b.category,...(b.categories||[]),...(b.services||[])]
             .join(" ")
             .toLowerCase()
             .includes(term),
@@ -216,13 +225,17 @@ export default async function BrowsePage({
                   />
                   <div>
                     <p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />} {b.premium && <AtgVerified/>}
-                    <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`}>{b.name}</Link></h2>
+                    <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`} aria-label={b.branch ? branchName(b) : undefined}>
+                      {kind === "directory" && b.branch
+                        ? <>{b.name}<span className="business-branch">{b.branch.label}</span></>
+                        : branchName(b)}
+                    </Link></h2>
                   </div>
                 </div>
                 {b.summary && <p className="business-excerpt">{b.summary}</p>}
                 {kind === "directory" && (
                   <Link className="business-card-cta button button-orange" href={`/directory/${encodeURIComponent(b.slug)}`}
-                    aria-label={`View profile for ${b.name}`}>View profile</Link>
+                    aria-label={`View profile for ${branchName(b)}`}>View profile</Link>
                 )}
               </article>
             ))}

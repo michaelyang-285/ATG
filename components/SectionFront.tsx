@@ -82,7 +82,7 @@ function FoodListings({ businesses }: { businesses: Business[] }) {
     <ul className="sf-listings">{picks.map(b => <li key={b._id}>
       <Link href={'/directory/' + encodeURIComponent(b.slug)}>
         {b.logo && <img src={b.logo} alt="" width="54" height="54" loading="lazy" />}
-        <span><strong>{b.name}</strong>{b.neighborhood && <small>{b.neighborhood}</small>}</span><DirectionIcon />
+        <span><strong>{b.name}</strong>{(b.branch?.label || b.neighborhood) && <small>{b.branch?.label || b.neighborhood}</small>}</span><DirectionIcon />
       </Link></li>)}</ul></section>;
 }
 

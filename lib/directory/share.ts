@@ -2,17 +2,18 @@ import {createHash} from "node:crypto";
 import type {Metadata} from "next";
 import type {Business} from "@/lib/publication";
 import {categoryStyle} from "./share-categories";
+import {branchName, publicAddress} from "./branch";
 import highlights from "./share-highlights.json";
 
 type Highlight = {
   primary: string; evidence?: string; style: string; line: string; shortName?: string; showStreet?: boolean;
-  seoTitle?: string; seoDescription?: string; ogTitle?: string; ogDescription?: string;
+  branchHook?: string; seoTitle?: string; seoDescription?: string; ogTitle?: string; ogDescription?: string;
 };
 const curated: Record<string,Highlight> = highlights;
 const compact = (s?: string | null) => (s || "").replace(/\s+/g, " ").trim();
 
 function locationFor(b: Business) {
-  const addressCity = b.address?.match(/,\s*([^,]+),\s*(?:GA|Georgia)\b(?:\s+\d{5}(?:-\d{4})?)?\s*$/i)?.[1].trim();
+  const addressCity = publicAddress(b.address)?.city;
   if (addressCity) return {label: addressCity + ", GA", phrase: "in " + addressCity};
   const areas = (b.neighborhood || "").split(",").map(s => s.trim()).filter(Boolean);
   if (!areas.length) return {label: "Gwinnett County", phrase: "in Gwinnett County"};
@@ -41,12 +42,13 @@ function readHighlight(b: Business) {
 export function directoryCard(b: Business) {
   const entry = readHighlight(b);
   const style = categoryStyle(b.category, entry?.style || legacyFoodStyle(b));
-  const location = locationFor(b);
+  const location = b.branch ? {label: b.branch.city || b.branch.label} : locationFor(b);
   const street = compact(b.address?.split(",")[0]);
   const secondary = Array.from(new Set([...(b.categories || []), ...(b.services || [])]))
     .filter(tag => tag && tag !== b.category && tag !== style.label).slice(0, 2).join(" · ");
   let detail = entry?.line || street || secondary;
   if (entry?.showStreet && street) detail = street + " · " + entry.line;
+  if (b.branch?.street) detail = b.branch.street;
   return {name: compact(entry?.shortName || b.name), ...style, location: location.label, detail: compact(detail)};
 }
 
@@ -82,6 +84,18 @@ export function directoryPreview(b: Business) {
   const card = directoryCard(b);
   const copy = entry?.seoTitle && entry.seoDescription && entry.ogTitle && entry.ogDescription
     ? entry : {...listingCopy(b, card, locationFor(b).phrase), ...entry};
+  if (b.branch) {
+    const title = branchName(b);
+    const {label, city, street} = b.branch;
+    const location = city ? (street ? `Find this location at ${street} in ${city}.` : `Find this location in ${city}.`) : label + ".";
+    const localize = (value: string) => {
+      const text = (value || "").toLowerCase();
+      const required = street ? [city, street] : [city || label];
+      return required.every(part => text.includes(part.toLowerCase())) ? value : [location, value].filter(Boolean).join(" ");
+    };
+    return {card, seoTitle: title, seoDescription: localize(copy.seoDescription),
+      ogTitle: title + " | " + (entry?.branchHook || card.label), ogDescription: localize(copy.ogDescription)};
+  }
   return {card, seoTitle: copy.seoTitle, seoDescription: copy.seoDescription,
     ogTitle: copy.ogTitle, ogDescription: copy.ogDescription};
 }
@@ -94,7 +108,7 @@ export function directoryMetadata(b: Business): Metadata {
     ? "https://" + process.env.VERCEL_URL : production;
   const key = createHash("sha256").update("snes-directory-v1:" + JSON.stringify(card)).digest("hex").slice(0, 16);
   const image = {url: origin + path + "/share-image?v=" + key, width: 1200, height: 630, type: "image/png",
-    alt: `${card.name}, ${card.location}. ${card.label} in SNES-style pixel art. All Things Gwinnett.`};
+    alt: `${card.name}, ${b.branch?.label || card.location}. ${card.label} in SNES-style pixel art. All Things Gwinnett.`};
   return {title: {absolute: title}, description, alternates: {canonical: production + path},
     openGraph: {type: "website", siteName: "All Things Gwinnett", locale: "en_US",
       url: origin + path, title: ogTitle, description: ogDescription, images: [image]},
