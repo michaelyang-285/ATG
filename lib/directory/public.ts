@@ -32,10 +32,20 @@ export async function directoryPublic(filter?: {id: string} | {path: string}) {
 }
 
 export async function searchDirectory(terms: string, cities: string[] | null, category: string, service: string, editorial: Business[]): Promise<Business[]> {
-  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    auth: {persistSession: false},
-    global: { fetch: fetchCurrentListing },
-  });
+  const db = directoryClient();
+  if (!db) {
+    // Environments without a member directory can still browse their published editorial listings.
+    const words = terms.toLowerCase().replace(/\s+-\s*$/, "").split(/\s+/).filter(Boolean);
+    const selectedCities = cities?.map(city => city.toLowerCase());
+    return editorial.filter(b => {
+      const areas = (b.neighborhood || "").toLowerCase().split(",").map(area => area.trim());
+      const coversCity = !selectedCities || (selectedCities.length > 0 && areas.some(area =>
+        selectedCities.includes(area) || ["all of gwinnett", "gwinnett county", "gwinnett"].includes(area)));
+      const text = [b.name, b.summary, b.category, ...(b.categories || []), ...(b.services || []), b.neighborhood].join(" ").toLowerCase();
+      return coversCity && (!category || b.category === category || b.categories?.includes(category))
+        && (!service || b.services?.includes(service)) && words.every(word => text.includes(word));
+    });
+  }
   const businesses: Business[] = [];
   for (let start = 0; ; start += 500) {
     const {data, error} = await db.rpc("search_atg_directory", {
