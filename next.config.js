@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {outputFileTracingIncludes: {
+    "/directory/*/share-image": ["./public/directory-art/*.jpg", "./public/fonts/DMSans-{Bold,Medium}.ttf", "./public/brand/atg-avatar.png", "./public/fonts/be-vietnam-pro/*.ttf"],
+  }},
   async redirects() {
     return [{ source: "/directory/manage", destination: "/account", permanent: true },
       { source: "/stories/gwinnett-schools-since-2004", destination: "/stories/were-gwinnett-county-public-schools-better-in-the-2000s", permanent: true }];
