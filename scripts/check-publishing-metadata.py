@@ -100,7 +100,9 @@ PLACEHOLDERS = {"untitled", "untitled article", "untitled business", "todo", "tb
 
 
 def placeholder(value):
-    return value.casefold().strip(" .") in PLACEHOLDERS
+    normalized = value.casefold().strip(" .")
+    return (normalized in PLACEHOLDERS
+            or re.fullmatch(r"find .+ in the all things gwinnett business directory", normalized) is not None)
 
 
 def inspect(url):

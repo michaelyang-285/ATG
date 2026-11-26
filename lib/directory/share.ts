@@ -67,10 +67,13 @@ function listingCopy(b: Business, card: DirectoryCard, place: string) {
   const first = lines[0] || "";
   const second = lines[1] || "";
   const excerpt = first && second && (first + " " + second).length <= 160 ? first + " " + second : first;
-  const description = excerpt || [intro, serviceDetail || localDetail].filter(Boolean).join(" ");
+  // With just one useful sentence, give social the original wording and search the listing context.
+  const singleDetail = first && !second && !serviceDetail && !localDetail;
+  const description = singleDetail && (intro + " " + first).length <= 165
+    ? intro + " " + first : excerpt || [intro, serviceDetail || localDetail].filter(Boolean).join(" ");
   const ogTitle = `${card.name} | ${card.location}`;
   const ogDescription = [second, serviceDetail, localDetail, first].find(s => s && s !== description)
-    || `Find ${card.name} in the All Things Gwinnett business directory.`;
+    || first || `Find ${card.name} in the All Things Gwinnett business directory.`;
   return {seoTitle: title, seoDescription: description, ogTitle, ogDescription};
 }
 
