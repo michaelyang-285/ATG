@@ -2,7 +2,7 @@ import {activeDeal} from "./deal";
 import type { DayHours } from "./hours";
 import {networks,type SocialFields} from "./social";
 import {cache} from "react";
-import {publication, type Business, imageUrl, safeUrl} from "@/lib/publication";
+import {publication, BUSINESS_FIELDS, type Business, imageUrl, safeUrl} from "@/lib/publication";
 import {directoryPublic} from "./public";
 import {categories} from "./categories";
 
@@ -16,7 +16,7 @@ export const getListing = cache(async (slug: string): Promise<Listing | null> =>
   const [local] = await directoryPublic(legacy ? {id: legacy[1]} : {path: slug});
   if (local) return {...local, source: "local"};
   if (legacy) return null;
-  return publication.fetch('*[_type=="business" && slug.current==$slug][0]{_id,name,"slug":slug.current,category,neighborhood,summary,address,url,image}', {slug}, {next:{revalidate:60}});
+  return publication.fetch(`*[_type=="business" && slug.current==$slug][0]{${BUSINESS_FIELDS}}`, {slug}, {next:{revalidate:60}});
 });
 const types: Record<string,string> = {
   Coffee:"CafeOrCoffeeShop", "Cafés":"CafeOrCoffeeShop", Restaurants:"Restaurant", Bakers:"Bakery",

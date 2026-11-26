@@ -87,6 +87,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
   });
   const articleBody = body.map((block: any) => {
     if (block._type !== "block") return block;
+    if (isHolidayGuide && block.style === "normal" &&
+        block.markDefs?.some((mark: { href?: string }) => mark.href?.startsWith("https://www.google.com/maps"))) {
+      return { ...block, children: block.children.map((span: { _type: string; text?: string; marks?: string[] }) =>
+        span._type === "span" && !span.marks?.length && /^\d{3}-\d{3}-\d{4}$/.test(span.text || "")
+          ? { ...span, _type: "directoryPhone" } : span) };
+    }
     if (/^h[1-6]$/.test(block.style)) {
       const heading = (block.children || []).map((span: any) => span.text || "").join("").trim();
       inSources = /^(sources?|references|methods and sources|sources and methodology)[:.]?$/i.test(heading);
@@ -234,6 +240,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 },
               },
               types: {
+                directoryPhone: ({ value }) => <a href={"tel:+1" + value.text.replace(/-/g, "")}>{value.text}</a>,
                 faq: StoryFaq,
                 upcomingGameEvents: ({ value }) => hasCalendar ? (
                   <section>
