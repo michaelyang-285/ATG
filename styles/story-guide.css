@@ -77,3 +77,17 @@
 
 .article-body .story-summary ul { margin: .75em 0 0; padding-inline-start: 1.3em; list-style: disc; }
 .article-body .story-summary li + li { margin-block-start: .35em; }
+
+.article-body h3.story-business-heading {
+  display: flex;
+  align-items: center;
+  gap: clamp(.5rem, 1.6vw, .9rem);
+  margin-bottom: .3rem;
+}
+.story-business-heading img {
+  width: clamp(3rem, 10vw, 5rem);
+  height: clamp(2.25rem, 6vw, 3rem);
+  flex: none;
+  object-fit: contain;
+}
+.story-business-heading > span { min-width: 0; overflow-wrap: break-word; }
