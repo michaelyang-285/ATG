@@ -24,3 +24,9 @@ export const cities = [
 
 export const facebookGroup =
   "https://www.facebook.com/groups/allthingsgwinnett";
+
+export const socialProfiles = {
+  facebook: "https://www.facebook.com/AllThingsGwinnett",
+  instagram: "https://www.instagram.com/allthingsgwinnett/",
+  linkedin: "https://www.linkedin.com/company/all-things-gwinnett/",
+};
