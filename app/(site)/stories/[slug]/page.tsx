@@ -12,13 +12,14 @@ import {
   PUBLISHED,
   STORY_FIELDS,
   storyLabel,
-  formatDate,
+  storyAuthor,
   imageUrl,
   safeUrl,
   type Story,
 } from "@/lib/publication";
 import "@/styles/story-guide.css";
 import { StoryCallout } from "@/components/StoryCallout";
+import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
 export const revalidate = 60;
@@ -60,11 +61,21 @@ export async function generateMetadata({
       description: socialDescription,
       url: path,
       publishedTime: s.publishedAt,
+      modifiedTime: s.updatedAt,
       images,
     },
     ...(seo && { twitter: { card: "summary_large_image", title: socialTitle, description: socialDescription, images } }),
   };
 }
+function StorySummary({ value }: { value: { heading?: string; points?: string[] } }) {
+  return (
+    <aside className="story-summary" aria-label="Article summary">
+      <h2>{value.heading || "TL;DR"}</h2>
+      <ul>{value.points?.map(point => <li key={point}>{point}</li>)}</ul>
+    </aside>
+  );
+}
+
 export default async function Page({ params }: { params: { slug: string } }) {
   const story = await getStory(params.slug);
   if (!story) notFound();
@@ -100,6 +111,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     if ((!inSources && !/^source-\d+$/.test(block._key)) || !block.markDefs?.length) return block;
     return { ...block, markDefs: block.markDefs.map((mark: any) => ({ ...mark, sourceEntry: true })) };
   });
+  const leadSummary = isHolidayGuide && articleBody[0]?._type === "tldr" ? articleBody[0] : undefined;
   const figureMetadata: Record<string, { description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
   "cityPop": {
     "description": "July 2025 population estimates for each municipality’s Gwinnett residents and unincorporated Gwinnett.",
@@ -187,8 +199,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
     description: story.excerpt,
     mainEntityOfPage: canonical,
     datePublished: story.publishedAt,
+    dateModified: story.updatedAt,
     image: imageUrl(story.image) || undefined,
-    author: story.author?.name ? { "@type": "Person", name: story.author.name } : undefined,
+    author: storyAuthor(story.author),
     publisher: { "@type": "Organization", name: "All Things Gwinnett", url: "https://allthingsgwinnett.com" },
   };
   return (
@@ -199,14 +212,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <p className="story-label">{storyLabel(story)}</p>
           <h1>{story.title}</h1>
           {story.excerpt && <p className="lead-deck">{story.excerpt}</p>}
-          <p className="byline">
-            {story.author?.name && <>By {story.author.slug ? <a href={"/authors/"+encodeURIComponent(story.author.slug)}>{story.author.name}</a> : story.author.name} · </>}
-            {story.publishedAt && (
-              <time dateTime={story.publishedAt}>
-                {formatDate(story.publishedAt)}
-              </time>
-            )}
-          </p>
+          <p className="byline"><StoryByline story={story} /></p>
+          {leadSummary && <div className="article-body"><StorySummary value={leadSummary} /></div>}
           <StoryImage story={story} priority />
           {story.image?.credit && (
             <p className="quiet">Photo: {story.image.credit}</p>
@@ -214,7 +221,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </header>
         <div className="article-body">
           <PortableText
-            value={articleBody}
+            value={leadSummary ? articleBody.slice(1) : articleBody}
             components={{
               block: {
                 h3: ({ children, value }) => {
@@ -266,16 +273,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 ),
                 divider: () => <hr />,
                 callout: ({ value }) => figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
-                tldr: ({ value }) => (
-                  <aside className="story-summary" aria-label="Article summary">
-                    <h2>{value.heading || "TL;DR"}</h2>
-                    <ul>
-                      {value.points?.map((p: string) => (
-                        <li key={p}>{p}</li>
-                      ))}
-                    </ul>
-                  </aside>
-                ),
+                tldr: StorySummary,
                 editorsNote: ({ value }) => (
                   <aside>
                     <h2>{value.title || "Editor’s note"}</h2>

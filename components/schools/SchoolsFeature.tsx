@@ -1,7 +1,8 @@
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { PortableText, toPlainText } from "@portabletext/react";
 import type { Story } from "@/lib/publication";
-import { formatDate, imageUrl, safeUrl } from "@/lib/publication";
+import { StoryByline } from "@/components/StoryByline";
+import { storyAuthor, imageUrl, safeUrl } from "@/lib/publication";
 import ChartControls from "./ChartControls";
 import figures from "./figures.json";
 import datasets from "./datasets.json";
@@ -28,7 +29,7 @@ export default function SchoolsFeature({story}: {story: Story}) {
   }));
   const graph = {"@context":"https://schema.org","@graph":[
     {"@type":"Article","@id":canonical+"#article",headline:story.title,description:story.seo?.description || story.excerpt,
-      author:{"@type":"Person",name:story.author?.name},publisher:{"@type":"Organization",name:"All Things Gwinnett"},datePublished:story.publishedAt,
+      author:storyAuthor(story.author),publisher:{"@type":"Organization",name:"All Things Gwinnett"},datePublished:story.publishedAt,dateModified:story.updatedAt,
       citation:blocks.filter(b=>layout[b._key]?.id?.startsWith("source-")).flatMap(b=>b.markDefs.map((m:{href:string})=>m.href)),hasPart:datasets.map(d=>({"@id":d["@id"]}))},
     ...datasets, {"@type":"FAQPage",mainEntity:questions}
   ]};
@@ -45,7 +46,7 @@ export default function SchoolsFeature({story}: {story: Story}) {
   }
   return <div className="gcps-feature">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(graph).replace(/</g,"\\u003c")}} />
-    <header><a href="/local-life">Local Life</a><h1>{story.title}</h1><div className="meta">Education · By {story.author?.name} · {story.publishedAt && formatDate(story.publishedAt)}</div>
+    <header><a href="/local-life">Local Life</a><h1>{story.title}</h1><div className="meta">Education · <StoryByline story={story} /></div>
     {hero && <img className="hero" src={hero} alt={story.image?.alt || ""} />}</header>
     <main id="main"><article>
       {summaryEnd >= 0 && <aside className="story-summary" aria-label="Article summary">
