@@ -67,6 +67,7 @@ export type Settings = {
   featuredGuides?: Story[];
   newsletterUrl?: string;
 };
+export const BUSINESS_FIELDS = `_id,name,"slug":slug.current,category,neighborhood,summary,address,url,image,"logo":image.asset->url + "?w=320&h=320&fit=max&auto=format"`;
 export const STORY_FIELDS = `_id,title,"slug":slug.current,excerpt,section,format,topic,gameTopics,location,publishedAt,"image":mainImage,"categories":categories[]->{title,"slug":slug.current},"author":author->{name,"slug":slug.current}`;
 export const PUBLISHED = `_type == "post" && defined(slug.current) && !(_id in path("drafts.**")) && hideFromSearch != true && defined(publishedAt) && publishedAt <= now()`;
 export const getPublication = cache(async () => {
@@ -79,7 +80,7 @@ export const getPublication = cache(async () => {
     `{
     "stories": *[${PUBLISHED}] | order(publishedAt desc)[0...100]{${STORY_FIELDS}},
     "settings": *[_type == "siteSettings"][0]{newsletterUrl,featuredPost->{${STORY_FIELDS},hideFromSearch},sidebarPosts[]->{${STORY_FIELDS},hideFromSearch},featuredGuides[]->{${STORY_FIELDS},hideFromSearch}},
-    "businesses": *[_type == "business" && defined(slug.current)] | order(name asc)[0...100]{_id,name,"slug":slug.current,category,neighborhood,summary,address,url,image},
+    "businesses": *[_type == "business" && defined(slug.current)] | order(name asc)[0...100]{${BUSINESS_FIELDS}},
     "events": *[_type == "event" && defined(slug.current) && coalesce(endsAt,startsAt) >= now()] | order(startsAt asc)[0...50]{_id,title,"slug":slug.current,startsAt,endsAt,venue,neighborhood,summary,priceLabel,url}
   }`,
     {},
