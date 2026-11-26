@@ -5,7 +5,9 @@ import { browserClient } from "@/lib/browser-client";
 import ListingPreview from "./ListingPreview";
 import type { Draft } from "./OwnerDashboard";
 
-type Listing = { id: string; revision: number; draft: Partial<Draft> };
+import type { directoryPreview } from "@/lib/directory/share";
+
+type Listing = { id: string; revision: number; draft: Partial<Draft>; preview: ReturnType<typeof directoryPreview> };
 type Removal = { id: string; name: string; deletion_due_at: string };
 type EventDraft = {
   _id: string; _rev: string; title: string; summary?: string; startsAt: string; endsAt?: string;
@@ -88,6 +90,21 @@ function ReviewerQueue({ session }: { session: Session }) {
           queue.listings.length === 0 && <p>No profiles awaiting review.</p>}
         {queue.listings?.map(row => <article key={row.id}>
           <ListingPreview data={row.draft} />
+          <details className="my-4">
+            <summary className="cursor-pointer font-bold">Search and social previews</summary>
+            <dl className="mt-3 grid gap-2">
+              <div><dt className="font-bold">Search title</dt><dd>{row.preview.seoTitle}</dd></div>
+              <div><dt className="font-bold">Meta description</dt><dd>{row.preview.seoDescription}</dd></div>
+              <div><dt className="font-bold">Social title</dt><dd>{row.preview.ogTitle}</dd></div>
+              <div><dt className="font-bold">Social description</dt><dd>{row.preview.ogDescription}</dd></div>
+              <div><dt className="font-bold">Share card artwork</dt><dd>
+                <img src={`/directory-art/${row.preview.card.asset}.jpg`}
+                  alt={row.preview.card.label + " category illustration"} width={300} height={100} />
+                {row.preview.card.name} · {row.preview.card.location}
+                {row.preview.card.detail && <div>{row.preview.card.detail}</div>}
+              </dd></div>
+            </dl>
+          </details>
           <label>Feedback for owner<textarea maxLength={1500} value={notes[row.id] || ""}
             onChange={e => setNotes({ ...notes, [row.id]: e.target.value })} /></label>
           <div className="submission-actions">
