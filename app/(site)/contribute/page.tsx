@@ -1,4 +1,5 @@
 import { BotIdClient } from "botid/client";
+import groupAudience from "@/lib/facebook-group.json";
 import InterestForm from "./InterestForm";
 import "./contribute.css";
 
@@ -29,7 +30,7 @@ export default function Contribute() {
     </header>
     <section><h2>What you get when we publish</h2>
       <p>ATG is entirely bootstrapped, with zero corporate funding. Contributions are unpaid right now. Here’s what I can offer for every published piece.</p>
-      <ul><li><strong>A local audience.</strong> We share every story in our Facebook group of 39,000 members.</li>
+      <ul><li><strong>A local audience.</strong> We share every story in our Facebook group of {groupAudience.memberCountDisplay} members.</li>
       <li><strong>Your byline.</strong> You get a published piece for your portfolio, with your name on it.</li>
       <li><strong>A link to your website.</strong> A link from allthingsgwinnett.com may help your website show up higher in Google search results. It also gives local readers a direct way to visit your shop, book a service, or buy from you.</li></ul>
       <p>Facebook is where we started. The website gives stories a home, with Instagram, TikTok, and local events planned.</p>
