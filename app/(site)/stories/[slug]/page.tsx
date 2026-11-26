@@ -74,11 +74,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];
   const canonical = "https://allthingsgwinnett.com/stories/" + encodeURIComponent(story.slug);
   let inSources = false;
+  const isHolidayGuide = story._id === "atg-gwinnett-thanksgiving-holiday-hacks-2026";
   const headingLogos = new Map<string, string>();
   const body = (story.body || []).filter((block, index, blocks) => {
     const heading = blocks[index - 1];
-    if (block._type === "image" && block.besideHeading && block.imageUrl && !block.caption &&
-        heading?._type === "block" && heading.style === "h3") {
+    if (isHolidayGuide && block._type === "image" && block.imageUrl && !block.caption &&
+        /\blogo\b/i.test(block.alt || "") && heading?._type === "block" && heading.style === "h3") {
       headingLogos.set(heading._key, block.imageUrl);
       return false;
     }
