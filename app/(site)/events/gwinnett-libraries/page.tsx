@@ -3,11 +3,11 @@ import LibraryFilters from "./LibraryFilters";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { libraryEventPath, libraryAgenda, libraryPath, libraryCalendar, jsonLd } from "@/lib/library-events";
-import { eventPageMetadata } from "@/lib/event-metadata";
+import { eventPageMetadata, libraryShareImage } from "@/lib/event-metadata";
 import "./library.css";
 
 const title = "Gwinnett County Public Library Events";
-export const metadata = eventPageMetadata(title,"Find upcoming Gwinnett library events by branch and audience, including toddler storytimes, kids’ programs and book clubs.",libraryPath);
+export const metadata = eventPageMetadata(title,"Find upcoming Gwinnett library events by branch and audience, including toddler storytimes, kids’ programs and book clubs.",libraryPath,libraryShareImage);
 const faq = [
   {question:"How do I find kids’ events at my library?",answer:"Pick a branch and select Kids under Audience. The listings update after each selection. Check each program’s age guidance for the best fit."},
   {question:"Which programs are right for my child’s age?",answer:"Read the age range and description together. A program in the library’s Ages 0–5 group may be designed specifically for toddlers or preschoolers."},

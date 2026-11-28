@@ -15,8 +15,13 @@ export const eventPublisher = {
   logo: { "@type": "ImageObject", ...squareLogo },
 };
 
-export function eventPageMetadata(title: string, description: string | undefined, path: string): Metadata {
-  const preview = { ...squareLogo, alt: "All Things Gwinnett logo" };
+export const libraryShareImage = {
+  url: site + "/social/gwinnett-library-events.jpg", width: 1200, height: 630,
+  alt: "Gwinnett Library Events from All Things Gwinnett, illustrated in pixel art",
+};
+
+export function eventPageMetadata(title: string, description: string | undefined, path: string, image?: typeof libraryShareImage): Metadata {
+  const preview = image ?? { ...squareLogo, alt: "All Things Gwinnett logo" };
   return {
     title,
     description,
@@ -29,7 +34,7 @@ export function eventPageMetadata(title: string, description: string | undefined
       url: path,
       images: [preview],
     },
-    twitter: { card: "summary", title, description, images: [preview] },
+    twitter: { card: image ? "summary_large_image" : "summary", title, description, images: [preview] },
   };
 }
 
