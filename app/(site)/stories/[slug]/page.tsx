@@ -19,7 +19,7 @@ import {
   type Story,
 } from "@/lib/publication";
 import "@/styles/story-guide.css";
-import { RecruitDirectory, StoryCallout } from "@/components/StoryCallout";
+import { RecruitDirectory, RecruitSchoolTotals, StoryCallout } from "@/components/StoryCallout";
 import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
@@ -211,6 +211,14 @@ export default async function Page({ params }: { params: { slug: string } }) {
     ]
   }
 } : story._id === "acb4b18b-db6b-4fa1-a004-a4d373dca55b" ? {
+  "recruit-school-counts": {
+    name: "Gwinnett Division I prospects by high school and graduation class",
+    creator: "All Things Gwinnett",
+    description: "Counts of listed athletes with documented Division I offers, commitments or signings, grouped by high school and graduating class.",
+    period: "2026-11-28",
+    variables: ["High school", "Class of 2027 athlete count", "Classes of 2028 through 2030 athlete count", "Total athlete count"],
+    sources: []
+  },
   "recruit-table-0": {
     "name": "Gwinnett County Division I recruits, Class of 2027",
     "creator": "All Things Gwinnett",
@@ -314,6 +322,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       } }),
       variableMeasured: figureMetadata[block._key].variables,
       citation: citations,
+      ...(block._key === "recruit-school-counts" && { isBasedOn: recruitTables.map(table => ({ "@id": canonical + "#" + table._key })) }),
       ...(figureMetadata[block._key].creator && { creator: { "@type": "Organization", name: figureMetadata[block._key].creator } }),
     };
   });
@@ -408,7 +417,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </blockquote>
                 ),
                 divider: () => <hr />,
-                callout: ({ value }) => recruitTables.some(table => table._key === value._key)
+                callout: ({ value }) => value._key === "recruit-school-counts" && recruitTables.length
+                  ? <div id={value._key}><RecruitSchoolTotals tables={recruitTables} title={value.heading} /></div>
+                  : recruitTables.some(table => table._key === value._key)
                   ? (value._key === recruitTables[0]._key ? <RecruitDirectory tables={recruitTables} transition={recruitTransition} /> : null)
                   : figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
                 tldr: StorySummary,

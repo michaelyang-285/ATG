@@ -34,6 +34,35 @@ function tableCells(row: Paragraph) {
   ));
 }
 
+function recruitSchool(row: Paragraph, younger: boolean) {
+  return row.children.map(span => span.text).join("").split("\n")[younger ? 2 : 1]?.trim() || "";
+}
+
+export function RecruitSchoolTotals({ tables, title }: { tables: Callout[]; title: string }) {
+  const counts = new Map<string, { seniors: number; younger: number }>();
+  let seniors = 0;
+  let younger = 0;
+  for (const table of tables) {
+    const isYounger = table._key === "recruit-table-1";
+    for (const row of Array.isArray(table.body) ? table.body.slice(1) : []) {
+      const school = recruitSchool(row, isYounger);
+      if (!school) continue;
+      const count = counts.get(school) || { seniors: 0, younger: 0 };
+      if (isYounger) { count.younger++; younger++; }
+      else { count.seniors++; seniors++; }
+      counts.set(school, count);
+    }
+  }
+  const schools = Array.from(counts).sort(([a, x], [b, y]) =>
+    (y.seniors + y.younger) - (x.seniors + x.younger) || a.localeCompare(b));
+  return <table className="story-table recruit-totals">
+    <caption>{title}</caption>
+    <thead><tr>{["High school", "2027", "2028–30", "Total"].map(label => <th key={label} scope="col">{label}</th>)}</tr></thead>
+    <tbody>{schools.map(([school, count]) => <tr key={school}><th scope="row">{school}</th><td>{count.seniors}</td><td>{count.younger}</td><td>{count.seniors + count.younger}</td></tr>)}</tbody>
+    <tfoot><tr><th scope="row">All schools</th><td>{seniors}</td><td>{younger}</td><td>{seniors + younger}</td></tr></tfoot>
+  </table>;
+}
+
 export function RecruitDirectory({ tables, transition }: { tables: Callout[]; transition?: Paragraph }) {
   const groups = tables.map(table => {
     const younger = table._key === "recruit-table-1";
@@ -41,7 +70,7 @@ export function RecruitDirectory({ tables, transition }: { tables: Callout[]; tr
     const athletes = rows.map(row => {
       const [name, ...fields] = tableCells(row);
       const [school, sport, status, college, rating, state, national] = fields.slice(younger ? 1 : 0);
-      const schoolName = row.children.map(span => span.text).join("").split("\n")[younger ? 2 : 1]?.trim() || "";
+      const schoolName = recruitSchool(row, younger);
       return { id: row._key, school: schoolName, content: <>
                 <div><strong>{name}</strong><div>{school}{younger && <> · {fields[0]}</>}</div><div>{sport}</div></div>
                 <div><strong>{status}</strong><div>{college}</div></div>

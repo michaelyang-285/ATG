@@ -117,3 +117,7 @@
 .recruit-paging button:focus-visible { outline: 2px solid var(--ink, #171717); outline-offset: 2px; }
 .recruit-paging button:disabled { color: var(--muted, #62625e); cursor: default; }
 .recruit-toggle { text-decoration: underline; text-underline-offset: .18em; }
+.story-table.recruit-totals { width: 100%; min-width: 0; }
+.recruit-totals :is(th, td):not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.story-table.recruit-totals thead { color: var(--ink); background: var(--surface); border-top: 2px solid var(--orange); }
+.recruit-totals tfoot { font-weight: 700; border-top: 2px solid var(--ink); }
