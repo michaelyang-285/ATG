@@ -24,14 +24,20 @@ import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
 import { tacoGuideSchema, type GuideRestaurant } from "@/lib/taco-guide-schema";
+import {GuideMenu, MallGuideFigure} from "@/components/MallGuide";
+const mallSlug = "gwinnett-place-mall-redevelopment";
+const mallDraftId = "drafts.atg-gwinnett-place-mall-guide";
 export const revalidate = 60;
-const getStory = cache((slug: string) =>
-  publication.fetch<(Story & {guideRestaurants?: GuideRestaurant[]}) | null>(
-    `*[${PUBLISHED} && slug.current==$slug][0]{${STORY_FIELDS},seo,_id == "atg-street-tacos-gwinnett" => {"guideRestaurants": *[_type == "business" && ("sanity:" + _id) in ^.relatedDirectoryListings]{name,address,"slug":slug.current}},body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
-    { slug },
+const getStory = cache((slug: string) => {
+  const previewMall = slug === mallSlug && process.env.VERCEL_ENV === "preview";
+  const client = previewMall ? publication.withConfig({useCdn:false, perspective:"raw", token:process.env.SANITY_API_READ_TOKEN || process.env.SANITY_WRITE_TOKEN?.trim()}) : publication;
+  const filter = previewMall ? "_id == $mallDraftId && _type == 'post'" : PUBLISHED;
+  return client.fetch<(Story & {guideRestaurants?: GuideRestaurant[]}) | null>(
+    `*[${filter} && slug.current==$slug][0]{${STORY_FIELDS},seo,_id == "atg-street-tacos-gwinnett" => {"guideRestaurants": *[_type == "business" && ("sanity:" + _id) in ^.relatedDirectoryListings]{name,address,"slug":slug.current}},body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
+    { slug, mallDraftId },
     { next: { revalidate: 60 } },
-  ),
-);
+  );
+});
 export async function generateMetadata({
   params,
 }: {
@@ -56,6 +62,7 @@ export async function generateMetadata({
     title: seo?.title ? { absolute: seo.title } : s.title,
     description,
     alternates: { canonical: path },
+    ...(s._id === mallDraftId && { robots: {index:false, follow:false} }),
     openGraph: {
       type: "article",
       siteName: "All Things Gwinnett",
@@ -114,6 +121,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   const story = await getStory(params.slug);
   if (!story) notFound();
   if (story._id === "gcps-schools-since-2004") return <SchoolsFeature story={story} />;
+  const mallGuide = story.slug === mallSlug;
   const topics = story.gameTopics || [];
   const hasCalendar = topics.length > 0 && story.body?.some(block => block._type === "upcomingGameEvents");
   const nextEvents = hasCalendar ? (await upcomingGameEvents(topics)).slice(0, 5) : [];
@@ -128,7 +136,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       headingLogos.set(heading._key, block.imageUrl);
       return false;
     }
-    return true;
+    return !(mallGuide && block._key === "hero-original");
   });
   const recruitTables = body.filter(block => block._type === "callout" && ["recruit-table-0", "recruit-table-1"].includes(block._key));
   const articleBody = body.map((block: any) => {
@@ -150,7 +158,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     block.style === "h2" && block.children?.some((span: GuideSpan) => span.text === "Sources and methodology")
   ) : -1;
   const mainBody = notesStart < 0 ? articleBody : articleBody.slice(0, notesStart);
-  const leadSummary = isHolidayGuide && articleBody[0]?._type === "tldr" ? articleBody[0] : undefined;
+  const leadSummary = (isHolidayGuide || mallGuide) && articleBody[0]?._type === "tldr" ? articleBody[0] : undefined;
   const figureMetadata: Record<string, { name?: string; creator?: string; description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
   "cityPop": {
     "description": "July 2025 population estimates for each municipality’s Gwinnett residents and unincorporated Gwinnett.",
@@ -332,7 +340,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
   };
   return (
     <main id="main" className="site-width page-content">
-      <article className="article">
+      <article className={mallGuide ? "article mall-guide" : "article"}>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }} />
         <header>
           {story.guideRestaurants ? <nav aria-label="Breadcrumb" style={{display:"flex",flexWrap:"wrap",alignItems:"baseline",gap:"0.45rem",fontSize:"0.875rem",marginBottom:"1rem"}}><Link href="/">Home</Link><span aria-hidden="true">/</span><Link href="/food-drink">Food &amp; drink</Link><span aria-hidden="true">/</span><span aria-current="page">{story.title}</span></nav> : <p className="story-label">{storyLabel(story)}</p>}
@@ -340,17 +348,19 @@ export default async function Page({ params }: { params: { slug: string } }) {
           {story.excerpt && <p className="lead-deck">{story.excerpt}</p>}
           <p className="byline"><StoryByline story={story} /></p>
           {leadSummary && <div className="article-body"><StorySummary value={leadSummary} /></div>}
-          <StoryImage story={story} priority />
+          {mallGuide && story.image ? <figure><a href={imageUrl(story.image,1800,1000) || undefined}><img className="story-image" style={{objectFit:"contain",height:"auto"}} src={story.body?.find(b=>b._key==="hero-original")?.imageUrl || imageUrl(story.image) || undefined} alt={story.image.alt}/></a><figcaption>{story.image.caption}</figcaption></figure> : <StoryImage story={story} priority />}
           {story.image?.credit && (
             <p className="quiet">Photo: {story.image.credit}</p>
           )}
         </header>
         <div className="article-body">
+          {mallGuide && <GuideMenu blocks={articleBody} />}
           <PortableText
             value={leadSummary ? mainBody.slice(1) : mainBody}
             components={{
               block: {
                 h2: ({children,value}) => {
+                  if (mallGuide) return <h2 id={value._key}>{children}</h2>;
                   const heading = value.children?.map(span => String(span.text || "")).join("") || "";
                   if (!story.guideRestaurants || !/^\d+\. /.test(heading) || !heading.includes(" | ")) return <h2>{children}</h2>;
                   const [name, detail] = heading.split(" | ");
@@ -374,6 +384,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   const anchor = (value?.href || "").replace(canonical, "");
                   if (/^#source-\d+$/.test(anchor)) return <sup><a href={anchor}>{children}</a></sup>;
                   if (/^#[\w-]+$/.test(anchor)) return <a style={value?.sourceEntry ? { fontSize: "0.875rem" } : undefined} href={anchor}>{children}</a>;
+                  if (mallGuide && /^\/(?![\/\\])/.test(value?.href || "")) return <Link href={value.href}>{children}</Link>;
                   const href = value?.internalSlug
                     ? `/stories/${encodeURIComponent(value.internalSlug)}`
                     : safeUrl(value?.href);
@@ -406,7 +417,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </blockquote>
                 ),
                 divider: () => <hr />,
-                callout: ({ value }) => recruitTables.some(table => table._key === value._key)
+                callout: ({ value }) => mallGuide ? <MallGuideFigure value={value}/> : recruitTables.some(table => table._key === value._key)
                   ? (value._key === recruitTables[0]._key ? <RecruitDirectory tables={recruitTables} /> : null)
                   : figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
                 tldr: StorySummary,
