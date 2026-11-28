@@ -112,7 +112,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     return { ...block, markDefs: block.markDefs.map((mark: any) => ({ ...mark, sourceEntry: true })) };
   });
   const leadSummary = isHolidayGuide && articleBody[0]?._type === "tldr" ? articleBody[0] : undefined;
-  const figureMetadata: Record<string, { description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
+  const figureMetadata: Record<string, { name?: string; creator?: string; description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
   "cityPop": {
     "description": "July 2025 population estimates for each municipality’s Gwinnett residents and unincorporated Gwinnett.",
     "period": "2025-07-01",
@@ -171,6 +171,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
   }
 } : story._id === "acb4b18b-db6b-4fa1-a004-a4d373dca55b" ? {
   "recruit-table-0": {
+    "name": "Gwinnett County Division I recruits, Class of 2027",
+    "creator": "All Things Gwinnett",
     "description": "Gwinnett County high school athletes in the class of 2027 with documented Division I college decisions, recruiting ratings and available state and national rankings.",
     "period": "2026-11-27",
     "variables": [
@@ -190,6 +192,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
     ]
   },
   "recruit-table-1": {
+    "name": "Gwinnett County Division I prospects, Classes of 2028 and 2029",
+    "creator": "All Things Gwinnett",
     "description": "Selected Gwinnett underclassmen with documented Division I offers or commitments, listed by class, school, sport, college and available ranking.",
     "period": "2026-11-27",
     "variables": [
@@ -209,6 +213,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     ]
   },
   "national-counties": {
+    "creator": "Gridpex",
     "description": "National ranks for the ten highest-ranked counties and two selected peers in Gridpex’s hometown-based, star-weighted football recruiting data from 2010 through 2026.",
     "period": "2010/2026",
     "variables": [
@@ -219,6 +224,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     ]
   },
   "alumni-table": {
+    "creator": "All Things Gwinnett",
     "description": "Selected Gwinnett high school alumni by sport, position or event, high school and graduating year from 2000 through 2026.",
     "period": "2000/2026",
     "variables": [
@@ -245,13 +251,13 @@ export default async function Page({ params }: { params: { slug: string } }) {
       "@type": "Dataset",
       "@id": url,
       url,
-      name: block.heading || chartFigures[block.asset._ref].title,
+      name: figureMetadata[block._key].name || block.heading || chartFigures[block.asset._ref].title,
       description: figureMetadata[block._key].description,
       temporalCoverage: figureMetadata[block._key].period,
       spatialCoverage: { "@type": "Place", name: block._key === "national-counties" ? "United States" : story.location },
       variableMeasured: figureMetadata[block._key].variables,
       citation: citations,
-      isPartOf: { "@id": canonical },
+      ...(figureMetadata[block._key].creator && { creator: { "@type": "Organization", name: figureMetadata[block._key].creator } }),
     };
   });
   const structured = {
