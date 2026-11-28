@@ -36,8 +36,8 @@ export function navigation(
         ...["Food", "Beauty", "Local services"]
           .filter((c) => businesses.some((b) => b.category === c))
           .map((c) => ({
-            label: c,
-            href: `/directory?category=${encodeURIComponent(c)}`,
+            label: c === "Food" ? "Food & Drink" : c,
+            href: c === "Food" ? "/directory/category/food-drink" : `/directory?category=${encodeURIComponent(c)}`,
           })),
         { label: "List your business", href: "/directory/submit" },
       ],
