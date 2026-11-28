@@ -144,6 +144,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
     if ((!inSources && !/^source-\d+$/.test(block._key)) || !block.markDefs?.length) return block;
     return { ...block, markDefs: block.markDefs.map((mark: any) => ({ ...mark, sourceEntry: true })) };
   });
+  const notesStart = story.guideRestaurants ? articleBody.findIndex(block =>
+    block.style === "h2" && block.children?.some((span: GuideSpan) => span.text === "Sources and methodology")
+  ) : -1;
+  const mainBody = notesStart < 0 ? articleBody : articleBody.slice(0, notesStart);
   const leadSummary = isHolidayGuide && articleBody[0]?._type === "tldr" ? articleBody[0] : undefined;
   const figureMetadata: Record<string, { name?: string; creator?: string; description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
   "cityPop": {
@@ -325,7 +329,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </header>
         <div className="article-body">
           <PortableText
-            value={leadSummary ? articleBody.slice(1) : articleBody}
+            value={leadSummary ? mainBody.slice(1) : mainBody}
             components={{
               block: {
                 h2: ({children,value}) => {
@@ -401,6 +405,14 @@ export default async function Page({ params }: { params: { slug: string } }) {
               },
             }}
           />
+          {notesStart >= 0 && <section aria-label="Sources and methodology" style={{borderTop:"1px solid #d5d3ce",marginTop:"2rem",paddingTop:"1rem",color:"#494945"}}>
+            <h2 style={{fontSize:"1rem",lineHeight:1.4,margin:"0 0 0.5rem"}}>Sources and methodology</h2>
+            <ol style={{listStyle:"decimal",fontSize:"0.875rem",lineHeight:1.55,paddingLeft:"1.4rem",margin:0}}>
+              {articleBody.slice(notesStart + 1).map(block => <li key={block._key} style={{fontSize:"inherit",margin:"0.35rem 0"}}>
+                <PortableText value={block} components={{block:{normal:({children}) => <>{children}</>},marks:{link:({value,children}) => <a style={{fontSize:"inherit",textDecoration:"underline"}} href={safeUrl(value?.href) || undefined}>{children}</a>}}}/>
+              </li>)}
+            </ol>
+          </section>}
         </div>
       <p><a className="text-link" href="https://www.facebook.com/groups/allthingsgwinnett">Discuss this story in the ATG Facebook group ↗</a></p>
       </article>
