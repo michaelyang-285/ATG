@@ -330,7 +330,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
             components={{
               block: {
                 h2: ({children,value}) => {
-                  const heading = value.children?.map((span: GuideSpan) => span.text).join("") || "";
+                  const heading = value.children?.map(span => String(span.text || "")).join("") || "";
                   if (!story.guideRestaurants || !/^\d+\. /.test(heading) || !heading.includes(" | ")) return <h2>{children}</h2>;
                   const [name, detail] = heading.split(" | ");
                   return <h2>{name}<small style={{display:"block",fontSize:"1rem",fontWeight:500,marginTop:6}}>{detail}</small></h2>;
@@ -344,8 +344,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
                     </h3>
                   ) : <h3>{children}</h3>;
                 },
-                normal: ({children,value}) => story.guideRestaurants && value.children?.some((s: GuideSpan) => /^Google ★|^Go to the Directory$/.test(s.text.trim()))
-                  ? <RestaurantLinks spans={value.children} marks={value.markDefs || []}/>
+                normal: ({children,value}) => story.guideRestaurants && value.children?.some(s => /^Google ★|^Go to the Directory$/.test(String(s.text || "").trim()))
+                  ? <RestaurantLinks spans={value.children.map(s => ({text:String(s.text || ""),marks:Array.isArray(s.marks) ? s.marks : []}))} marks={(value.markDefs || []).map(m => ({_key:m._key,href:typeof m.href === "string" ? m.href : undefined}))}/>
                   : <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
               },
               marks: {
