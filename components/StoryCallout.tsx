@@ -1,5 +1,6 @@
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import type { PortableTextBlock, PortableTextSpan } from "@portabletext/types";
+import { RecruitSchoolFilter } from "./RecruitSchoolFilter";
 import { safeUrl } from "@/lib/publication";
 
 type Paragraph = PortableTextBlock<Record<string, unknown> & { _type: string; _key: string }, PortableTextSpan>;
@@ -33,30 +34,30 @@ function tableCells(row: Paragraph) {
   ));
 }
 
+export function RecruitDirectory({ tables }: { tables: Callout[] }) {
+  const groups = tables.map(table => {
+    const younger = table._key === "recruit-table-1";
+    const rows = Array.isArray(table.body) ? table.body.slice(1) : [];
+    const athletes = rows.map(row => {
+      const [name, ...fields] = tableCells(row);
+      const [school, sport, status, college, rating, state, national] = fields.slice(younger ? 1 : 0);
+      const schoolName = row.children.map(span => span.text).join("").split("\n")[younger ? 2 : 1]?.trim() || "";
+      return { id: row._key, school: schoolName, content: <>
+                <div><strong>{name}</strong><div>{school}{younger && <> · {fields[0]}</>}</div><div>{sport}</div></div>
+                <div><strong>{status}</strong><div>{college}</div></div>
+                <div><div>Rating: {rating}</div><div>Georgia: {state}</div><div>National: {national}</div></div>
+              </> };
+    });
+    return { id: table._key!, title: table.heading || table.title || "Recruits", athletes };
+  });
+  return <RecruitSchoolFilter groups={groups} />;
+}
+
 export function StoryCallout({ value }: { value: Callout }) {
   const title = value.heading || value.title;
   const rows = Array.isArray(value.body) ? value.body : [];
   if (value.style === "table" && rows.length) {
     const [head, ...records] = rows;
-    const younger = value._key === "recruit-table-1";
-    if (younger || value._key === "recruit-table-0") {
-      return (
-        <section className="recruit-index" aria-label={title}>
-          <h3>{title}</h3>
-          <ul>{records.map(row => {
-            const [name, ...fields] = tableCells(row);
-            const [school, sport, status, college, rating, state, national] = fields.slice(younger ? 1 : 0);
-            return (
-              <li key={row._key}>
-                <div><strong>{name}</strong><div>{school}{younger && <> · {fields[0]}</>}</div><div>{sport}</div></div>
-                <div><strong>{status}</strong><div>{college}</div></div>
-                <div><div>Rating: {rating}</div><div>Georgia: {state}</div><div>National: {national}</div></div>
-              </li>
-            );
-          })}</ul>
-        </section>
-      );
-    }
     return (
       <div className="story-table-wrap" role="region" aria-label={title || "Guide table"} tabIndex={0}>
         <table className="story-table">

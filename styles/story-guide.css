@@ -104,3 +104,5 @@
 @media (max-width: 600px) {
   .recruit-index li { grid-template-columns: minmax(0, 1fr); gap: .45rem; }
 }
+.recruit-school-filter { display: grid; gap: .35rem; margin-block: 1rem; font-weight: 700; }
+.recruit-school-filter select { width: min(100%, 22rem); min-height: 44px; padding: .5rem; color: var(--ink); background: white; font: inherit; border: 1px solid currentColor; border-radius: .25rem; }

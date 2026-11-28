@@ -19,7 +19,7 @@ import {
   type Story,
 } from "@/lib/publication";
 import "@/styles/story-guide.css";
-import { StoryCallout } from "@/components/StoryCallout";
+import { RecruitDirectory, StoryCallout } from "@/components/StoryCallout";
 import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
@@ -130,6 +130,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     }
     return true;
   });
+  const recruitTables = body.filter(block => block._type === "callout" && ["recruit-table-0", "recruit-table-1"].includes(block._key));
   const articleBody = body.map((block: any) => {
     if (block._type !== "block") return block;
     if (isHolidayGuide && block.style === "normal" &&
@@ -389,7 +390,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </blockquote>
                 ),
                 divider: () => <hr />,
-                callout: ({ value }) => figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
+                callout: ({ value }) => recruitTables.some(table => table._key === value._key)
+                  ? (value._key === recruitTables[0]._key ? <RecruitDirectory tables={recruitTables} /> : null)
+                  : figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
                 tldr: StorySummary,
                 editorsNote: ({ value }) => (
                   <aside>
