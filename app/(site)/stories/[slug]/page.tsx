@@ -441,7 +441,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   chartFigures[value.asset?._ref] ? <div id={figureMetadata[value._key] ? value._key : undefined}><StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /></div> : value.imageUrl ? (
                     <figure className={mallGuide ? "mall-image" : undefined}>
                       <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
-                      {mallGuide ? <GuideImageCaption caption={value.caption} sourceHref={mallImageSource} /> : value.caption && <figcaption>{value.caption}</figcaption>}
+                      {mallGuide ? <GuideImageCaption caption={value.caption} sourceHref={mallImageSource} fullSizeHref={value._key === "photo-original-timeline" ? value.imageUrl : undefined} /> : value.caption && <figcaption>{value.caption}</figcaption>}
                     </figure>
                   ) : null,
                 pullQuote: ({ value }) => (

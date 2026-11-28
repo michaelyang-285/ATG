@@ -84,6 +84,8 @@
 .mall-guide .story-table { width: 100%; min-width: 0; table-layout: fixed; }
 .mall-guide .story-table th,
 .mall-guide .story-table td { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.mall-table[aria-describedby="note-phase-sequence"] th:first-child { width: 6rem; }
+.mall-guide .mall-image-zoom { white-space: normal; font-size: .875rem; text-underline-offset: .16em; }
 .mall-table[aria-describedby] .story-table-wrap { margin-bottom: 0; }
 .mall-table + .mall-figure-note { border-top: 0; }
 .mall-guide .mall-bibliography {

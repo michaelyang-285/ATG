@@ -47,12 +47,14 @@ export function GuideCitations({ references }: { references: Reference[] }) {
   </span>;
 }
 
-export function GuideImageCaption({ caption, sourceHref }: { caption?: string; sourceHref?: string }) {
+export function GuideImageCaption({ caption, sourceHref, fullSizeHref }: { caption?: string; sourceHref?: string; fullSizeHref?: string }) {
   if (!caption) return null;
   const [description, credit] = caption.split(/\s+Source:\s+/, 2);
-  const href = safeUrl(sourceHref);
+  const page = credit?.match(/PDF p\. (\d+)/i)?.[1];
+  const source = safeUrl(sourceHref);
+  const href = source && page ? source.split("#")[0] + "#page=" + page : source;
   return <figcaption className="mall-image-caption">
-    {description}
+    {description}{fullSizeHref && <> <a className="mall-image-zoom" href={fullSizeHref}>Open full-size timeline</a></>}
     {credit && <span className="mall-credit">Source: {href ? <a href={href}>{credit}</a> : credit}</span>}
   </figcaption>;
 }
