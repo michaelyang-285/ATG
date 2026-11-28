@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 
 type Group = { id: string; title: string; athletes: { id: string; school: string; content: ReactNode }[] };
 
@@ -51,7 +51,7 @@ function RecruitGroup({ group, school }: { group: Group; school: string }) {
   </section>;
 }
 
-export function RecruitSchoolFilter({ groups }: { groups: Group[] }) {
+export function RecruitSchoolFilter({ groups, transition }: { groups: Group[]; transition?: ReactNode }) {
   const [school, setSchool] = useState("");
   const schools = Array.from(new Set(groups.flatMap(group => group.athletes.map(athlete => athlete.school)).filter(Boolean))).sort((a, b) => a.localeCompare(b));
   return <>
@@ -61,7 +61,10 @@ export function RecruitSchoolFilter({ groups }: { groups: Group[] }) {
         {schools.map(name => <option key={name}>{name}</option>)}
       </select>
     </label>
-    {groups.map(group => <RecruitGroup key={group.id + ":" + school} group={group} school={school} />)}
+    {groups.map(group => <Fragment key={group.id}>
+      {group.id === "recruit-table-1" && transition}
+      <RecruitGroup key={school} group={group} school={school} />
+    </Fragment>)}
     <noscript><style>{".recruit-index li[hidden]{display:grid}.recruit-paging,.recruit-school-filter{display:none}"}</style></noscript>
   </>;
 }

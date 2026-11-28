@@ -131,7 +131,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
     return true;
   });
   const recruitTables = body.filter(block => block._type === "callout" && ["recruit-table-0", "recruit-table-1"].includes(block._key));
-  const articleBody = body.map((block: any) => {
+  const recruitTransition = recruitTables.some(table => table._key === "recruit-table-1")
+    ? body.find(block => block._key === "recruit-transition") : undefined;
+  const articleBody = body.filter(block => block !== recruitTransition).map((block: any) => {
     if (block._type !== "block") return block;
     if (isHolidayGuide && block.style === "normal" &&
         block.markDefs?.some((mark: { href?: string }) => mark.href?.startsWith("https://www.google.com/maps"))) {
@@ -407,7 +409,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 ),
                 divider: () => <hr />,
                 callout: ({ value }) => recruitTables.some(table => table._key === value._key)
-                  ? (value._key === recruitTables[0]._key ? <RecruitDirectory tables={recruitTables} /> : null)
+                  ? (value._key === recruitTables[0]._key ? <RecruitDirectory tables={recruitTables} transition={recruitTransition} /> : null)
                   : figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
                 tldr: StorySummary,
                 editorsNote: ({ value }) => (

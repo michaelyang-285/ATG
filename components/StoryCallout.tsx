@@ -34,7 +34,7 @@ function tableCells(row: Paragraph) {
   ));
 }
 
-export function RecruitDirectory({ tables }: { tables: Callout[] }) {
+export function RecruitDirectory({ tables, transition }: { tables: Callout[]; transition?: Paragraph }) {
   const groups = tables.map(table => {
     const younger = table._key === "recruit-table-1";
     const rows = Array.isArray(table.body) ? table.body.slice(1) : [];
@@ -50,7 +50,7 @@ export function RecruitDirectory({ tables }: { tables: Callout[] }) {
     });
     return { id: table._key!, title: table.heading || table.title || "Recruits", athletes };
   });
-  return <RecruitSchoolFilter groups={groups} />;
+  return <RecruitSchoolFilter groups={groups} transition={transition && <PortableText value={transition} components={profileMarks} />} />;
 }
 
 export function StoryCallout({ value }: { value: Callout }) {
