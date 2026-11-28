@@ -45,7 +45,8 @@ export function tacoGuideSchema(canonical: string, title: string, body: GuideBlo
     mainEntityOfPage: {"@type": "WebPage", "@id": canonical, url: canonical,
       breadcrumb: {"@type": "BreadcrumbList", itemListElement: [
         {"@type": "ListItem", position: 1, name: "All Things Gwinnett", item: origin + "/"},
-        {"@type": "ListItem", position: 2, name: title, item: canonical}
+        {"@type": "ListItem", position: 2, name: "Food & drink", item: origin + "/food-drink"},
+        {"@type": "ListItem", position: 3, name: title, item: canonical}
       ]}}
   };
 }
