@@ -22,10 +22,11 @@ import { StoryCallout } from "@/components/StoryCallout";
 import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
+import { tacoGuideSchema, type GuideRestaurant } from "@/lib/taco-guide-schema";
 export const revalidate = 60;
 const getStory = cache((slug: string) =>
-  publication.fetch<Story | null>(
-    `*[${PUBLISHED} && slug.current==$slug][0]{${STORY_FIELDS},seo,body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
+  publication.fetch<(Story & {guideRestaurants?: GuideRestaurant[]}) | null>(
+    `*[${PUBLISHED} && slug.current==$slug][0]{${STORY_FIELDS},seo,_id == "atg-street-tacos-gwinnett" => {"guideRestaurants": *[_type == "business" && ("sanity:" + _id) in ^.relatedDirectoryListings]{name,address,"slug":slug.current}},body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
     { slug },
     { next: { revalidate: 60 } },
   ),
@@ -67,6 +68,38 @@ export async function generateMetadata({
     ...(seo && { twitter: { card: "summary_large_image", title: socialTitle, description: socialDescription, images } }),
   };
 }
+type GuideSpan = {text: string; marks?: string[]};
+function RestaurantLinks({spans, marks}: {spans: GuideSpan[]; marks: { _key: string; href?: string }[]}) {
+  const links = spans.flatMap(span => {
+    const href = safeUrl(marks.find(mark => span.marks?.includes(mark._key))?.href);
+    return href ? [{label: span.text.trim(), href}] : [];
+  });
+  const ratings = links.filter(link => /^(Google|Yelp)\b/.test(link.label));
+  const actions = links.filter(link => !ratings.includes(link));
+  return <div style={{fontSize:"1rem", marginBlock:"0.45rem"}}>
+    {ratings.map(({label,href}) => {
+      const [provider] = label.split(" ");
+      const score = label.match(/([\d.]+)\/5/);
+      const detail = score ? label.slice(label.indexOf(score[0]) + score[0].length).trim() : label.slice(provider.length).trim();
+      return <div key={href} data-review-provider={provider} style={{maxWidth:"34rem",borderBottom:"1px solid #dedbd4"}}>
+        <a href={href} aria-label={label} style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:"0.5rem",minHeight:44,paddingBlock:4,color:"inherit",textDecoration:"none"}}>
+          <strong style={{minWidth:"3.75rem"}}>{provider}</strong>
+          {score && <><span aria-hidden="true" style={{position:"relative",color:"#cac6bc",lineHeight:1,whiteSpace:"nowrap"}}>★★★★★<span style={{position:"absolute",inset:"0 auto 0 0",width:Number(score[1])*20+"%",overflow:"hidden",color:"#96600e"}}>★★★★★</span></span><b>{score[1]}/5</b></>}
+          <small>{detail}</small>
+        </a>
+      </div>;
+    })}
+    <div style={{display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
+      {actions.map(({href,label}) => {
+        const icon = label==="🌐" ? "Website" : label==="ⓕ" ? "Facebook" : undefined;
+        return <a key={href} href={href} title={icon} aria-label={icon} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:44,minWidth:icon?44:undefined,fontSize:"0.95rem"}}>
+          {icon==="Website" ? <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg> : icon==="Facebook" ? <b aria-hidden="true">ⓕ</b> : label}
+        </a>;
+      })}
+    </div>
+  </div>;
+}
+
 function StorySummary({ value }: { value: { heading?: string; points?: string[] } }) {
   return (
     <aside className="story-summary" aria-label="Article summary">
@@ -111,6 +144,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
     if ((!inSources && !/^source-\d+$/.test(block._key)) || !block.markDefs?.length) return block;
     return { ...block, markDefs: block.markDefs.map((mark: any) => ({ ...mark, sourceEntry: true })) };
   });
+  const notesStart = story.guideRestaurants ? articleBody.findIndex(block =>
+    block.style === "h2" && block.children?.some((span: GuideSpan) => span.text === "Sources and methodology")
+  ) : -1;
+  const mainBody = notesStart < 0 ? articleBody : articleBody.slice(0, notesStart);
   const leadSummary = isHolidayGuide && articleBody[0]?._type === "tldr" ? articleBody[0] : undefined;
   const figureMetadata: Record<string, { name?: string; creator?: string; description: string; period: string; variables: string[]; sources: string[] }> = story._id === "d74a7eb1-dd41-4b97-b316-ea5d72d3e60c" ? {
   "cityPop": {
@@ -273,13 +310,14 @@ export default async function Page({ params }: { params: { slug: string } }) {
     image: imageUrl(story.image) || undefined,
     author: storyAuthor(story.author),
     publisher: { "@type": "Organization", name: "All Things Gwinnett", url: "https://allthingsgwinnett.com" },
+    ...(story.guideRestaurants && { ...tacoGuideSchema(canonical, story.title, body, story.guideRestaurants), "@id": canonical + "#article" }),
   };
   return (
     <main id="main" className="site-width page-content">
       <article className="article">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }} />
         <header>
-          <p className="story-label">{storyLabel(story)}</p>
+          {story.guideRestaurants ? <nav aria-label="Breadcrumb" style={{display:"flex",flexWrap:"wrap",alignItems:"baseline",gap:"0.45rem",fontSize:"0.875rem",marginBottom:"1rem"}}><Link href="/">Home</Link><span aria-hidden="true">/</span><Link href="/food-drink">Food &amp; drink</Link><span aria-hidden="true">/</span><span aria-current="page">{story.title}</span></nav> : <p className="story-label">{storyLabel(story)}</p>}
           <h1>{story.title}</h1>
           {story.excerpt && <p className="lead-deck">{story.excerpt}</p>}
           <p className="byline"><StoryByline story={story} /></p>
@@ -291,9 +329,15 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </header>
         <div className="article-body">
           <PortableText
-            value={leadSummary ? articleBody.slice(1) : articleBody}
+            value={leadSummary ? mainBody.slice(1) : mainBody}
             components={{
               block: {
+                h2: ({children,value}) => {
+                  const heading = value.children?.map(span => String(span.text || "")).join("") || "";
+                  if (!story.guideRestaurants || !/^\d+\. /.test(heading) || !heading.includes(" | ")) return <h2>{children}</h2>;
+                  const [name, detail] = heading.split(" | ");
+                  return <h2>{name}<small style={{display:"block",fontSize:"1rem",fontWeight:500,marginTop:6}}>{detail}</small></h2>;
+                },
                 h3: ({ children, value }) => {
                   const logo = headingLogos.get(value._key);
                   return logo ? (
@@ -303,7 +347,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
                     </h3>
                   ) : <h3>{children}</h3>;
                 },
-                normal: ({children,value}) => <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
+                normal: ({children,value}) => story.guideRestaurants && value.children?.some(s => /^Google ★|^Go to the Directory$/.test(String(s.text || "").trim()))
+                  ? <RestaurantLinks spans={value.children.map(s => ({text:String(s.text || ""),marks:Array.isArray(s.marks) ? s.marks : []}))} marks={(value.markDefs || []).map(m => ({_key:m._key,href:typeof m.href === "string" ? m.href : undefined}))}/>
+                  : <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
               },
               marks: {
                 link: ({ children, value }) => {
@@ -359,6 +405,14 @@ export default async function Page({ params }: { params: { slug: string } }) {
               },
             }}
           />
+          {notesStart >= 0 && <section aria-label="Sources and methodology" style={{borderTop:"1px solid #d5d3ce",marginTop:"2rem",paddingTop:"1rem",color:"#494945"}}>
+            <h2 style={{fontSize:"1rem",lineHeight:1.4,margin:"0 0 0.5rem"}}>Sources and methodology</h2>
+            <ol style={{listStyle:"decimal",fontSize:"0.875rem",lineHeight:1.55,paddingLeft:"1.4rem",margin:0}}>
+              {articleBody.slice(notesStart + 1).map(block => <li key={block._key} style={{fontSize:"inherit",margin:"0.35rem 0"}}>
+                <PortableText value={block} components={{block:{normal:({children}) => <>{children}</>},marks:{link:({value,children}) => <a style={{fontSize:"inherit",textDecoration:"underline"}} href={safeUrl(value?.href) || undefined}>{children}</a>}}}/>
+              </li>)}
+            </ol>
+          </section>}
         </div>
       <p><a className="text-link" href="https://www.facebook.com/groups/allthingsgwinnett">Discuss this story in the ATG Facebook group ↗</a></p>
       </article>
