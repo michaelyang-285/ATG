@@ -32,3 +32,11 @@
   .deals-photo { aspect-ratio: 2.15; }
   .deals-membership { gap: 21px; }
 }
+
+.deals-offers .offer-card {display:grid;max-width:62rem;padding:0;border:1px solid var(--rule);border-radius:8px;overflow:hidden;background:#fff}
+.offer-photo {display:block;width:100%;height:100%;object-fit:cover;aspect-ratio:4/3}
+.deals-offers .offer-copy {min-width:0;margin:0;padding:clamp(1rem,3vw,2rem);align-self:center}
+.offer-copy h3 {font-size:clamp(1.5rem,3vw,2.2rem);line-height:1.1;margin-bottom:.35rem}
+.offer-copy p {margin:.85rem 0 0;max-width:56ch;overflow-wrap:anywhere}
+.offer-copy .offer-cta {min-height:44px;gap:.65rem;padding:.7rem 1.1rem}
+@media(min-width:700px){.offer-card:has(.offer-photo){grid-template-columns:minmax(12rem,36%) minmax(0,1fr)}}

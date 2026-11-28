@@ -71,7 +71,7 @@ export function listingSchema(b:Listing) {
     breadcrumb:{"@type":"BreadcrumbList",itemListElement:listingCrumbs(b).map((c,i)=>({"@type":"ListItem",position:i+1,name:c.name,item:"https://allthingsgwinnett.com"+c.path}))},
     mainEntity:{"@type":type,"@id":url+"#listing",name:b.name,description:b.summary||undefined,
       url:safeUrl(b.url)||url,image:photos.length ? photos : listingPhoto(b)||undefined,logo:safeUrl(b.logo)||undefined,
-      ...(offer ? {makesOffer:{"@type":"Offer",name:offer.title,description:offer.terms,validThrough:offer.end,url}} : {}),
+      ...(offer ? {makesOffer:{"@type":"Offer",name:offer.title,description:offer.terms,validThrough:offer.noEnd ? undefined : offer.end,url}} : {}),
       telephone:b.publicPhone||undefined,address:postalAddress(b.address),
       openingHoursSpecification:week?.map(row=>({"@type":"OpeningHoursSpecification",dayOfWeek:"https://schema.org/"+row.day,opens:row.open?row.opens:"00:00",closes:row.open?row.closes:"00:00"})),
       areaServed:["Church","Mosque","Synagogue","PlaceOfWorship"].includes(type)?undefined:areas,

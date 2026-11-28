@@ -61,10 +61,11 @@ export function POST(req: Request) {
       if (body.deal === null) delete draft.deal;
       else {
         const { title, terms, end } = body.deal || {};
+        const noEnd = body.deal?.noEnd === true;
         if (typeof title !== "string" || !title.trim() || title.length > 100 ||
           typeof terms !== "string" || !terms.trim() || terms.length > 500 ||
-          typeof end !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(end) ||
-          !Number.isFinite(Date.parse(end)) || new Date(end).toISOString().slice(0,10) !== end)
+          (!noEnd && (typeof end !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(end) ||
+          !Number.isFinite(Date.parse(end)) || new Date(end).toISOString().slice(0,10) !== end)))
           throw new Failure(400, "Include an offer, redemption instructions and a valid last day.");
         const detail = (key: string, max: number) => {
           const value = body.deal[key] ?? "";
@@ -73,7 +74,7 @@ export function POST(req: Request) {
         }
         const start = detail("start",10), description = detail("description",1500);
         if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !Number.isFinite(Date.parse(start)) ||
-          new Date(start).toISOString().slice(0,10) !== start || start > end)
+          new Date(start).toISOString().slice(0,10) !== start || (!noEnd && start > end))
           throw new Failure(400,"Choose a valid start date on or before the end date.");
         if (!description) throw new Failure(400,"Add a description of your deal.");
         const image = detail("image",1000);
@@ -93,7 +94,7 @@ export function POST(req: Request) {
           destination = directoryWebLink(destination) || "";
           if (!destination) throw new Failure(400,"Enter a social profile or messaging link.");
         }
-        draft.deal = {title:title.trim(), terms:terms.trim(), end, start, description, image, code:detail("code",80), link, channel, destination:channel ? destination : ""};
+        draft.deal = {title:title.trim(), terms:terms.trim(), ...(noEnd ? {noEnd:true} : {end}), start, description, image, code:detail("code",80), link, channel, destination:channel ? destination : ""};
       }
       const saved = await table.update({draft, status:"review", revision:row.revision + 1, review_note:""})
         .eq("id",body.id).eq("owner_id",user.id).eq("revision",body.revision).eq("status",row.status)

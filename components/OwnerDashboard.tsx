@@ -784,7 +784,8 @@ function MemberDeal({row, onSave, uploadImage}: {row: Row; uploadImage: (file: F
   const [error, setError] = useState("");
   const [image, setImage] = useState(deal?.image || "");
   const [channel, setChannel] = useState(deal?.channel || "");
-  const expired = deal && deal.end < new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
+  const [noEnd,setNoEnd] = useState(deal?.noEnd === true);
+  const expired = deal && !deal.noEnd && deal.end && deal.end < new Date().toLocaleDateString("en-CA", {timeZone:"America/New_York"});
   async function save(value: typeof deal | null) {
     setSaving(true);
     setError("");
@@ -800,7 +801,7 @@ function MemberDeal({row, onSave, uploadImage}: {row: Row; uploadImage: (file: F
       e.preventDefault();
       const data = new FormData(e.currentTarget);
       const value = (key: string) => String(data.get(key) || "").trim();
-      void save({image, channel, destination:value("destination"), start:value("start"), description:value("description"), code:value("code"), link:value("link"), title:String(data.get("title")), terms:String(data.get("terms")), end:String(data.get("end"))});
+      void save({image, channel, destination:value("destination"), start:value("start"), description:value("description"), code:value("code"), link:value("link"), title:String(data.get("title")), terms:String(data.get("terms")), noEnd, end:noEnd ? undefined : value("end")});
     }}><fieldset disabled={saving}>
       <label>Deal image (4:3)<input type="file" accept="image/png,image/jpeg,image/webp" onChange={async e => {
         const file = e.currentTarget.files?.[0];
@@ -816,7 +817,8 @@ function MemberDeal({row, onSave, uploadImage}: {row: Row; uploadImage: (file: F
       <label>Start date<input name="start" type="date" required defaultValue={deal?.start}/></label>
       <label>Description<textarea name="description" required maxLength={1500} defaultValue={deal?.description}/></label>
       <label>How to redeem<textarea name="terms" required maxLength={500} defaultValue={deal?.terms}/></label>
-      <label>End date<input type="date" name="end" required defaultValue={deal?.end}/></label>
+      <label><input type="checkbox" checked={noEnd} onChange={e=>setNoEnd(e.target.checked)}/> This deal has no end date</label>
+      {!noEnd && <label>End date<input type="date" name="end" required defaultValue={deal?.end}/></label>}
       <label>Promo code (optional)<input name="code" maxLength={80} defaultValue={deal?.code}/></label>
       <label>Deal link (optional)<input name="link" inputMode="url" defaultValue={deal?.link}/></label>
       <label>Contact button<select value={channel} onChange={e => setChannel(e.target.value)}>
@@ -827,6 +829,6 @@ function MemberDeal({row, onSave, uploadImage}: {row: Row; uploadImage: (file: F
       <button type="button" onClick={() => setOpen(false)}>Cancel</button>
       {deal && <button type="button" onClick={() => void save(null)}>End deal</button>}
     </fieldset>{error && <p role="alert">{error}</p>}</form> :
-    <button onClick={() => {setImage(deal?.image || ""); setChannel(deal?.channel || ""); setError(""); setOpen(true);}}>{deal ? "Manage deal" : "Create a deal"}</button>}
+    <button onClick={() => {setImage(deal?.image || ""); setChannel(deal?.channel || ""); setNoEnd(deal?.noEnd === true); setError(""); setOpen(true);}}>{deal ? "Manage deal" : "Create a deal"}</button>}
   </section>;
 }

@@ -22,16 +22,16 @@ export default async function Deals() {
       <div className="deals-intro">
         <h1>Gwinnett Deals</h1>
         <h2>{offers.length ? "Local offers you can use now." : "Local offers are coming soon."}</h2>
-        <p>{offers.length ? "Explore offers from independent Gwinnett businesses. Each deal includes the dates, terms, and how to use it." : "We’re gathering offers from independent shops, restaurants, and service providers across Gwinnett. Each deal will tell you where to go, when it ends, and how to redeem it."}</p>
+        <p>{offers.length ? "Explore offers from independent Gwinnett businesses. See what’s included and how to redeem each offer." : "We’re gathering offers from independent shops, restaurants, and service providers across Gwinnett. Each deal will tell you where to go, when it ends, and how to redeem it."}</p>
         <Link className="deals-text-link" href={offers.length ? "#current-offers" : "/#newsletter"}>{offers.length ? "See current offers" : "Get deals in the ATG newsletter"} <DirectionIcon /></Link>
       </div>
       <Image className="deals-photo" src="/images/gwinnett-deals-counter.webp" width={1080} height={720}
         sizes="(max-width: 700px) 100vw, 48vw" priority alt="A bakery employee hands a customer a paper bag across the counter." />
     </header>
     {offers.length > 0 && <section className="deals-offers" id="current-offers"><h2>Current offers</h2>
-      {offers.map(row => <article key={row._id}><h3>{row.deal.title}</h3>
+      {offers.map(row => <article key={row._id} className="offer-card">{row.deal.image && <img className="offer-photo" src={row.deal.image} alt="" width={600} height={450}/>}<div className="offer-copy"><h3>{row.deal.title}</h3>
         <Link className="deals-business" href={listingPath(row.slug)}>{row.name}</Link>
-        <DealDetails deal={row.deal} />
+        <DealDetails deal={{...row.deal,image:undefined}} /></div>
       </article>)}</section>}
     <section className="deals-membership" aria-labelledby="business-offer">
       <div className="deals-pitch"><h2 id="business-offer">Put your offer in front of Gwinnett.</h2>

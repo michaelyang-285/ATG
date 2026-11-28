@@ -25,7 +25,7 @@ export default function ListingPreview({ data: d }: { data: Partial<Draft> & {de
           .join(" · ")}
       </p>
       <p>{d.summary}</p>
-      {deal?.title && <section><h4>{deal.title}</h4><p>{deal.terms}</p><p>Valid through {deal.end}</p></section>}
+      {deal?.title && <section><h4>{deal.title}</h4><p>{deal.terms}</p>{deal.end && <p>Valid through {deal.end}</p>}</section>}
       {[
         d.neighborhood,
         d.hideAddress ? "" : (d.streetAddress ? [d.streetAddress, d.city, "GA " + d.zip].join(", ") : d.address),
