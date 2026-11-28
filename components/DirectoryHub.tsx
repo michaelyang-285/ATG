@@ -14,12 +14,12 @@ function serviceCities(b:Business) {return city(b).split(",").map(x=>x.trim()).f
 function Listing({b,placement}:{b:Business;placement:string}) {
   return <article className="dh-row" data-listing={b._id} data-placement={placement} data-category={b.category}>
     <ListingLogo src={b.logo} size={50} />
-    <div><h3><Link data-profile href={"/directory/"+encodeURIComponent(b.slug)}>{branchName(b)}</Link></h3>
+    <div><div style={{display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"0.15rem 0.6rem"}}><h3><Link data-profile href={"/directory/"+encodeURIComponent(b.slug)}>{branchName(b)}</Link></h3>{b.premium && <AtgVerified/>}</div>
     {placement==="homepage_feature" ? <Link className="dh-kind" href={"/directory?category="+encodeURIComponent(b.category||"Community")}>{b.category||"Community"}</Link> :
       <span className="dh-kind">{b.category==="Food"?directoryCard(b).label:b.category}</span>}
     <p className="dh-location">{publicAddress(b.address)?.street ? b.address : city(b)}</p>
     {b.summary && <p className="dh-summary">{b.summary}</p>}
-    {b.premium && <AtgVerified/>} {b.providerType==="independent" && <IndependentProBadge/>}</div></article>;
+    {b.providerType==="independent" && <IndependentProBadge/>}</div></article>;
 }
 export default function DirectoryHub({businesses,filters,unsupported}:{businesses:Business[];filters:Filters;unsupported:string}) {
   const group = filters.group || "";
@@ -54,7 +54,7 @@ export default function DirectoryHub({businesses,filters,unsupported}:{businesse
       <button className="button button-orange">Search</button>
     </form>
     {!browsing ? <>
-      {featured.length>0 && <section className="dh-feature"><div className="dh-section-heading"><h2>Featured local businesses</h2><small>Sponsored</small></div><div className="dh-pair">{featured.map(b=><Listing key={b._id} b={b} placement="homepage_feature"/>)}</div></section>}
+      {featured.length>0 && <section className="dh-feature"><div className="dh-section-heading"><h2>ATG Verified businesses</h2></div><div className="dh-pair">{featured.map(b=><Listing key={b._id} b={b} placement="homepage_feature"/>)}</div></section>}
       <section><div className="dh-section-heading"><h2>Browse by category</h2><Link href="/directory?all=1">Browse all {businesses.length} listings</Link></div>
         <div className="dh-index">{groups.map(([name,count])=><Link key={name} href={groupUrl(name)}><strong>{name}</strong><span>{count} {count===1?"listing":"listings"}</span></Link>)}</div></section>
     </> : <section><div className="dh-section-heading"><h2>{filtered.length} {filtered.length===1?"listing":"listings"}</h2>{(filters.q || filters.city) && <Link href={clearUrl}>Clear search</Link>}</div>
