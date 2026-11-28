@@ -63,7 +63,7 @@ export function MallGuideFigure({ value, noteId }: { value: Block; noteId?: stri
   if (value._key === "newsletter-cta") return <aside className="mall-signup"><h2>{value.heading}</h2>
     {value.body?.map(row => <p key={row._key}>{guideText(row)}</p>)}<Link className="button button-orange" href="/newsletter#newsletter">Sign up for the newsletter</Link></aside>;
 
-  if (!value._key.startsWith("chart-")) return <div className="mall-table" role="group" aria-label={value.heading} aria-describedby={noteId}>
+  if (!value._key.startsWith("chart-")) return <div className="mall-table" id={value._key} role="group" aria-label={value.heading} aria-describedby={noteId}>
     <StoryCallout value={value as Parameters<typeof StoryCallout>[0]["value"]} />
   </div>;
 

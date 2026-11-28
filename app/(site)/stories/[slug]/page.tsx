@@ -35,7 +35,7 @@ const getStory = cache((slug: string) => {
   return client.fetch<(Story & {guideRestaurants?: GuideRestaurant[]}) | null>(
     `*[${filter} && slug.current==$slug][0]{${STORY_FIELDS},seo,_id == "atg-street-tacos-gwinnett" => {"guideRestaurants": *[_type == "business" && ("sanity:" + _id) in ^.relatedDirectoryListings]{name,address,"slug":slug.current}},body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
     { slug, mallDraftId },
-    { next: { revalidate: 60 } },
+    previewMall ? { cache: "no-store" } : { next: { revalidate: 60 } },
   );
 });
 export async function generateMetadata({
@@ -332,11 +332,14 @@ export default async function Page({ params }: { params: { slug: string } }) {
       ["chart-land","Gwinnett Place Mall property acquisitions","2021/2025","Purchase price in millions of dollars","https://www.gwinnettcounty.com/government/departments/planning-development/economic-development/gwinnett-place-mall"],
       ["chart-demand","Gwinnett annual housing demand by dwelling type","2020/2040","Forecast annual housing units","https://www.gwinnettcounty.com/documents/d/gwinnett-county/gwinnett_county_comprehensive_housing_study-pdf"],
       ["chart-parking","Modeled public investment for the Global Villages","2022/2023","Estimated public investment in millions of dollars","https://www.gwinnettcounty.com/documents/d/gwinnett-county/gwinnett-place-mall-site-revitalization-strategy-pdf"],
+      ["moves-local","Previous residence of people living in ZCTA 30096","2020/2024","Share of population age one or older by residence one year earlier","https://censusreporter.org/profiles/86000US30096-30096/","ZIP Code Tabulation Area 30096, Georgia"],
+      ["moves-county-table","Annual net migration in Gwinnett County","2022-07-01/2025-07-01","Net domestic and net international migrants by year ending July 1","https://www.census.gov/data/tables/time-series/demo/popest/2020s-counties-total.html","Gwinnett County, Georgia"],
     ];
-    for (const [id,name,period,variable,citation] of figures) {
+    for (const [id,name,period,variable,citation,geography] of figures) {
       const figure = body.find(block=>block._key===id);
       if (figure) datasets.push({ "@type":"Dataset", "@id":canonical+"#"+id, url:canonical+"#"+id,
-        name, description:figure.heading, temporalCoverage:period, variableMeasured:[variable], citation:[citation] });
+        name, description:figure.heading, temporalCoverage:period, variableMeasured:[variable], citation:[citation],
+        ...(geography && {spatialCoverage:{"@type":"Place",name:geography}}) });
     }
   }
   const structured = {
