@@ -12,7 +12,8 @@ function city(b:Business) {return publicAddress(b.address)?.city || b.neighborho
 function serviceCities(b:Business) {return city(b).split(",").map(x=>x.trim()).filter(Boolean);}
 function Listing({b,placement}:{b:Business;placement:string}) {
   return <article className="dh-row" data-listing={b._id} data-placement={placement} data-category={b.category}>
-    {b.logo && <img src={b.logo} width="50" height="50" alt=""/>}
+    <img src={b.logo || "/brand/atg-avatar.png"} width="50" height="50" alt=""
+      style={b.logo ? undefined : {filter:"grayscale(1)", opacity:0.5}}/>
     <div><h3><Link data-profile href={"/directory/"+encodeURIComponent(b.slug)}>{branchName(b)}</Link></h3>
     {placement==="homepage_feature" ? <Link className="dh-kind" href={"/directory?category="+encodeURIComponent(b.category||"Community")}>{b.category||"Community"}</Link> :
       <span className="dh-kind">{b.category==="Food"?directoryCard(b).label:b.category}</span>}
