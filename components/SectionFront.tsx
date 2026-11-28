@@ -14,7 +14,7 @@ const sections = {
     title: "Food & drink",
     deck: "Where to eat, what to order, and where to shop for dinner in Gwinnett.",
     explore: "Find your next stop",
-    links: [["Local food directory", "/directory?category=Food"], ["Markets & grocers", "/directory?q=market"], ["Send a food tip", "/contact"]],
+    links: [["Local food directory", "/directory/category/food-drink"], ["Markets & grocers", "/directory/category/grocery-stores-supermarkets"], ["Send a food tip", "/contact"]],
     more: "More food stories",
     community: "Where should we eat next?",
     prompt: "Tell your neighbors about a dish worth crossing the county for. Give the restaurant, the city, and your order.",

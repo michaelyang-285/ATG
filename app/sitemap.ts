@@ -28,6 +28,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       "/events/pokemon",
       "/events/gwinnett-libraries",
       "/directory",
+      "/directory/category/food-drink",
+      "/directory/category/grocery-stores-supermarkets",
       "/about","/advertise","/contact","/contribute",
     ].map((p) => ({ url: "https://allthingsgwinnett.com" + p })),
     ...stories.map((s) => ({

@@ -1,3 +1,4 @@
+import DirectoryHub from "./DirectoryHub";
 import {branchName, resolveBranch} from "@/lib/directory/branch";
 import {getBranchIndex} from "@/lib/directory/branch-records";
 import AtgVerified from "./AtgVerified";
@@ -41,6 +42,9 @@ const DESCRIPTIONS: Record<string, string> = {
 };
 export type Filters = {
   q?: string;
+  group?: string;
+  all?: string;
+  city?: string;
   format?: string;
   topic?: string;
   category?: string;
@@ -79,7 +83,6 @@ export default async function BrowsePage({
   }
   const directoryBusinesses = ["search","areas"].includes(kind) ? [...data.businesses,...await directoryPublic()].sort((a,b)=>Number(!!b.premium)-Number(!!a.premium) || a.name.localeCompare(b.name)) : data.businesses;
   const rawArea = kind !== "directory" && typeof filters.area === "string" ? filters.area : "";
-  const countyLink = {pathname: "/directory", query: {provider: filters.provider, q: query || undefined, category: filters.category, service: filters.service}};
   let businesses = directoryBusinesses
     .filter((b) => !filters.category || b.category === filters.category || b.categories?.includes(filters.category))
     .filter(b => !filters.service || b.services?.includes(filters.service))
@@ -107,6 +110,7 @@ export default async function BrowsePage({
     if (filters.provider === "independent") businesses = businesses.filter(b => b.providerType === "independent");
   }
   if (["directory", "search", "areas"].includes(kind)) businesses = await labelBranches(businesses);
+  if (kind === "directory") return <DirectoryHub businesses={businesses} filters={{...filters,q:query}} unsupported={unsupportedLocation}/>;
   let events = data.events;
   if (kind === "search") {
     const term = query.toLocaleLowerCase();
@@ -191,26 +195,7 @@ export default async function BrowsePage({
           )}
         </>
       )}
-      {kind === "directory" && (
-        <>
-          <section className="directory-tools" aria-label="Find a listing"><form className="directory-find" role="search" aria-label="Search directory listings" action="/directory">
-            <label>What are you looking for?<input type="search" name="q" defaultValue={query} maxLength={100} placeholder="Mobile barber, math tutor, or coffee shop"/></label>
-            <button className="button button-orange">Search directory</button></form>
-            {(filters.provider === "independent" || filters.category || filters.service) && <p className="directory-context">Showing {([filters.provider === "independent" && "independent pros", filters.service, filters.category].filter(Boolean).join(" · "))}. <Link href="/directory">Browse all listings</Link></p>}
-          </section>
-          {unsupportedLocation ? (
-            <EmptyState title="We only cover Gwinnett County right now.">We couldn’t match “{unsupportedLocation}” to a local city or ZIP. <Link href={{...countyLink, query: {...countyLink.query, q: query.replace(/(?:^|\s)(?:in|near|around)\s+(.+)$/i, "").trim()}}}>Search all of Gwinnett</Link></EmptyState>
-          ) : (query || filters.category || filters.service || filters.provider==="independent") && !businesses.length ? (
-            <EmptyState title="No listings found."><Link href="/directory">Browse all listings</Link></EmptyState>
-          ) : !businesses.length && (
-            <EmptyState title="Our local directory is taking shape.">
-              Independent restaurants, beauty professionals, and local services
-              will be listed here.
-            </EmptyState>
-          )}
-        </>
-      )}
-      {(kind === "directory" || kind === "search" || kind === "areas") &&
+      {(kind === "search" || kind === "areas") &&
         businesses.length > 0 && (
           <section className="business-list" aria-label="Businesses">
             {businesses.map((b) => (
@@ -226,28 +211,15 @@ export default async function BrowsePage({
                   <div>
                     <p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />} {b.premium && <AtgVerified/>}
                     <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`} aria-label={b.branch ? branchName(b) : undefined}>
-                      {kind === "directory" && b.branch
-                        ? <>{b.name}<span className="business-branch">{b.branch.label}</span></>
-                        : branchName(b)}
+                      {branchName(b)}
                     </Link></h2>
                   </div>
                 </div>
                 {b.summary && <p className="business-excerpt">{b.summary}</p>}
-                {kind === "directory" && (
-                  <Link className="business-card-cta button button-orange" href={`/directory/${encodeURIComponent(b.slug)}`}
-                    aria-label={`View profile for ${branchName(b)}`}>View profile</Link>
-                )}
               </article>
             ))}
           </section>
         )}
-      {kind === "directory" && (
-        <aside className="directory-owner-tools" aria-labelledby="business-owners">
-          <h2 id="business-owners">For businesses and independent providers</h2>
-          <p>List your business for free with a logo, hours and contact details. Include your website and booking links for free. Advertise for $1/month, billed at $12 per year, with priority placement, photos and a deal for local members.</p>
-          <div><Link href="/directory/submit">Free and paid listings</Link><Link href="/deals">Gwinnett Deals</Link><Link href="/account?mode=signin">Manage my listings</Link></div>
-        </aside>
-      )}
       {(kind === "events" || kind === "search") && (
         <>
           {events.length ? (

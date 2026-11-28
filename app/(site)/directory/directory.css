@@ -93,3 +93,32 @@ html:has(.listing-lightbox[open]) { overflow: hidden; }
 .listing-plans {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:1rem;margin:2rem 0}
 .listing-plans section {padding:clamp(1.2rem,3vw,2rem);border:1px solid #ccc;border-radius:12px}
 .listing-plans li {margin:.45rem 0}
+
+.dh { max-width: 70rem; }
+.dh header { margin: 1rem 0 1.6rem; }
+.dh header p { max-width: 54ch; font-size: 1.12rem; }
+.dh-form { display:flex; flex-wrap:wrap; gap:.8rem; align-items:end; }
+.dh-form label { display:grid; gap:.35rem; flex:1 1 13rem; font-weight:700; }
+.dh-form input,.dh-form select { width:100%; min-width:0; height:3rem; padding:0 .8rem; border:1px solid var(--ink); border-radius:5px; background:white; font:inherit; }
+.dh-form button { min-height:3rem; }
+.dh section { margin-top:clamp(2rem,5vw,3.5rem); }
+.dh-section-heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:.5rem; margin-bottom:1rem; }
+.dh-section-heading h2 { margin:0; }
+.dh-section-heading small { font-size:.85rem; }
+.dh-feature { background:#f6f6f4; padding:clamp(1rem,3vw,2rem); border-block:1px solid var(--rule); }
+.dh-pair,.dh-index { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 2rem; }
+.dh-index a { display:flex; gap:1rem; justify-content:space-between; align-items:baseline; padding:1rem 0; border-top:1px solid var(--rule); text-decoration:none; }
+.dh-index strong { font-size:1.15rem; }
+.dh-index span,.dh-location { color:#515151; }
+.dh-index span { white-space:nowrap; font-size:.9rem; }
+.dh-index a:hover strong,.dh-row h3 a:hover { text-decoration:underline; }
+.dh-row { display:flex; gap:1rem; padding:1.15rem 0; border-top:1px solid var(--rule); }
+.dh-row img { object-fit:contain; flex:none; }
+.dh-row>div { min-width:0; }
+.dh-row h3 { font-size:1.35rem; margin:.2rem 0; }
+.dh-row h3 a { color:inherit; }
+.dh-kind { font-size:.87rem; color:var(--text-orange); }
+.dh-row p { margin:.2rem 0; }
+.dh-summary { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dh-city { margin:2rem 0 .25rem; }
+@media(max-width:640px){.dh-pair,.dh-index{grid-template-columns:1fr}.dh-form button{width:100%}.dh-row{gap:.7rem}.dh-section-heading h2{font-size:1.6rem}}
