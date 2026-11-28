@@ -21,7 +21,7 @@ function Listing({b,placement}:{b:Business;placement:string}) {
     {b.summary && <p className="dh-summary">{b.summary}</p>}
     {b.providerType==="independent" && <IndependentProBadge/>}</div></article>;
 }
-export default function DirectoryHub({businesses,filters,unsupported}:{businesses:Business[];filters:Filters;unsupported:string}) {
+export default function DirectoryHub({businesses,filters,unsupported,canonicalCategory}:{canonicalCategory:boolean;businesses:Business[];filters:Filters;unsupported:string}) {
   const group = filters.group || "";
   const landing = Object.values(landings).find(item=>item.name===group);
   const path = landing ? groupUrl(group) : "/directory";
@@ -44,6 +44,11 @@ export default function DirectoryHub({businesses,filters,unsupported}:{businesse
   const title = scope || (filters.q ? "Directory search" : filters.all ? "All listings" : "Gwinnett directory");
   const sections = group===grocery && !filters.city ? cities.map(c=>({label:c,items:filtered.filter(b=>serviceCities(b).includes(c))})) : [{label:"",items:filtered}];
   return <main id="main" className="site-width page-content dh"><DirectoryMetrics view={JSON.stringify([filters,(browsing?filtered:featured).map(b=>b._id)])} group={scope}>
+    {canonicalCategory && filtered.length>0 && <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({
+      "@context":"https://schema.org","@type":"ItemList",name:title,
+      itemListElement:sections.flatMap(section=>section.items).map((listing,index)=>({"@type":"ListItem",position:index+1,
+        name:branchName(listing),url:"https://allthingsgwinnett.com/directory/"+encodeURIComponent(listing.slug)}))
+    }).replace(/</g,"\\u003c")}}/>}
     {browsing && <nav aria-label="Breadcrumb"><Link href="/directory">Directory</Link> / {title}</nav>}
     <header><h1>{title}</h1><p>{landing?.description || (browsing ? "" : "Find businesses, independent pros and community organizations across Gwinnett County.")}</p></header>
     <form action={path} role="search" className="dh-form">

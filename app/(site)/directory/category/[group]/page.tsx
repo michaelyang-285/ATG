@@ -21,5 +21,5 @@ export default function Page({params,searchParams}:Props) {
   const {name}=landing(params.group);
   const base="https://allthingsgwinnett.com";
   const crumbs=["Home","Directory",name].map((label,i)=>({"@type":"ListItem",position:i+1,name:label,item:base+["/","/directory","/directory/category/"+params.group][i]}));
-  return <div className="atg-directory"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:crumbs})}}/><BrowsePage kind="directory" filters={{...searchParams,group:name}}/></div>;
+  return <div className="atg-directory"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:crumbs})}}/><BrowsePage canonicalCategory={Object.keys(searchParams).length===0} kind="directory" filters={{...searchParams,group:name}}/></div>;
 }
