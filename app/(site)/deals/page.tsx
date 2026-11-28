@@ -22,7 +22,7 @@ export default async function Deals() {
       <div className="deals-intro">
         <h1>Gwinnett Deals</h1>
         <h2>{offers.length ? "Local offers you can use now." : "Local offers are coming soon."}</h2>
-        <p>{offers.length ? "Explore offers from independent Gwinnett businesses. See what’s included and how to redeem each offer." : "We’re gathering offers from independent shops, restaurants, and service providers across Gwinnett. Each deal will tell you where to go, when it ends, and how to redeem it."}</p>
+        <p>{offers.length ? "Explore offers from independent Gwinnett businesses. See what’s included and how to redeem each offer." : "We’re gathering offers from independent shops, restaurants, and service providers across Gwinnett. Each deal will tell you where to go and how to redeem it."}</p>
         <Link className="deals-text-link" href={offers.length ? "#current-offers" : "/#newsletter"}>{offers.length ? "See current offers" : "Get deals in the ATG newsletter"} <DirectionIcon /></Link>
       </div>
       <Image className="deals-photo" src="/images/gwinnett-deals-counter.webp" width={1080} height={720}
