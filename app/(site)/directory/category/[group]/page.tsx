@@ -1,3 +1,4 @@
+import {categoryInventory} from "@/lib/directory/category-inventory";
 import {notFound} from "next/navigation";
 import BrowsePage,{type Filters} from "@/components/BrowsePage";
 import {landings} from "@/lib/directory/browse-groups";
@@ -8,11 +9,11 @@ function landing(slug:string) {
   if (!Object.prototype.hasOwnProperty.call(landings,slug)) notFound();
   return landings[slug];
 }
-export function generateMetadata({params,searchParams}:Props) {
+export async function generateMetadata({params,searchParams}:Props) {
   const {name,description}=landing(params.group);
   const title=name+" in Gwinnett County";
   const url="/directory/category/"+params.group;
-  return {title,description,alternates:{canonical:url},robots:Object.keys(searchParams).length?{index:false,follow:true}:undefined,
+  return {title,description,alternates:{canonical:url},robots:(Object.keys(searchParams).length || !(await categoryInventory()).slugs.includes(params.group))?{index:false,follow:true}:undefined,
     openGraph:{title,description,url,images:["/brand/og.png"]}};
 }
 export default function Page({params,searchParams}:Props) {

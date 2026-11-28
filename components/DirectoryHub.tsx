@@ -59,7 +59,7 @@ export default function DirectoryHub({businesses,filters,unsupported}:{businesse
         <div className="dh-index">{groups.map(([name,count])=><Link key={name} href={groupUrl(name)}><strong>{name}</strong><span>{count} {count===1?"listing":"listings"}</span></Link>)}</div></section>
     </> : <section><div className="dh-section-heading"><h2>{filtered.length} {filtered.length===1?"listing":"listings"}</h2>{(filters.q || filters.city) && <Link href={clearUrl}>Clear search</Link>}</div>
       {unsupported && <p>We couldn’t match {unsupported} to a Gwinnett city or ZIP.</p>}
-      {!filtered.length && <p>Try another business name or <Link href="/directory">browse all categories</Link>.</p>}
+      {!filtered.length && landing && !filters.q && !filters.city ? <p>There are no published listings in this category yet. <Link href="/directory/submit">Add your business or organization</Link>.</p> : !filtered.length && <p>Try another business name or <Link href="/directory">browse all categories</Link>.</p>}
       {sections.map(s=><div key={s.label}>{s.label && <h2 className="dh-city">{s.label}</h2>}{s.items.map(b=><Listing key={b._id} b={b} placement={filters.q?"search_results":scope?"category_results":"all_listings"}/>)}</div>)}</section>}
     <aside className="directory-owner-tools"><h2>List your business</h2><p>Start free, or get featured rotation on the directory homepage and priority in relevant categories for $12 a year.</p><div><Link href="/directory/submit">Free and paid listings</Link><Link href="/deals">Gwinnett Deals</Link><Link href="/account?mode=signin">Manage my listings</Link></div></aside>
   </DirectoryMetrics></main>;
