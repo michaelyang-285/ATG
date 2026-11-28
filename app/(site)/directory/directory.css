@@ -128,3 +128,7 @@ html:has(.listing-lightbox[open]) { overflow: hidden; }
 .dh-logo-link { display:block; flex:0 0 50px; align-self:flex-start; border-radius:4px; }
 .dh-logo-link img { display:block; }
 .dh-profile-cta { display:flex; width:fit-content; min-height:44px; align-items:center; margin-top:.8rem; }
+
+.dh-pair .dh-row > div { display:flex; flex-direction:column; align-self:stretch; align-items:flex-start; }
+.dh-pair .dh-summary { max-width:100%; margin-bottom:.8rem; }
+.dh-pair .dh-profile-cta { margin-top:auto; }
