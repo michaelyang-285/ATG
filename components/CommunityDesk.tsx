@@ -1,6 +1,6 @@
 import InquiryForm from "./InquiryForm";
 import Link from "next/link";
-import { facebookGroup } from "@/lib/gwinnett";
+import { facebookGroup, socialProfiles } from "@/lib/gwinnett";
 import "./community.css";
 const desks = {
   advertise: {
@@ -83,15 +83,20 @@ const desks = {
       ],
       [
         "Where the conversation happens",
-        "The website gives stories, events, and listings a home. The Facebook group is where residents compare notes, ask follow-up questions, and tell us what deserves a closer look.",
+        <>
+          Follow our local coverage on <a className="underline underline-offset-2" href={socialProfiles.facebook}>Facebook</a> and{" "}
+          <a className="underline underline-offset-2" href={socialProfiles.instagram}>Instagram</a>. You can also find ATG on{" "}
+          <a className="underline underline-offset-2" href={socialProfiles.linkedin}>LinkedIn</a>. The Facebook group is where
+          residents compare notes, ask follow-up questions, and tell us what deserves a closer look.
+        </>,
       ],
     ],
     actions: [
-      ["Join All Things Gwinnett on Facebook", facebookGroup],
+      ["Join the ATG Facebook group", facebookGroup],
       ["Read our editorial standards", "/editorial-standards"],
     ],
   },
-};
+} as const;
 export type Desk = keyof typeof desks;
 export function deskMetadata(kind: Desk) {
   const d = desks[kind];

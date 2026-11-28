@@ -1,5 +1,6 @@
 import NewsletterSignup from "./NewsletterSignup";
 import { DirectionIcon } from "@/components/DirectionIcon";
+import { facebookGroup, socialProfiles } from "@/lib/gwinnett";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -90,9 +91,12 @@ export function Footer() {
           </Link>
         ))}
       </nav>
-      <a href="https://www.facebook.com/groups/allthingsgwinnett">
-        Join the Facebook group <DirectionIcon external />
-      </a>
+      <nav aria-label="All Things Gwinnett on social media">
+        <a href={socialProfiles.facebook} rel="me">Facebook Page</a>
+        <a href={socialProfiles.instagram} rel="me">Instagram</a>
+        <a href={socialProfiles.linkedin} rel="me">LinkedIn</a>
+        <a href={facebookGroup}>Join the Facebook group <DirectionIcon external /></a>
+      </nav>
       <p className="footer-credit">
         All Things Gwinnett · Independent local coverage.
       </p>
