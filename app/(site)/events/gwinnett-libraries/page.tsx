@@ -1,7 +1,7 @@
 import LibraryFilters from "./LibraryFilters";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
-import { libraryAgenda, libraryPath, libraryCalendar, jsonLd } from "@/lib/library-events";
+import { libraryEventPath, libraryAgenda, libraryPath, libraryCalendar, jsonLd } from "@/lib/library-events";
 import { eventPageMetadata } from "@/lib/event-metadata";
 import "./library.css";
 
@@ -28,7 +28,7 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
     {title:"Next Week",events:rows.filter(e=>e.day>data.thisEnd && e.day<=data.nextEnd),empty:"No matching events next week."},
     {title:"Later in "+laterMonth,events:rows.filter(e=>e.day>=data.laterStart),empty:"No matching events later in "+laterMonth+"."}
   ] : [];
-  const schema={"@context":"https://schema.org","@graph":[{"@type":"CollectionPage",name:title,url:base+libraryPath,mainEntity:{"@type":"ItemList",itemListElement:rows.map((e,i)=>({"@type":"ListItem",position:i+1,url:base+libraryPath+"/"+e.id,name:e.title}))}},{"@type":"BreadcrumbList",itemListElement:[["Events","/events"],[title,libraryPath]].map(([name,path],i)=>({"@type":"ListItem",position:i+1,name,item:base+path}))},{"@type":"FAQPage",mainEntity:faq.map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))}]};
+  const schema={"@context":"https://schema.org","@graph":[{"@type":"CollectionPage",name:title,url:base+libraryPath,mainEntity:{"@type":"ItemList",itemListElement:rows.map((e,i)=>({"@type":"ListItem",position:i+1,url:base+libraryEventPath(e),name:e.title}))}},{"@type":"BreadcrumbList",itemListElement:[["Events","/events"],[title,libraryPath]].map(([name,path],i)=>({"@type":"ListItem",position:i+1,name,item:base+path}))},{"@type":"FAQPage",mainEntity:faq.map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))}]};
   return <main id="main" className="site-width page-content library-hub">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd(schema)}}/>
     <Link href="/events">‹ Events calendar</Link><h1>{title}</h1>
@@ -46,7 +46,7 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
       const list = Array.from(days,([day,sessions])=><div key={day} className="library-day">
         <h3><time dateTime={day}>{agendaDate.format(new Date(day + "T12:00:00Z"))}</time></h3>
         <ul>{sessions.map(e=><li key={e.id}><strong className="library-location">{e.branch||"Check library for location"}</strong>
-          <Link href={libraryPath+"/"+e.id}>{e.title}</Link>
+          <Link href={libraryEventPath(e)}>{e.title}</Link>
           <time className="library-session-time" dateTime={e.start}>{e.time}</time>{e.ages.length>0&&<small>{e.ages.join(" · ")}</small>}</li>)}</ul>
       </div>);
       return <section key={title} className="library-period"><h2>{title}</h2>
