@@ -97,4 +97,10 @@
   background: var(--surface);
   border-top: 2px solid #ff4d22;
 }
-:is(#recruit-table-0, #recruit-table-1) .story-table { min-width: 50rem; }
+.recruit-index ul { list-style: none; padding: 0; margin: 0; border-top: 2px solid var(--orange); }
+.recruit-index li { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 1rem; padding: .85rem .6rem; border-bottom: 1px solid var(--line, #ddd); overflow-wrap: anywhere; }
+.recruit-index li:nth-child(even) { background: var(--surface); }
+.recruit-index li > div { min-width: 0; }
+@media (max-width: 600px) {
+  .recruit-index li { grid-template-columns: minmax(0, 1fr); gap: .45rem; }
+}
