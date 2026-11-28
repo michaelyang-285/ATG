@@ -59,7 +59,47 @@ export function GuideImageCaption({ caption, sourceHref, fullSizeHref }: { capti
   </figcaption>;
 }
 
+export function GuideImage({ image, sourceHref }: { image: { _key: string; imageUrl: string; alt?: string; caption?: string }; sourceHref?: string }) {
+  const originalTimeline = image._key === "photo-original-timeline";
+  const figure = <figure className="mall-image">
+    <img src={image.imageUrl} alt={image.alt || ""} loading="lazy" decoding="async" />
+    <GuideImageCaption caption={image.caption} sourceHref={sourceHref} fullSizeHref={originalTimeline ? image.imageUrl : undefined} />
+  </figure>;
+
+  if (!originalTimeline) return figure;
+  return <details className="mall-timeline-source">
+    <summary>View the county’s original timeline graphic</summary>
+    {figure}
+  </details>;
+}
+
+function PhaseTimeline({ value, noteId }: { value: Block; noteId?: string }) {
+  const table = <StoryCallout value={value as Parameters<typeof StoryCallout>[0]["value"]} />;
+  const phases = value.body?.slice(1).map(row => {
+    const [year, ...description] = guideText(row).split("\n");
+    return { key: row._key, year: year.trim(), label: description.join(" ").trim().replace(/^\d+\.\s+/, "") };
+  });
+  if (!phases?.length || phases.some(phase => !phase.year || !phase.label)) return table;
+
+  return <figure className="mall-phase-timeline" id={value._key} aria-describedby={noteId}>
+    <figcaption>{value.heading}</figcaption>
+    <ol role="list">
+      {phases.map((phase, index) => <li key={phase.key}>
+        <span className="mall-phase-number" aria-hidden="true">{index + 1}</span>
+        <span className="mall-phase-year">{phase.year}</span>
+        <span className="mall-phase-label">{phase.label}</span>
+      </li>)}
+    </ol>
+    <details className="mall-timeline-table">
+      <summary>View these dates as a table</summary>
+      {table}
+    </details>
+  </figure>;
+}
+
 export function MallGuideFigure({ value, noteId }: { value: Block; noteId?: string }) {
+  if (value._key === "phase-sequence") return <PhaseTimeline value={value} noteId={noteId} />;
+
   if (value._key === "newsletter-cta") return <aside className="mall-signup"><h2>{value.heading}</h2>
     {value.body?.map(row => <p key={row._key}>{guideText(row)}</p>)}<Link className="button button-orange" href="/newsletter#newsletter">Sign up for the newsletter</Link></aside>;
 

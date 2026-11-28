@@ -24,7 +24,7 @@ import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
 import { tacoGuideSchema, type GuideRestaurant } from "@/lib/taco-guide-schema";
-import {formatGuideParagraph, GuideCitations, GuideImageCaption, GuideMenu, MallGuideFigure} from "@/components/MallGuide";
+import {formatGuideParagraph, GuideCitations, GuideImage, GuideImageCaption, GuideMenu, MallGuideFigure} from "@/components/MallGuide";
 const mallSlug = "gwinnett-place-mall-redevelopment";
 const mallDraftId = "drafts.atg-gwinnett-place-mall-guide";
 export const revalidate = 60;
@@ -442,9 +442,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 ) : null,
                 image: ({ value }) =>
                   chartFigures[value.asset?._ref] ? <div id={figureMetadata[value._key] ? value._key : undefined}><StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /></div> : value.imageUrl ? (
-                    <figure className={mallGuide ? "mall-image" : undefined}>
+                    mallGuide ? <GuideImage image={value} sourceHref={mallImageSource} /> :
+                    <figure>
                       <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
-                      {mallGuide ? <GuideImageCaption caption={value.caption} sourceHref={mallImageSource} fullSizeHref={value._key === "photo-original-timeline" ? value.imageUrl : undefined} /> : value.caption && <figcaption>{value.caption}</figcaption>}
+                      {value.caption && <figcaption>{value.caption}</figcaption>}
                     </figure>
                   ) : null,
                 pullQuote: ({ value }) => (
