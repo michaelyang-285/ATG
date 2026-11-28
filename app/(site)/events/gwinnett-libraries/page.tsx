@@ -1,3 +1,4 @@
+import LibraryBreadcrumbs from "./LibraryBreadcrumbs";
 import LibraryFilters from "./LibraryFilters";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
@@ -28,10 +29,10 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
     {title:"Next Week",events:rows.filter(e=>e.day>data.thisEnd && e.day<=data.nextEnd),empty:"No matching events next week."},
     {title:"Later in "+laterMonth,events:rows.filter(e=>e.day>=data.laterStart),empty:"No matching events later in "+laterMonth+"."}
   ] : [];
-  const schema={"@context":"https://schema.org","@graph":[{"@type":"CollectionPage",name:title,url:base+libraryPath,mainEntity:{"@type":"ItemList",itemListElement:rows.map((e,i)=>({"@type":"ListItem",position:i+1,url:base+libraryEventPath(e),name:e.title}))}},{"@type":"BreadcrumbList",itemListElement:[["Events","/events"],[title,libraryPath]].map(([name,path],i)=>({"@type":"ListItem",position:i+1,name,item:base+path}))},{"@type":"FAQPage",mainEntity:faq.map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))}]};
+  const schema={"@context":"https://schema.org","@graph":[{"@type":"CollectionPage",name:title,url:base+libraryPath,mainEntity:{"@type":"ItemList",itemListElement:rows.map((e,i)=>({"@type":"ListItem",position:i+1,url:base+libraryEventPath(e),name:e.title}))}},{"@type":"FAQPage",mainEntity:faq.map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))}]};
   return <main id="main" className="site-width page-content library-hub">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd(schema)}}/>
-    <Link href="/events">‹ Events calendar</Link><h1>{title}</h1>
+    <LibraryBreadcrumbs /><h1>{title}</h1>
     <p>Find storytimes, workshops and book clubs at your Gwinnett library branch. All times are Eastern.</p>
     <LibraryFilters key={JSON.stringify([q.branch,q.audience])} path={libraryPath} branches={branches} branch={q.branch||""} audience={q.audience||""}/>
     <p><strong>Before you go:</strong> Event dates and times can change, and our listings may lag behind the library’s updates. Check the <a href={libraryCalendar} target="_blank" rel="noopener noreferrer">official Gwinnett County Public Library calendar</a> for the latest schedule.</p>
