@@ -30,7 +30,7 @@ const mallDraftId = "drafts.atg-gwinnett-place-mall-guide";
 export const revalidate = 60;
 const getStory = cache((slug: string) => {
   const previewMall = slug === mallSlug && process.env.VERCEL_ENV === "preview";
-  const client = previewMall ? publication.withConfig({useCdn:false, perspective:"raw", token:process.env.SANITY_API_READ_TOKEN || process.env.SANITY_WRITE_TOKEN?.trim()}) : publication;
+  const client = previewMall ? publication.withConfig({useCdn:false, perspective:"raw", token:process.env.SANITY_API_READ_TOKEN?.trim()}) : publication;
   const filter = previewMall ? "_id == $mallDraftId && _type == 'post'" : PUBLISHED;
   return client.fetch<(Story & {guideRestaurants?: GuideRestaurant[]}) | null>(
     `*[${filter} && slug.current==$slug][0]{${STORY_FIELDS},seo,_id == "atg-street-tacos-gwinnett" => {"guideRestaurants": *[_type == "business" && ("sanity:" + _id) in ^.relatedDirectoryListings]{name,address,"slug":slug.current}},body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
@@ -287,7 +287,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     ]
   }
 } : {};
-  const datasets = (story.body || []).filter(block => figureMetadata[block._key]?.description && (
+  const datasets: Record<string,unknown>[] = (story.body || []).filter(block => figureMetadata[block._key]?.description && (
     block._type === "callout" || (block._type === "image" && chartFigures[block.asset?._ref])
   )).map(block => {
     const url = canonical + "#" + encodeURIComponent(block._key);
@@ -323,6 +323,19 @@ export default async function Page({ params }: { params: { slug: string } }) {
       ...(figureMetadata[block._key].creator && { creator: { "@type": "Organization", name: figureMetadata[block._key].creator } }),
     };
   });
+  if (mallGuide) {
+    const figures = [
+      ["chart-census","Decennial population of Gwinnett County","1990/2020","Residents","https://www.census.gov/quickfacts/fact/table/gwinnettcountygeorgia/PST040224"],
+      ["chart-land","Gwinnett Place Mall property acquisitions","2021/2025","Purchase price in millions of dollars","https://www.gwinnettcounty.com/government/departments/planning-development/economic-development/gwinnett-place-mall"],
+      ["chart-demand","Gwinnett annual housing demand by dwelling type","2020/2040","Forecast annual housing units","https://www.gwinnettcounty.com/documents/d/gwinnett-county/gwinnett_county_comprehensive_housing_study-pdf"],
+      ["chart-parking","Modeled public investment for the Global Villages","2022/2023","Estimated public investment in millions of dollars","https://www.gwinnettcounty.com/documents/d/gwinnett-county/gwinnett-place-mall-site-revitalization-strategy-pdf"],
+    ];
+    for (const [id,name,period,variable,citation] of figures) {
+      const figure = body.find(block=>block._key===id);
+      if (figure) datasets.push({ "@type":"Dataset", "@id":canonical+"#"+id, url:canonical+"#"+id,
+        name, description:figure.heading, temporalCoverage:period, variableMeasured:[variable], citation:[citation] });
+    }
+  }
   const structured = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -336,19 +349,33 @@ export default async function Page({ params }: { params: { slug: string } }) {
     image: imageUrl(story.image) || undefined,
     author: storyAuthor(story.author),
     publisher,
+    ...(mallGuide && {isAccessibleForFree:true, about:{"@type":"Place",name:"Gwinnett Place Mall",address:{"@type":"PostalAddress",addressLocality:"Duluth",addressRegion:"GA",addressCountry:"US"}}}),
     ...(story.guideRestaurants && { ...tacoGuideSchema(canonical, story.title, body, story.guideRestaurants), "@id": canonical + "#article" }),
   };
+  const guideSchema = mallGuide ? [
+    structured,
+    {"@context":"https://schema.org","@type":"BreadcrumbList",itemListElement:[
+      {"@type":"ListItem",position:1,name:"Home",item:"https://allthingsgwinnett.com/"},
+      {"@type":"ListItem",position:2,name:"Local life",item:"https://allthingsgwinnett.com/local-life"},
+      {"@type":"ListItem",position:3,name:story.title,item:canonical}
+    ]},
+    {"@context":"https://schema.org","@type":"FAQPage","@id":canonical+"#questions",
+      mainEntity:body.find(block=>block._type==="faq")?.items?.map((item:{question:string;answer:{children:{text:string}[]}[]})=>({
+        "@type":"Question",name:item.question,acceptedAnswer:{"@type":"Answer",text:item.answer.map(row=>row.children.map(span=>span.text).join("")).join(" ")}
+      }))}
+  ] : structured;
   return (
     <main id="main" className="site-width page-content">
       <article className={mallGuide ? "article mall-guide" : "article"}>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(guideSchema).replace(/</g, "\\u003c") }} />
         <header>
+          {mallGuide && <nav aria-label="Breadcrumb" className="mall-crumbs"><Link href="/">Home</Link> / <Link href="/local-life">Local life</Link> / Gwinnett Place Mall</nav>}
           {story.guideRestaurants ? <nav aria-label="Breadcrumb" style={{display:"flex",flexWrap:"wrap",alignItems:"baseline",gap:"0.45rem",fontSize:"0.875rem",marginBottom:"1rem"}}><Link href="/">Home</Link><span aria-hidden="true">/</span><Link href="/food-drink">Food &amp; drink</Link><span aria-hidden="true">/</span><span aria-current="page">{story.title}</span></nav> : <p className="story-label">{storyLabel(story)}</p>}
           <h1>{story.title}</h1>
           {story.excerpt && <p className="lead-deck">{story.excerpt}</p>}
           <p className="byline"><StoryByline story={story} /></p>
           {leadSummary && <div className="article-body"><StorySummary value={leadSummary} /></div>}
-          {mallGuide && story.image ? <figure><a href={imageUrl(story.image,1800,1000) || undefined}><img className="story-image" style={{objectFit:"contain",height:"auto"}} src={story.body?.find(b=>b._key==="hero-original")?.imageUrl || imageUrl(story.image) || undefined} alt={story.image.alt}/></a><figcaption>{story.image.caption}</figcaption></figure> : <StoryImage story={story} priority />}
+          {mallGuide && story.image ? <figure><a href={story.body?.find(b=>b._key==="hero-original")?.imageUrl || undefined}><img className="story-image" style={{objectFit:"contain",height:"auto"}} src={story.body?.find(b=>b._key==="hero-original")?.imageUrl || imageUrl(story.image) || undefined} alt={story.image.alt}/></a><figcaption>{story.image.caption}</figcaption></figure> : <StoryImage story={story} priority />}
           {story.image?.credit && (
             <p className="quiet">Photo: {story.image.credit}</p>
           )}
@@ -393,7 +420,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               },
               types: {
                 directoryPhone: ({ value }) => <a href={"tel:+1" + value.text.replace(/-/g, "")}>{value.text}</a>,
-                faq: StoryFaq,
+                faq: ({value}) => <StoryFaq value={value} omitHeading={mallGuide}/>,
                 upcomingGameEvents: ({ value }) => hasCalendar ? (
                   <section>
                     <h2>{value.heading || "Upcoming events"}</h2>
