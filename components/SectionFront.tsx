@@ -1,3 +1,4 @@
+import ListingLogo from "@/components/ListingLogo";
 import Link from "next/link";
 import { facebookGroup } from "@/lib/gwinnett";
 import group from "@/lib/facebook-group.json";
@@ -81,8 +82,7 @@ function FoodListings({ businesses }: { businesses: Business[] }) {
   return <section><h2>Restaurants &amp; markets</h2>
     <ul className="sf-listings">{picks.map(b => <li key={b._id}>
       <Link href={'/directory/' + encodeURIComponent(b.slug)}>
-        <img src={b.logo || "/brand/atg-avatar.png"} alt="" width="54" height="54" loading="lazy"
-          style={b.logo ? undefined : {filter:"grayscale(1)", opacity:0.5}} />
+        <ListingLogo src={b.logo} size={54} loading="lazy" />
         <span><strong>{b.name}</strong>{(b.branch?.label || b.neighborhood) && <small>{b.branch?.label || b.neighborhood}</small>}</span><DirectionIcon />
       </Link></li>)}</ul></section>;
 }

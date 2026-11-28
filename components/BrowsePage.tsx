@@ -1,3 +1,4 @@
+import ListingLogo from "@/components/ListingLogo";
 import DirectoryHub from "./DirectoryHub";
 import {branchName, resolveBranch} from "@/lib/directory/branch";
 import {getBranchIndex} from "@/lib/directory/branch-records";
@@ -201,13 +202,7 @@ export default async function BrowsePage({
             {businesses.map((b) => (
               <article key={b._id}>
                 <div className="business-card-heading">
-                  <img
-                    src={b.logo || "/brand/atg-avatar.png"}
-                    alt=""
-                    width="56"
-                    height="56"
-                    style={{objectFit:"contain", ...(b.logo ? {} : {filter:"grayscale(1)", opacity:0.5})}}
-                  />
+                  <ListingLogo src={b.logo} size={56} />
                   <div>
                     <p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />} {b.premium && <AtgVerified/>}
                     <h2><Link href={`/directory/${encodeURIComponent(b.slug)}`} aria-label={b.branch ? branchName(b) : undefined}>

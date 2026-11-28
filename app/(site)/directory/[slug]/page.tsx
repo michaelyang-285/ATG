@@ -1,3 +1,4 @@
+import ListingLogo from "@/components/ListingLogo";
 import DealDetails from "@/components/DealDetails";
 import AtgVerified from "@/components/AtgVerified";
 import {upcomingListingEvents, occurrencePath} from "@/lib/events";
@@ -10,10 +11,9 @@ import DirectorySocialIcon from "@/components/DirectorySocialIcon";
 import {networks} from "@/lib/directory/social";
 import {notFound, permanentRedirect} from "next/navigation";
 import ListingGallery from "@/components/ListingGallery";
-import {directoryThumbnail} from "@/lib/directory/thumbnail";
 import Link from "next/link";
 import {publication,PUBLISHED,isGuide,storyHref,type Story,safeUrl} from "@/lib/publication";
-import {getListing, listingPhoto, listingPath, listingSchema} from "@/lib/directory/profile";
+import {getListing, listingPath, listingSchema} from "@/lib/directory/profile";
 import {branchName} from "@/lib/directory/branch";
 import {directoryMetadata} from "@/lib/directory/share";
 import "../directory.css";
@@ -48,7 +48,7 @@ export default async function Page({params}:Props) {
   const b: Awaited<ReturnType<typeof getListing>> = demo ? sample : await getListing(params.slug);
   if (!b) notFound();
   if (b.slug !== params.slug) permanentRedirect(listingPath(b.slug));
-  const photo = demo ? sample.logo : listingPhoto(b);
+  const photo = demo ? sample.logo : b.logo;
   const listingKey = (b.source === "local" ? "local:" : "sanity:") + b._id;
   const coverage = demo ? [] : await publication.fetch<Story[]>(
     `*[${PUBLISHED} && $listingKey in relatedDirectoryListings] | order(publishedAt desc){_id,title,"slug":slug.current,format,"categories":categories[]->{title}}`,
@@ -72,7 +72,7 @@ export default async function Page({params}:Props) {
     {demo ? <p className="story-label">Sample profile · Fictional business</p> : <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(listingSchema(b)).replace(/</g,"\\u003c")}}/>}
     <Link className="text-link" href="/directory">← Gwinnett directory</Link>
     <header className="listing-heading">
-      {photo && <img src={photo === b.gallery?.[0] ? directoryThumbnail(photo) : photo} width="112" height="112" alt=""/>}
+      <ListingLogo src={photo} size={112} />
       <div><p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}<h1>{branchName(b)}</h1>{b.premium && <AtgVerified/>}
       {!b.branch && b.neighborhood && <p>{b.neighborhood}</p>}{website && <a className="button button-orange" href={website}>{instagramWebsite ? "Go to Instagram" : "Visit website"} <span aria-hidden="true">↗</span></a>}</div>
     </header>
