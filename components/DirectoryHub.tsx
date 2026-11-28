@@ -14,14 +14,14 @@ function serviceCities(b:Business) {return city(b).split(",").map(x=>x.trim()).f
 function Listing({b,placement}:{b:Business;placement:string}) {
   return <article className="dh-row" data-listing={b._id} data-placement={placement} data-category={b.category}>
     <ListingLogo src={b.logo} size={50} />
-    <div><h3><Link data-profile href={"/directory/"+encodeURIComponent(b.slug)}>{branchName(b)}</Link></h3>
+    <div><div style={{display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"0.15rem 0.6rem"}}><h3><Link data-profile href={"/directory/"+encodeURIComponent(b.slug)}>{branchName(b)}</Link></h3>{b.premium && <AtgVerified/>}</div>
     {placement==="homepage_feature" ? <Link className="dh-kind" href={"/directory?category="+encodeURIComponent(b.category||"Community")}>{b.category||"Community"}</Link> :
       <span className="dh-kind">{b.category==="Food"?directoryCard(b).label:b.category}</span>}
     <p className="dh-location">{publicAddress(b.address)?.street ? b.address : city(b)}</p>
     {b.summary && <p className="dh-summary">{b.summary}</p>}
-    {b.premium && <AtgVerified/>} {b.providerType==="independent" && <IndependentProBadge/>}</div></article>;
+    {b.providerType==="independent" && <IndependentProBadge/>}</div></article>;
 }
-export default function DirectoryHub({businesses,filters,unsupported}:{businesses:Business[];filters:Filters;unsupported:string}) {
+export default function DirectoryHub({businesses,filters,unsupported,canonicalCategory}:{canonicalCategory:boolean;businesses:Business[];filters:Filters;unsupported:string}) {
   const group = filters.group || "";
   const landing = Object.values(landings).find(item=>item.name===group);
   const path = landing ? groupUrl(group) : "/directory";
@@ -44,6 +44,11 @@ export default function DirectoryHub({businesses,filters,unsupported}:{businesse
   const title = scope || (filters.q ? "Directory search" : filters.all ? "All listings" : "Gwinnett directory");
   const sections = group===grocery && !filters.city ? cities.map(c=>({label:c,items:filtered.filter(b=>serviceCities(b).includes(c))})) : [{label:"",items:filtered}];
   return <main id="main" className="site-width page-content dh"><DirectoryMetrics view={JSON.stringify([filters,(browsing?filtered:featured).map(b=>b._id)])} group={scope}>
+    {canonicalCategory && filtered.length>0 && <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({
+      "@context":"https://schema.org","@type":"ItemList",name:title,
+      itemListElement:sections.flatMap(section=>section.items).map((listing,index)=>({"@type":"ListItem",position:index+1,
+        name:branchName(listing),url:"https://allthingsgwinnett.com/directory/"+encodeURIComponent(listing.slug)}))
+    }).replace(/</g,"\\u003c")}}/>}
     {browsing && <nav aria-label="Breadcrumb"><Link href="/directory">Directory</Link> / {title}</nav>}
     <header><h1>{title}</h1><p>{landing?.description || (browsing ? "" : "Find businesses, independent pros and community organizations across Gwinnett County.")}</p></header>
     <form action={path} role="search" className="dh-form">
@@ -54,12 +59,12 @@ export default function DirectoryHub({businesses,filters,unsupported}:{businesse
       <button className="button button-orange">Search</button>
     </form>
     {!browsing ? <>
-      {featured.length>0 && <section className="dh-feature"><div className="dh-section-heading"><h2>Featured local businesses</h2><small>Sponsored</small></div><div className="dh-pair">{featured.map(b=><Listing key={b._id} b={b} placement="homepage_feature"/>)}</div></section>}
+      {featured.length>0 && <section className="dh-feature"><div className="dh-section-heading"><h2>ATG Verified businesses</h2></div><div className="dh-pair">{featured.map(b=><Listing key={b._id} b={b} placement="homepage_feature"/>)}</div></section>}
       <section><div className="dh-section-heading"><h2>Browse by category</h2><Link href="/directory?all=1">Browse all {businesses.length} listings</Link></div>
         <div className="dh-index">{groups.map(([name,count])=><Link key={name} href={groupUrl(name)}><strong>{name}</strong><span>{count} {count===1?"listing":"listings"}</span></Link>)}</div></section>
     </> : <section><div className="dh-section-heading"><h2>{filtered.length} {filtered.length===1?"listing":"listings"}</h2>{(filters.q || filters.city) && <Link href={clearUrl}>Clear search</Link>}</div>
       {unsupported && <p>We couldn’t match {unsupported} to a Gwinnett city or ZIP.</p>}
-      {!filtered.length && <p>Try another business name or <Link href="/directory">browse all categories</Link>.</p>}
+      {!filtered.length && landing && !filters.q && !filters.city ? <p>There are no published listings in this category yet. <Link href="/directory/submit">Add your business or organization</Link>.</p> : !filtered.length && <p>Try another business name or <Link href="/directory">browse all categories</Link>.</p>}
       {sections.map(s=><div key={s.label}>{s.label && <h2 className="dh-city">{s.label}</h2>}{s.items.map(b=><Listing key={b._id} b={b} placement={filters.q?"search_results":scope?"category_results":"all_listings"}/>)}</div>)}</section>}
     <aside className="directory-owner-tools"><h2>List your business</h2><p>Start free, or get featured rotation on the directory homepage and priority in relevant categories for $12 a year.</p><div><Link href="/directory/submit">Free and paid listings</Link><Link href="/deals">Gwinnett Deals</Link><Link href="/account?mode=signin">Manage my listings</Link></div></aside>
   </DirectoryMetrics></main>;

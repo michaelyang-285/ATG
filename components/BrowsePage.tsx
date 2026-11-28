@@ -62,9 +62,11 @@ async function labelBranches(businesses: Awaited<ReturnType<typeof getPublicatio
 export default async function BrowsePage({
   kind,
   filters = {},
+  canonicalCategory = false,
 }: {
   kind: string;
   filters?: Filters;
+  canonicalCategory?: boolean;
 }) {
   const data = await getPublication(),
     query = (typeof filters.q === "string" ? filters.q : "").trim().slice(0, 100);
@@ -111,7 +113,7 @@ export default async function BrowsePage({
     if (filters.provider === "independent") businesses = businesses.filter(b => b.providerType === "independent");
   }
   if (["directory", "search", "areas"].includes(kind)) businesses = await labelBranches(businesses);
-  if (kind === "directory") return <DirectoryHub businesses={businesses} filters={{...filters,q:query}} unsupported={unsupportedLocation}/>;
+  if (kind === "directory") return <DirectoryHub canonicalCategory={canonicalCategory} businesses={businesses} filters={{...filters,q:query}} unsupported={unsupportedLocation}/>;
   let events = data.events;
   if (kind === "search") {
     const term = query.toLocaleLowerCase();

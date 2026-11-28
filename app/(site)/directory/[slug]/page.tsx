@@ -13,7 +13,7 @@ import {notFound, permanentRedirect} from "next/navigation";
 import ListingGallery from "@/components/ListingGallery";
 import Link from "next/link";
 import {publication,PUBLISHED,isGuide,storyHref,type Story,safeUrl} from "@/lib/publication";
-import {getListing, listingPath, listingSchema} from "@/lib/directory/profile";
+import {getListing, listingCrumbs, listingPath, listingSchema} from "@/lib/directory/profile";
 import {branchName} from "@/lib/directory/branch";
 import {directoryMetadata} from "@/lib/directory/share";
 import "../directory.css";
@@ -70,7 +70,7 @@ export default async function Page({params}:Props) {
   const tags = Array.from(new Set([b.category,...(b.categories||[]),...(b.services||[])].filter(Boolean)));
   return <main id="main" className="site-width page-content atg-profile">
     {demo ? <p className="story-label">Sample profile · Fictional business</p> : <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(listingSchema(b)).replace(/</g,"\\u003c")}}/>}
-    <Link className="text-link" href="/directory">← Gwinnett directory</Link>
+    <nav aria-label="Breadcrumb">{listingCrumbs(b).map((crumb,index,crumbs)=><span key={crumb.path}>{index>0 && <span aria-hidden="true"> / </span>}{index===crumbs.length-1 ? <span aria-current="page">{crumb.name}</span> : <Link className="text-link" href={crumb.path}>{crumb.name}</Link>}</span>)}</nav>
     <header className="listing-heading">
       <ListingLogo src={photo} size={112} />
       <div><p className="story-label">{b.category || "Community directory"}</p>{b.providerType === "independent" && <IndependentProBadge />}<h1>{branchName(b)}</h1>{b.premium && <AtgVerified/>}
