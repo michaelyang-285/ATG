@@ -286,6 +286,17 @@ export default async function Page({ params }: { params: { slug: string } }) {
     const citations = (figureMetadata[block._key].sources as string[]).map(key =>
       story.body?.find(source => source._key === key)?.markDefs?.[0]?.href
     ).filter(Boolean);
+    const recruitTable = recruitTables.find(table => table._key === block._key);
+    const athletes = recruitTable && Array.isArray(recruitTable.body)
+      ? recruitTable.body.slice(1).flatMap((row: { children?: { text?: string }[] }) => {
+          const cells = row.children?.map(span => span.text || "").join("").split("\n");
+          if (!cells?.[0]?.trim()) return [];
+          const younger = block._key === "recruit-table-1";
+          const [school, sport, status, college] = cells.slice(younger ? 2 : 1);
+          const description = [school, younger ? cells[1] : "2027", sport, status, college].filter(Boolean).join(" · ");
+          return [{ "@type": "Person", name: cells[0].trim(), description }];
+        })
+      : [];
     return {
       "@type": "Dataset",
       "@id": url,
@@ -294,6 +305,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
       description: figureMetadata[block._key].description,
       temporalCoverage: figureMetadata[block._key].period,
       spatialCoverage: { "@type": "Place", name: block._key === "national-counties" ? "United States" : story.location },
+      ...(athletes.length > 0 && { mainEntity: {
+        "@type": "ItemList", "@id": url + "-list", name: figureMetadata[block._key].name,
+        itemListOrder: "https://schema.org/ItemListUnordered", numberOfItems: athletes.length,
+        itemListElement: athletes,
+      } }),
       variableMeasured: figureMetadata[block._key].variables,
       citation: citations,
       ...(figureMetadata[block._key].creator && { creator: { "@type": "Organization", name: figureMetadata[block._key].creator } }),
