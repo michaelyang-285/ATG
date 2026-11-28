@@ -1,3 +1,4 @@
+import { eventDetailMetadata } from "@/lib/event-metadata";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { libraryFeed,enrich,dayLabel,libraryPath,libraryEventPath,jsonLd } from "@/lib/library-events";
@@ -16,7 +17,10 @@ async function find(params: Params){
 }
 export async function generateMetadata({params}:{params:Params}){
   const e=await find(params);
-  return {title:[e.title,e.branch,dayLabel(e.day)].filter(Boolean).join(" | "),description:e.description,alternates:{canonical:libraryEventPath(e)}};
+  return eventDetailMetadata({
+    name: e.title, place: e.branch || "Gwinnett County Public Library", day: e.day,
+    time: e.time, summary: e.description, path: libraryEventPath(e),
+  });
 }
 export default async function Page({params}:{params:Params}){
   const e=await find(params);
