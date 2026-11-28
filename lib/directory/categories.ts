@@ -61,7 +61,7 @@ export const categories = {
     "Youth Programs",
   ],
   Health: ["Clinics", "Dentists", "Counseling", "Fitness", "Senior Care"],
-  Shopping: ["Boutiques", "Specialty Shops", "Local Makers"],
+  Shopping: ["Grocery Stores & Supermarkets", "Boutiques", "Specialty Shops", "Local Makers"],
   Events: ["Photographers", "DJs", "Venues", "Party Rentals", "Performers"],
   "Professional Services": [
     "Accounting",
