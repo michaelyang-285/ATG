@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useRef, type ReactNode} from "react";
-export default function DirectoryMetrics({children,view}:{children:ReactNode;view:string}) {
+export default function DirectoryMetrics({children,view,group}:{children:ReactNode;view:string;group?:string}) {
   const root = useRef<HTMLDivElement>(null);
   useEffect(()=>{
     const node = root.current;
@@ -10,7 +10,7 @@ export default function DirectoryMetrics({children,view}:{children:ReactNode;vie
     const visible = new Set<HTMLElement>();
     const emit = (event:string, el:HTMLElement) => {
       const gtag = (window as Window & {gtag?:Function}).gtag;
-      gtag?.("event",event,{listing_id:el.dataset.listing,placement:el.dataset.placement,listing_category:el.dataset.category});
+      gtag?.("event",event,{listing_id:el.dataset.listing,placement:el.dataset.placement,listing_category:el.dataset.category,browse_category:group});
     };
     function stop(el:Element) {clearTimeout(timers.get(el));timers.delete(el);}
     function start(el:HTMLElement) {
@@ -34,6 +34,6 @@ export default function DirectoryMetrics({children,view}:{children:ReactNode;vie
     document.addEventListener("visibilitychange",visibility);
     node.addEventListener("click",click);
     return ()=>{observer.disconnect();timers.forEach(clearTimeout);document.removeEventListener("visibilitychange",visibility);node.removeEventListener("click",click);};
-  },[view]);
+  },[view,group]);
   return <div ref={root}>{children}</div>;
 }

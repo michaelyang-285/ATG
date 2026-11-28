@@ -105,11 +105,11 @@ html:has(.listing-lightbox[open]) { overflow: hidden; }
 .dh-section-heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:.5rem; margin-bottom:1rem; }
 .dh-section-heading h2 { margin:0; }
 .dh-section-heading small { font-size:.85rem; }
-.dh-feature { background:#faf5ea; padding:clamp(1rem,3vw,2rem); border-block:1px solid #cabfaf; }
+.dh-feature { background:#f6f6f4; padding:clamp(1rem,3vw,2rem); border-block:1px solid var(--rule); }
 .dh-pair,.dh-index { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 2rem; }
 .dh-index a { display:flex; gap:1rem; justify-content:space-between; align-items:baseline; padding:1rem 0; border-top:1px solid var(--rule); text-decoration:none; }
 .dh-index strong { font-size:1.15rem; }
-.dh-index span,.dh-location { color:#554f48; }
+.dh-index span,.dh-location { color:#515151; }
 .dh-index span { white-space:nowrap; font-size:.9rem; }
 .dh-index a:hover strong,.dh-row h3 a:hover { text-decoration:underline; }
 .dh-row { display:flex; gap:1rem; padding:1.15rem 0; border-top:1px solid var(--rule); }
