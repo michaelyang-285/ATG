@@ -8,7 +8,7 @@ import {
   type EventRecord,
 } from "@/lib/events";
 import { publication, safeUrl, imageUrl } from "@/lib/publication";
-import { eventPageMetadata, eventPublisher } from "@/lib/event-metadata";
+import { eventDetailMetadata, eventPublisher } from "@/lib/event-metadata";
 import { localClock, zone } from "@/lib/event-time";
 import styles from "./event.module.css";
 
@@ -51,7 +51,11 @@ const load = cache(async (slug: string, day?: string) => {
 type Props = { params: { slug: string }; searchParams: { date?: string } };
 export async function generateMetadata({ params, searchParams }: Props) {
   const e = await load(params.slug, searchParams.date);
-  return e ? eventPageMetadata(e.title, e.summary, occurrencePath(e)) : {};
+  return e ? eventDetailMetadata({
+    name: e.title, place: e.venue || e.city || e.neighborhood || "", day: e.day,
+    time: timeLabel.format(new Date(e.startsAt)), summary: e.summary, path: occurrencePath(e),
+    image: imageUrl(e.image, 1200, 630, "jpg"), imageAlt: e.image?.alt, cancelled: e.cancelled,
+  }) : {};
 }
 export default async function Page({ params, searchParams }: Props) {
   const e = await load(params.slug, searchParams.date);
