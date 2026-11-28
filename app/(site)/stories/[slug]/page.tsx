@@ -22,10 +22,11 @@ import { StoryCallout } from "@/components/StoryCallout";
 import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
+import { tacoGuideSchema, type GuideRestaurant } from "@/lib/taco-guide-schema";
 export const revalidate = 60;
 const getStory = cache((slug: string) =>
-  publication.fetch<Story | null>(
-    `*[${PUBLISHED} && slug.current==$slug][0]{${STORY_FIELDS},seo,body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
+  publication.fetch<(Story & {guideRestaurants?: GuideRestaurant[]}) | null>(
+    `*[${PUBLISHED} && slug.current==$slug][0]{${STORY_FIELDS},seo,_id == "atg-street-tacos-gwinnett" => {"guideRestaurants": *[_type == "business" && ("sanity:" + _id) in ^.relatedDirectoryListings]{name,address,"slug":slug.current}},body[]{...,"imageUrl":asset->url,markDefs[]{...,"internalSlug":internal->slug.current}}}`,
     { slug },
     { next: { revalidate: 60 } },
   ),
@@ -273,6 +274,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     image: imageUrl(story.image) || undefined,
     author: storyAuthor(story.author),
     publisher: { "@type": "Organization", name: "All Things Gwinnett", url: "https://allthingsgwinnett.com" },
+    ...(story.guideRestaurants && { ...tacoGuideSchema(canonical, story.title, body, story.guideRestaurants), "@id": canonical + "#article" }),
   };
   return (
     <main id="main" className="site-width page-content">
