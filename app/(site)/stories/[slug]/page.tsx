@@ -313,7 +313,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       <article className="article">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, "\\u003c") }} />
         <header>
-          <p className="story-label">{storyLabel(story)}</p>
+          {story.guideRestaurants ? <nav aria-label="Breadcrumb" style={{display:"flex",flexWrap:"wrap",alignItems:"baseline",gap:"0.45rem",fontSize:"0.875rem",marginBottom:"1rem"}}><Link href="/">Home</Link><span aria-hidden="true">/</span><Link href="/food-drink">Food &amp; drink</Link><span aria-hidden="true">/</span><span aria-current="page">{story.title}</span></nav> : <p className="story-label">{storyLabel(story)}</p>}
           <h1>{story.title}</h1>
           {story.excerpt && <p className="lead-deck">{story.excerpt}</p>}
           <p className="byline"><StoryByline story={story} /></p>
