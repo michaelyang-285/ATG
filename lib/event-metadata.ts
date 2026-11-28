@@ -1,3 +1,4 @@
+import {publisher} from "./publisher";
 import type { Metadata } from "next";
 
 const site = "https://allthingsgwinnett.com";
@@ -7,13 +8,7 @@ const squareLogo = {
   height: 1024,
 };
 
-export const eventPublisher = {
-  "@type": "Organization",
-  "@id": site + "/#organization",
-  name: "All Things Gwinnett",
-  url: site,
-  logo: { "@type": "ImageObject", ...squareLogo },
-};
+export const eventPublisher = publisher;
 
 export const libraryShareImage = {
   url: site + "/social/gwinnett-library-events.jpg", width: 1200, height: 630,

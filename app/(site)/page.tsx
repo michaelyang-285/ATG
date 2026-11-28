@@ -1,3 +1,4 @@
+import {publisher,website,siteUrl} from "@/lib/publisher";
 import WeekendPreview from "@/components/WeekendPreview";
 import CalendarHighlights from "@/components/CalendarHighlights";
 import groupAudience from "@/lib/facebook-group.json";
@@ -30,6 +31,7 @@ export default async function HomePage() {
     .slice(0, 2);
   return (
     <main id="main" className="site-width homepage">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({"@context":"https://schema.org","@type":"WebPage","@id":siteUrl+"/#homepage",url:siteUrl+"/",name:publisher.name,isPartOf:{"@id":website["@id"]},about:{"@id":publisher["@id"]}})}}/>
       <a className="text-link" style={{ display: "flex", alignItems: "center", gap: ".45rem", paddingBlock: ".8rem", borderBottom: "1px solid currentColor" }} href={facebookGroup} target="_blank" rel="noopener noreferrer">
         <strong>{groupAudience.memberCountDisplay} members</strong> in our Facebook group <DirectionIcon />
       </a>

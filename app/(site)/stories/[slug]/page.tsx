@@ -1,3 +1,4 @@
+import {publisher} from "@/lib/publisher";
 import { chartFigures, StoryDataChart } from "@/components/StoryDataChart";
 import { StoryFaq } from "@/components/StoryFaq";
 import SchoolsFeature from "@/components/schools/SchoolsFeature";
@@ -309,7 +310,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     dateModified: story.updatedAt,
     image: imageUrl(story.image) || undefined,
     author: storyAuthor(story.author),
-    publisher: { "@type": "Organization", name: "All Things Gwinnett", url: "https://allthingsgwinnett.com" },
+    publisher,
     ...(story.guideRestaurants && { ...tacoGuideSchema(canonical, story.title, body, story.guideRestaurants), "@id": canonical + "#article" }),
   };
   return (

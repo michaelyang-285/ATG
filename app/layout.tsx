@@ -11,6 +11,7 @@ const protectedRoutes = [
   "/api/directory/checkout",
   "/api/directory/deletion",
   "/api/directory/corrections",
+  "/api/inquiry",
   "/api/events",
   "/api/subscribe",
 ].map(path => ({path, method: "POST" as const}));

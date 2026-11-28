@@ -1,3 +1,4 @@
+import InquiryForm from "@/components/InquiryForm";
 import groupAudience from "@/lib/facebook-group.json";
 import Link from "next/link";
 import { facebookGroup } from "@/lib/gwinnett";
@@ -47,9 +48,9 @@ export default function AdvertisePage() {
         </figure>
       </section>
       <section id="advertising">
-        <h2>Discuss a sponsorship</h2>
-        <p>Message a group admin with your target cities, timing, budget range, and what you’d like neighbors to do. We’ll discuss availability and placement options. We label sponsored placements and choose editorial stories independently.</p>
-        <a className="button button-orange" href={facebookGroup}>Find the group admins on Facebook</a>
+        <h2>Discuss a partnership</h2>
+        <p>Tell us who you’d like to reach in Gwinnett and what you have in mind. We’ll follow up by email.</p>
+        <InquiryForm kind="partnership"/>
         <h3>Give your business a directory listing</h3>
         <p>Help neighbors find your hours, service area, website, and directions. Basic listings are free, with advertising for $1/month, billed at $12 per year, including priority placement, photos and deals.</p>
         <Link className="text-link" href="/account">Create a directory listing</Link>

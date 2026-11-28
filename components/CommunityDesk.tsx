@@ -1,3 +1,4 @@
+import InquiryForm from "./InquiryForm";
 import Link from "next/link";
 import { facebookGroup } from "@/lib/gwinnett";
 import "./community.css";
@@ -8,7 +9,7 @@ const desks = {
     sections: [
       [
         "Discuss a sponsorship",
-        "For a campaign tied to a date, send the group admins your launch window, budget range, target cities, and the action you want readers to take. We’ll discuss availability and what a labeled placement could look like.",
+        "For a campaign tied to a date, use the partnership form to share your launch window, budget range, target cities, and the action you want readers to take. We’ll discuss availability and what a labeled placement could look like.",
       ],
       [
         "Give your business a home",
@@ -20,7 +21,7 @@ const desks = {
       ],
     ],
     actions: [
-      ["Ask about advertising", facebookGroup],
+      ["Ask about advertising", "/advertise#advertising"],
       ["Create a directory listing", "/account"],
     ],
   },
@@ -30,7 +31,7 @@ const desks = {
     sections: [
       [
         "Pitch a story",
-        "Tell the group admins what happened, where, why it matters now, and how you know. For a restaurant opening, for example, include the cross streets, the opening date, and who can confirm it.",
+        "Tell the editorial team what happened, where, why it matters now, and how you know. For a restaurant opening, for example, include the cross streets, the opening date, and who can confirm it.",
       ],
       [
         "Write from experience",
@@ -42,13 +43,13 @@ const desks = {
       ],
     ],
     actions: [
-      ["Pitch the group admins", facebookGroup],
+      ["Pitch a story", "/contribute"],
       ["Submit an event", "/events/submit"],
     ],
   },
   contact: {
     title: "Contact All Things Gwinnett",
-    lead: "Start with the team that can help. The ATG group admins handle editorial questions, listing support, corrections, and sponsorship inquiries.",
+    lead: "Start with the team that can help. Our team handles editorial questions, listing support, corrections, and sponsorship inquiries.",
     sections: [
       [
         "Request a correction",
@@ -56,7 +57,7 @@ const desks = {
       ],
       [
         "Get listing or payment help",
-        "Include your business name, listing URL if available, and what happened. Contact an admin privately for account or payment questions. Keep card details, passwords, and sign-in links out of messages.",
+        "Include your business name, listing URL if available, and what happened. Use the contact form for account or payment questions. Keep card details, passwords, and sign-in links out of messages.",
       ],
       [
         "Ask your neighbors",
@@ -64,7 +65,7 @@ const desks = {
       ],
     ],
     actions: [
-      ["Find the ATG group admins", facebookGroup],
+      ["Contact the team", "#contact-form"],
       ["Manage my listing", "/account?mode=signin"],
     ],
   },
@@ -119,6 +120,7 @@ export default function CommunityDesk({ kind }: { kind: Desk }) {
           ))}
         </div>
       </header>
+      {kind==="contact" && <section id="contact-form"><h2>Send a message</h2><InquiryForm kind="contact"/></section>}
       <section>
         {d.sections.map(([title, body]) => (
           <article key={title}>

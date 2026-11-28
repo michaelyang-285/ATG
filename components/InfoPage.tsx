@@ -11,7 +11,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
   contact: {
     title: "Get in touch",
     paragraphs: [
-      "Have a local story, a question, or a correction? Contact the admins of the All Things Gwinnett Facebook group.",
+      "Have a local story, a question, or a correction? Use our contact form.",
       "For corrections, include the article link and explain what needs to be checked.",
     ],
   },
@@ -19,7 +19,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
     title: "Bring your perspective",
     paragraphs: [
       "Live here? Know a story we should hear? We’re interested in local perspectives on food, culture, neighborhoods, and everyday life in Gwinnett.",
-      "Send the group admins a short introduction and your story idea. Tell us what you know firsthand, what you’d need to report, and any personal or business connection to the subject.",
+      "Send our editorial team a short introduction and your story idea. Tell us what you know firsthand, what you’d need to report, and any personal or business connection to the subject.",
       "Please ask permission before sharing someone else’s private group post or story. Contributor terms will be discussed before publication.",
     ],
   },
@@ -36,7 +36,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
   advertise: {
     title: "Reach people who live here",
     paragraphs: [
-      "Interested in a clearly labeled sponsorship or advertising on All Things Gwinnett? Contact the group admins to discuss the opportunity.",
+      "Interested in a clearly labeled sponsorship or advertising on All Things Gwinnett? Use the partnership form on our advertising page.",
       "Paid placements are separate from editorial coverage. A commercial relationship does not buy a favorable review or inclusion in a recommendation list.",
     ],
   },
@@ -46,9 +46,9 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
       "You can browse this site without creating an account. Search terms are used to display matching public content.",
       "This website is hosted by Vercel, and published content is served through Sanity. Those services receive normal technical request information needed to deliver the website, such as your IP address and browser details.",
       "Directory and event accounts use Supabase authentication. Your account email and private contact details are used to manage submissions. Published listings display the contact fields, service areas, links, and photos you choose to share. Event organizers supply public venue and event details.",
-      "Stripe processes directory checkout. ATG reviews all listings. Stripe handles the optional annual upgrade. To request a correction, removal, or help with a charge, contact a group admin privately.",
+      "Stripe processes directory checkout. ATG reviews all listings. Stripe handles the optional annual upgrade. To request a correction, removal, or help with a charge, use our contact form.",
       "Links to Facebook and other external websites take you to services with their own privacy practices.",
-      "To ask about privacy, contact the All Things Gwinnett group admins through Facebook.",
+      "To ask about privacy, send a message through our contact form.",
     ],
   },
   "directory-submit": {
@@ -56,7 +56,7 @@ export const info: Record<string, { title: string; paragraphs: string[] }> = {
     paragraphs: [
       "The directory is for independent small businesses around Gwinnett, including food businesses, beauty professionals, and local services. Franchises and large businesses aren’t the focus.",
       "Basic listings are free. Owners can upgrade for $12 per year. A listing is not an editorial endorsement, and an exclusive group promotion is not required for a basic listing.",
-      "Submissions and payment are not open yet. The billing and review details will be shown before you submit or pay. In the meantime, contact the group admins to express interest.",
+      "Use the directory signup form to submit your listing.",
     ],
   },
 };
@@ -71,12 +71,7 @@ export default function InfoPage({ kind }: { kind: string }) {
             <p key={p}>{p}</p>
           ))}
         </div>
-        <a
-          className="text-link"
-          href="https://www.facebook.com/groups/allthingsgwinnett"
-        >
-          Visit the Facebook group <span aria-hidden="true">↗</span>
-        </a>
+        <Link className="text-link" href="/contact">Contact the ATG team</Link>
         <p style={{ marginTop: 28 }}>
           <Link href="/">Back to All Things Gwinnett</Link>
         </p>

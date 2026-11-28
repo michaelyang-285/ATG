@@ -1,0 +1,7 @@
+.atg-inquiry {max-width:44rem;margin-block:1rem 2rem}
+.atg-inquiry form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.atg-inquiry label{display:grid;gap:.35rem;font-weight:600}
+.atg-inquiry input,.atg-inquiry textarea{min-width:0;width:100%;padding:.75rem;border:1px solid var(--ink);border-radius:5px;background:white;color:var(--ink);font:inherit}
+.atg-inquiry label:has(textarea),.atg-inquiry button{grid-column:1/-1}
+.atg-inquiry button{justify-self:start}
+@media(max-width:640px){.atg-inquiry form{grid-template-columns:1fr}}
