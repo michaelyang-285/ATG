@@ -38,7 +38,7 @@ export default async function HomePage() {
           {featured ? (
             <>
               <p className="story-label">{storyLabel(featured)}</p>
-              <h1 style={{ fontSize: "clamp(2rem, 4vw, 3.6rem)", lineHeight: 1.06, margin: ".5rem 0 1rem" }}>
+              <h1 className="featured-headline">
                 <Link href={storyHref(featured)}>{featured.title}</Link>
               </h1>
               <Link href={storyHref(featured)} tabIndex={-1} aria-hidden="true">

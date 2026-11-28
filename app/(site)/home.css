@@ -8,3 +8,10 @@
 .homepage .lead-story h2{font-size:clamp(2rem,4vw,3.6rem);line-height:1.06;margin:.8rem 0}
 .home-business{border-top:2px solid currentColor;padding-top:2rem}
 @media(max-width:720px){.homepage .home-welcome{grid-template-columns:1fr}.home-community{padding:1.5rem}}
+
+.homepage .lead-story .featured-headline {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  line-height: 1.08;
+  margin: .5rem 0 1rem;
+  text-wrap: wrap;
+}
