@@ -169,6 +169,70 @@ export default async function Page({ params }: { params: { slug: string } }) {
       "source-19"
     ]
   }
+} : story._id === "acb4b18b-db6b-4fa1-a004-a4d373dca55b" ? {
+  "recruit-table-0": {
+    "description": "Gwinnett County high school athletes in the class of 2027 with documented Division I college decisions, recruiting ratings and available state and national rankings.",
+    "period": "2026-11-27",
+    "variables": [
+      "College decision",
+      "Recruiting rating",
+      "Georgia rank",
+      "National rank"
+    ],
+    "sources": [
+      "source-1",
+      "source-3",
+      "source-4",
+      "source-5",
+      "source-6",
+      "source-7",
+      "source-8"
+    ]
+  },
+  "recruit-table-1": {
+    "description": "Selected Gwinnett underclassmen with documented Division I offers or commitments, listed by class, school, sport, college and available ranking.",
+    "period": "2026-11-27",
+    "variables": [
+      "Graduation class",
+      "College offer or commitment",
+      "Recruiting rating",
+      "Georgia rank",
+      "National rank"
+    ],
+    "sources": [
+      "source-10",
+      "source-11",
+      "source-12",
+      "source-13",
+      "source-14",
+      "source-16"
+    ]
+  },
+  "national-counties": {
+    "description": "National ranks for the ten highest-ranked counties and two selected peers in Gridpex’s hometown-based, star-weighted football recruiting data from 2010 through 2026.",
+    "period": "2010/2026",
+    "variables": [
+      "National county rank"
+    ],
+    "sources": [
+      "source-19"
+    ]
+  },
+  "alumni-table": {
+    "description": "Selected Gwinnett high school alumni by sport, position or event, high school and graduating year from 2000 through 2026.",
+    "period": "2000/2026",
+    "variables": [
+      "Graduation year",
+      "Sport",
+      "Position or event",
+      "High school"
+    ],
+    "sources": [
+      "source-17",
+      "source-20",
+      "source-21"
+    ]
+  }
 } : {};
   const datasets = (story.body || []).filter(block => figureMetadata[block._key]?.description && (
     block._type === "callout" || (block._type === "image" && chartFigures[block.asset?._ref])
@@ -184,7 +248,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       name: block.heading || chartFigures[block.asset._ref].title,
       description: figureMetadata[block._key].description,
       temporalCoverage: figureMetadata[block._key].period,
-      spatialCoverage: { "@type": "Place", name: story.location },
+      spatialCoverage: { "@type": "Place", name: block._key === "national-counties" ? "United States" : story.location },
       variableMeasured: figureMetadata[block._key].variables,
       citation: citations,
       isPartOf: { "@id": canonical },

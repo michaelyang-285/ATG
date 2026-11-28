@@ -91,3 +91,10 @@
   object-fit: contain;
 }
 .story-business-heading > span { min-width: 0; overflow-wrap: break-word; }
+
+:is(#recruit-table-0, #recruit-table-1, #national-counties, #alumni-table) .story-table thead {
+  color: var(--ink);
+  background: var(--surface);
+  border-top: 2px solid #ff4d22;
+}
+:is(#recruit-table-0, #recruit-table-1) .story-table { min-width: 50rem; }
