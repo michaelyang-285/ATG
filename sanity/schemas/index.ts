@@ -245,7 +245,7 @@ export const schemaTypes = [
       defineField({
         name: "category",
         type: "string",
-        options: { list: ["Food", "Beauty", "Local services"] },
+        options: { list: ["Food", "Grocery Stores & Supermarkets", "Beauty", "Local services"] },
       }),
       text("neighborhood", "Area"),
       text("address", "Address"),
