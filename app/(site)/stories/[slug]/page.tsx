@@ -68,6 +68,38 @@ export async function generateMetadata({
     ...(seo && { twitter: { card: "summary_large_image", title: socialTitle, description: socialDescription, images } }),
   };
 }
+type GuideSpan = {text: string; marks?: string[]};
+function RestaurantLinks({spans, marks}: {spans: GuideSpan[]; marks: { _key: string; href?: string }[]}) {
+  const links = spans.flatMap(span => {
+    const href = safeUrl(marks.find(mark => span.marks?.includes(mark._key))?.href);
+    return href ? [{label: span.text.trim(), href}] : [];
+  });
+  const ratings = links.filter(link => /^(Google|Yelp)\b/.test(link.label));
+  const actions = links.filter(link => !ratings.includes(link));
+  return <div style={{fontSize:"1rem", marginBlock:"0.45rem"}}>
+    {ratings.map(({label,href}) => {
+      const [provider] = label.split(" ");
+      const score = label.match(/([\d.]+)\/5/);
+      const detail = score ? label.slice(label.indexOf(score[0]) + score[0].length).trim() : label.slice(provider.length).trim();
+      return <div key={href} data-review-provider={provider} style={{maxWidth:"34rem",borderBottom:"1px solid #dedbd4"}}>
+        <a href={href} aria-label={label} style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:"0.5rem",minHeight:44,paddingBlock:4,color:"inherit",textDecoration:"none"}}>
+          <strong style={{minWidth:"3.75rem"}}>{provider}</strong>
+          {score && <><span aria-hidden="true" style={{position:"relative",color:"#cac6bc",lineHeight:1,whiteSpace:"nowrap"}}>★★★★★<span style={{position:"absolute",inset:"0 auto 0 0",width:Number(score[1])*20+"%",overflow:"hidden",color:"#96600e"}}>★★★★★</span></span><b>{score[1]}/5</b></>}
+          <small>{detail}</small>
+        </a>
+      </div>;
+    })}
+    <div style={{display:"flex",alignItems:"center",gap:"1rem",flexWrap:"wrap"}}>
+      {actions.map(({href,label}) => {
+        const icon = label==="🌐" ? "Website" : label==="ⓕ" ? "Facebook" : undefined;
+        return <a key={href} href={href} title={icon} aria-label={icon} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:44,minWidth:icon?44:undefined,fontSize:"0.95rem"}}>
+          {icon==="Website" ? <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg> : icon==="Facebook" ? <b aria-hidden="true">ⓕ</b> : label}
+        </a>;
+      })}
+    </div>
+  </div>;
+}
+
 function StorySummary({ value }: { value: { heading?: string; points?: string[] } }) {
   return (
     <aside className="story-summary" aria-label="Article summary">
@@ -296,6 +328,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
             value={leadSummary ? articleBody.slice(1) : articleBody}
             components={{
               block: {
+                h2: ({children,value}) => {
+                  const heading = value.children?.map((span: GuideSpan) => span.text).join("") || "";
+                  if (!story.guideRestaurants || !/^\d+\. /.test(heading) || !heading.includes(" | ")) return <h2>{children}</h2>;
+                  const [name, detail] = heading.split(" | ");
+                  return <h2>{name}<small style={{display:"block",fontSize:"1rem",fontWeight:500,marginTop:6}}>{detail}</small></h2>;
+                },
                 h3: ({ children, value }) => {
                   const logo = headingLogos.get(value._key);
                   return logo ? (
@@ -305,7 +343,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
                     </h3>
                   ) : <h3>{children}</h3>;
                 },
-                normal: ({children,value}) => <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
+                normal: ({children,value}) => story.guideRestaurants && value.children?.some((s: GuideSpan) => /^Google ★|^Go to the Directory$/.test(s.text.trim()))
+                  ? <RestaurantLinks spans={value.children} marks={value.markDefs || []}/>
+                  : <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
               },
               marks: {
                 link: ({ children, value }) => {
