@@ -19,7 +19,7 @@ function Listing({b,placement}:{b:Business;placement:string}) {
     <div><div style={{display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"0.15rem 0.6rem"}}><h3><Link data-profile href={href}>{name}</Link></h3>{b.premium && <AtgVerified/>}</div>
     {placement==="homepage_feature" ? <Link className="dh-kind" href={"/directory?category="+encodeURIComponent(b.category||"Community")}>{b.category||"Community"}</Link> :
       <span className="dh-kind">{b.category==="Food"?directoryCard(b).label:b.category}</span>}
-    <p className="dh-location">{publicAddress(b.address)?.street ? b.address : city(b)}</p>
+    <p className="dh-location">{placement==="homepage_feature" ? city(b) : publicAddress(b.address)?.street ? b.address : city(b)}</p>
     {b.summary && <p className="dh-summary">{b.summary}</p>}
     {b.providerType==="independent" && <IndependentProBadge/>}
     {b.premium && <Link data-profile className="button button-orange dh-profile-cta" href={href} aria-label={"View profile for "+name}>View profile</Link>}</div></article>;
