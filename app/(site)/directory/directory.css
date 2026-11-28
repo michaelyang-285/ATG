@@ -122,3 +122,9 @@ html:has(.listing-lightbox[open]) { overflow: hidden; }
 .dh-summary { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .dh-city { margin:2rem 0 .25rem; }
 @media(max-width:640px){.dh-pair,.dh-index{grid-template-columns:1fr}.dh-form button{width:100%}.dh-row{gap:.7rem}.dh-section-heading h2{font-size:1.6rem}}
+
+.dh-pair { gap:1rem; }
+.dh-pair .dh-row { padding:clamp(1rem,2vw,1.5rem); background:#fff; border:1px solid #ccc; border-radius:8px; }
+.dh-logo-link { display:block; flex:0 0 50px; align-self:flex-start; border-radius:4px; }
+.dh-logo-link img { display:block; }
+.dh-profile-cta { display:flex; width:fit-content; min-height:44px; align-items:center; margin-top:.8rem; }

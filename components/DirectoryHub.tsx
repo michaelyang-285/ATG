@@ -12,14 +12,17 @@ import DirectoryMetrics from "./DirectoryMetrics";
 function city(b:Business) {return publicAddress(b.address)?.city || b.neighborhood || "Across Gwinnett";}
 function serviceCities(b:Business) {return city(b).split(",").map(x=>x.trim()).filter(Boolean);}
 function Listing({b,placement}:{b:Business;placement:string}) {
+  const href = "/directory/"+encodeURIComponent(b.slug);
+  const name = branchName(b);
   return <article className="dh-row" data-listing={b._id} data-placement={placement} data-category={b.category}>
-    <ListingLogo src={b.logo} size={50} />
-    <div><div style={{display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"0.15rem 0.6rem"}}><h3><Link data-profile href={"/directory/"+encodeURIComponent(b.slug)}>{branchName(b)}</Link></h3>{b.premium && <AtgVerified/>}</div>
+    <Link data-profile className="dh-logo-link" href={href} aria-label={"View profile for "+name}><ListingLogo src={b.logo} size={50} /></Link>
+    <div><div style={{display:"flex",alignItems:"baseline",flexWrap:"wrap",gap:"0.15rem 0.6rem"}}><h3><Link data-profile href={href}>{name}</Link></h3>{b.premium && <AtgVerified/>}</div>
     {placement==="homepage_feature" ? <Link className="dh-kind" href={"/directory?category="+encodeURIComponent(b.category||"Community")}>{b.category||"Community"}</Link> :
       <span className="dh-kind">{b.category==="Food"?directoryCard(b).label:b.category}</span>}
     <p className="dh-location">{publicAddress(b.address)?.street ? b.address : city(b)}</p>
     {b.summary && <p className="dh-summary">{b.summary}</p>}
-    {b.providerType==="independent" && <IndependentProBadge/>}</div></article>;
+    {b.providerType==="independent" && <IndependentProBadge/>}
+    {b.premium && <Link data-profile className="button button-orange dh-profile-cta" href={href} aria-label={"View profile for "+name}>View profile</Link>}</div></article>;
 }
 export default function DirectoryHub({businesses,filters,unsupported,canonicalCategory}:{canonicalCategory:boolean;businesses:Business[];filters:Filters;unsupported:string}) {
   const group = filters.group || "";
