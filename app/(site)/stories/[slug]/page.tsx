@@ -24,7 +24,7 @@ import { StoryByline } from "@/components/StoryByline";
 import { StoryImage } from "@/components/Publication";
 import { cache } from "react";
 import { tacoGuideSchema, type GuideRestaurant } from "@/lib/taco-guide-schema";
-import {GuideMenu, MallGuideFigure} from "@/components/MallGuide";
+import {formatGuideParagraph, GuideCitations, GuideImageCaption, GuideMenu, MallGuideFigure} from "@/components/MallGuide";
 const mallSlug = "gwinnett-place-mall-redevelopment";
 const mallDraftId = "drafts.atg-gwinnett-place-mall-guide";
 export const revalidate = 60;
@@ -138,9 +138,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
     }
     return !(mallGuide && block._key === "hero-original");
   });
+  const mallNoteIds = new Set(mallGuide ? body.filter(block => block._key.startsWith("note-")).map(block => block._key) : []);
+  const mallImageSource = mallGuide ? body.find(block => block._key === "source-2")?.markDefs?.[0]?.href : undefined;
   const recruitTables = body.filter(block => block._type === "callout" && ["recruit-table-0", "recruit-table-1"].includes(block._key));
   const articleBody = body.map((block: any) => {
     if (block._type !== "block") return block;
+    if (mallGuide && block.style === "normal") return formatGuideParagraph(block);
     if (isHolidayGuide && block.style === "normal" &&
         block.markDefs?.some((mark: { href?: string }) => mark.href?.startsWith("https://www.google.com/maps"))) {
       return { ...block, children: block.children.map((span: { _type: string; text?: string; marks?: string[] }) =>
@@ -375,7 +378,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
           {story.excerpt && <p className="lead-deck">{story.excerpt}</p>}
           <p className="byline"><StoryByline story={story} /></p>
           {leadSummary && <div className="article-body"><StorySummary value={leadSummary} /></div>}
-          {mallGuide && story.image ? <figure><a href={story.body?.find(b=>b._key==="hero-original")?.imageUrl || undefined}><img className="story-image" style={{objectFit:"contain",height:"auto"}} src={story.body?.find(b=>b._key==="hero-original")?.imageUrl || imageUrl(story.image) || undefined} alt={story.image.alt}/></a><figcaption>{story.image.caption}</figcaption></figure> : <StoryImage story={story} priority />}
+          {mallGuide && story.image ? <figure className="mall-image"><a href={story.body?.find(b=>b._key==="hero-original")?.imageUrl || undefined}><img className="story-image" style={{objectFit:"contain",height:"auto"}} src={story.body?.find(b=>b._key==="hero-original")?.imageUrl || imageUrl(story.image) || undefined} alt={story.image.alt}/></a><GuideImageCaption caption={story.image.caption} sourceHref={mallImageSource} /></figure> : <StoryImage story={story} priority />}
           {story.image?.credit && (
             <p className="quiet">Photo: {story.image.credit}</p>
           )}
@@ -385,6 +388,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <PortableText
             value={leadSummary ? mainBody.slice(1) : mainBody}
             components={{
+              ...(mallGuide && {
+                list: {number: ({children}) => <ol className="mall-bibliography">{children}</ol>},
+                listItem: {number: ({children,value}) => <li id={value._key}>{children}</li>},
+              }),
               block: {
                 h2: ({children,value}) => {
                   if (mallGuide) return <h2 id={value._key}>{children}</h2>;
@@ -404,6 +411,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 },
                 normal: ({children,value}) => story.guideRestaurants && value.children?.some(s => /^Google ★|^Go to the Directory$/.test(String(s.text || "").trim()))
                   ? <RestaurantLinks spans={value.children.map(s => ({text:String(s.text || ""),marks:Array.isArray(s.marks) ? s.marks : []}))} marks={(value.markDefs || []).map(m => ({_key:m._key,href:typeof m.href === "string" ? m.href : undefined}))}/>
+                  : mallGuide && mallNoteIds.has(value._key) ? <p className="mall-figure-note" id={value._key}>{children}</p>
                   : <p id={/^source-\d+$/.test(value._key) ? value._key : undefined}>{children}</p>,
               },
               marks: {
@@ -419,6 +427,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 },
               },
               types: {
+                mallCitations: ({value}) => <GuideCitations references={value.references} />,
                 directoryPhone: ({ value }) => <a href={"tel:+1" + value.text.replace(/-/g, "")}>{value.text}</a>,
                 faq: ({value}) => <StoryFaq value={value} omitHeading={mallGuide}/>,
                 upcomingGameEvents: ({ value }) => hasCalendar ? (
@@ -430,11 +439,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 ) : null,
                 image: ({ value }) =>
                   chartFigures[value.asset?._ref] ? <div id={figureMetadata[value._key] ? value._key : undefined}><StoryDataChart chart={chartFigures[value.asset._ref]} caption={value.caption} /></div> : value.imageUrl ? (
-                    <figure>
+                    <figure className={mallGuide ? "mall-image" : undefined}>
                       <img src={value.imageUrl} alt={value.alt || ""} loading="lazy" decoding="async" />
-                      {value.caption && (
-                        <figcaption>{value.caption}</figcaption>
-                      )}
+                      {mallGuide ? <GuideImageCaption caption={value.caption} sourceHref={mallImageSource} /> : value.caption && <figcaption>{value.caption}</figcaption>}
                     </figure>
                   ) : null,
                 pullQuote: ({ value }) => (
@@ -444,7 +451,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
                   </blockquote>
                 ),
                 divider: () => <hr />,
-                callout: ({ value }) => mallGuide ? <MallGuideFigure value={value}/> : recruitTables.some(table => table._key === value._key)
+                callout: ({ value }) => mallGuide ? <MallGuideFigure value={value} noteId={mallNoteIds.has("note-" + value._key) ? "note-" + value._key : undefined}/> : recruitTables.some(table => table._key === value._key)
                   ? (value._key === recruitTables[0]._key ? <RecruitDirectory tables={recruitTables} /> : null)
                   : figureMetadata[value._key] ? <div id={value._key}><StoryCallout value={value} /></div> : <StoryCallout value={value} />,
                 tldr: StorySummary,
