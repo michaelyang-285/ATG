@@ -73,3 +73,13 @@ export function dayLabel(day:string) {
   return new Date(day+"T12:00:00Z").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",timeZone:"UTC"});
 }
 export function jsonLd(data:unknown) {return JSON.stringify(data).replace(/</g,"\\u003c");}
+
+function slugPart(value: string) {
+  return value.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+export function libraryEventPath(event: Listing & { branch: string }) {
+  const branch = slugPart(event.branch.replace(/\s+branch$/i, "")) || "library";
+  return `${libraryPath}/${branch}/${slugPart(event.title) || "event"}-${event.day}-${event.id}`;
+}

@@ -1,12 +1,13 @@
+import LibraryBreadcrumbs from "./LibraryBreadcrumbs";
 import LibraryFilters from "./LibraryFilters";
 import Link from "next/link";
 import { FaqAccordion } from "@/components/FaqAccordion";
-import { libraryAgenda, libraryPath, libraryCalendar, jsonLd } from "@/lib/library-events";
-import { eventPageMetadata } from "@/lib/event-metadata";
+import { libraryEventPath, libraryAgenda, libraryPath, libraryCalendar, jsonLd } from "@/lib/library-events";
+import { eventPageMetadata, libraryShareImage } from "@/lib/event-metadata";
 import "./library.css";
 
 const title = "Gwinnett County Public Library Events";
-export const metadata = eventPageMetadata(title,"Find upcoming Gwinnett library events by branch and audience, including toddler storytimes, kids’ programs and book clubs.",libraryPath);
+export const metadata = eventPageMetadata(title,"Find upcoming Gwinnett library events by branch and audience, including toddler storytimes, kids’ programs and book clubs.",libraryPath,libraryShareImage);
 const faq = [
   {question:"How do I find kids’ events at my library?",answer:"Pick a branch and select Kids under Audience. The listings update after each selection. Check each program’s age guidance for the best fit."},
   {question:"Which programs are right for my child’s age?",answer:"Read the age range and description together. A program in the library’s Ages 0–5 group may be designed specifically for toddlers or preschoolers."},
@@ -28,10 +29,10 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
     {title:"Next Week",events:rows.filter(e=>e.day>data.thisEnd && e.day<=data.nextEnd),empty:"No matching events next week."},
     {title:"Later in "+laterMonth,events:rows.filter(e=>e.day>=data.laterStart),empty:"No matching events later in "+laterMonth+"."}
   ] : [];
-  const schema={"@context":"https://schema.org","@graph":[{"@type":"CollectionPage",name:title,url:base+libraryPath,mainEntity:{"@type":"ItemList",itemListElement:rows.map((e,i)=>({"@type":"ListItem",position:i+1,url:base+libraryPath+"/"+e.id,name:e.title}))}},{"@type":"BreadcrumbList",itemListElement:[["Events","/events"],[title,libraryPath]].map(([name,path],i)=>({"@type":"ListItem",position:i+1,name,item:base+path}))},{"@type":"FAQPage",mainEntity:faq.map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))}]};
+  const schema={"@context":"https://schema.org","@graph":[{"@type":"CollectionPage",name:title,url:base+libraryPath,mainEntity:{"@type":"ItemList",itemListElement:rows.map((e,i)=>({"@type":"ListItem",position:i+1,url:base+libraryEventPath(e),name:e.title}))}},{"@type":"FAQPage",mainEntity:faq.map(f=>({"@type":"Question",name:f.question,acceptedAnswer:{"@type":"Answer",text:f.answer}}))}]};
   return <main id="main" className="site-width page-content library-hub">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd(schema)}}/>
-    <Link href="/events">‹ Events calendar</Link><h1>{title}</h1>
+    <LibraryBreadcrumbs /><h1>{title}</h1>
     <p>Find storytimes, workshops and book clubs at your Gwinnett library branch. All times are Eastern.</p>
     <LibraryFilters key={JSON.stringify([q.branch,q.audience])} path={libraryPath} branches={branches} branch={q.branch||""} audience={q.audience||""}/>
     <p><strong>Before you go:</strong> Event dates and times can change, and our listings may lag behind the library’s updates. Check the <a href={libraryCalendar} target="_blank" rel="noopener noreferrer">official Gwinnett County Public Library calendar</a> for the latest schedule.</p>
@@ -46,7 +47,7 @@ export default async function Page({searchParams:q}:{searchParams:{branch?:strin
       const list = Array.from(days,([day,sessions])=><div key={day} className="library-day">
         <h3><time dateTime={day}>{agendaDate.format(new Date(day + "T12:00:00Z"))}</time></h3>
         <ul>{sessions.map(e=><li key={e.id}><strong className="library-location">{e.branch||"Check library for location"}</strong>
-          <Link href={libraryPath+"/"+e.id}>{e.title}</Link>
+          <Link href={libraryEventPath(e)}>{e.title}</Link>
           <time className="library-session-time" dateTime={e.start}>{e.time}</time>{e.ages.length>0&&<small>{e.ages.join(" · ")}</small>}</li>)}</ul>
       </div>);
       return <section key={title} className="library-period"><h2>{title}</h2>
