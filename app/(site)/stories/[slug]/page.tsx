@@ -211,8 +211,8 @@ export default async function Page({ params }: { params: { slug: string } }) {
   "recruit-table-0": {
     "name": "Gwinnett County Division I recruits, Class of 2027",
     "creator": "All Things Gwinnett",
-    "description": "Gwinnett County high school athletes in the class of 2027 with documented Division I college decisions, recruiting ratings and available state and national rankings.",
-    "period": "2026-11-27",
+    "description": "Gwinnett County high school athletes in the class of 2027 with documented Division I offers, commitments or signings, recruiting ratings and available state and national rankings.",
+    "period": "2026-11-28",
     "variables": [
       "College decision",
       "Recruiting rating",
@@ -230,10 +230,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
     ]
   },
   "recruit-table-1": {
-    "name": "Gwinnett County Division I prospects, Classes of 2028 and 2029",
+    "name": "Gwinnett County Division I prospects, Classes of 2028 through 2030",
     "creator": "All Things Gwinnett",
     "description": "Selected Gwinnett underclassmen with documented Division I offers or commitments, listed by class, school, sport, college and available ranking.",
-    "period": "2026-11-27",
+    "period": "2026-11-28",
     "variables": [
       "Graduation class",
       "College offer or commitment",
