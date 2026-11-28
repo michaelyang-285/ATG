@@ -1,8 +1,5 @@
-import type { Business } from "./publication";
 import type { NavItem } from "@/components/SiteHeader";
-export function navigation(
-  businesses: Business[],
-): NavItem[] {
+export function navigation(): NavItem[] {
   return [
     {
       label: "Food & drink",
@@ -33,12 +30,6 @@ export function navigation(
       href: "/directory",
       children: [
         { label: "Browse businesses", href: "/directory" },
-        ...["Food", "Beauty", "Local services"]
-          .filter((c) => businesses.some((b) => b.category === c))
-          .map((c) => ({
-            label: c === "Food" ? "Food & Drink" : c,
-            href: c === "Food" ? "/directory/category/food-drink" : `/directory?category=${encodeURIComponent(c)}`,
-          })),
         { label: "List your business", href: "/directory/submit" },
       ],
     },
