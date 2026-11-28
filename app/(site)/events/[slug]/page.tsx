@@ -1,3 +1,4 @@
+import { EventPage } from "../EventPage";
 import Link from "next/link";
 import { cache } from "react";
 import { notFound } from "next/navigation";
@@ -120,19 +121,10 @@ export default async function Page({ params, searchParams }: Props) {
   const admission = e.priceLabel?.trim() || (price === 0 ? "Free" :
     typeof price === "number" ? "$" + price : e.cost === "paid" ? "Paid admission" : "");
 
-  return (
-    <main id="main" className="site-width page-content">
-      <article className={styles.event}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
-          }}
-        />
-        <Link className={styles.back} href="/events">← Events calendar</Link>
-        <h1>{e.title}</h1>
-        {e.cancelled && <p className={styles.cancelled}>This event has been cancelled.</p>}
-        <dl className={styles.details}>
+  return <EventPage title={e.title} schema={schema} description={e.summary} organizer={e.organizer}
+    navigation={<Link className={styles.back} href="/events">← Events calendar</Link>}
+    notice={e.cancelled && <p className={styles.cancelled}>This event has been cancelled.</p>}
+    details={<>
           <div>
             <dt>Date &amp; time</dt>
             <dd><EventTime startsAt={e.startsAt} endsAt={e.endsAt} /></dd>
@@ -153,14 +145,10 @@ export default async function Page({ params, searchParams }: Props) {
             <dd>{admission}{e.pricingDetails && <span>{e.pricingDetails}</span>}</dd>
           </div>}
           {typeof e.registrationRequired === "boolean" && <div><dt>Registration</dt><dd>{e.registrationRequired ? "Registration required" : "No registration required"}</dd></div>}
-        </dl>
-        {e.summary && <p className={styles.description}>{e.summary}</p>}
-        {e.organizer && <p className={styles.organizer}>Organized by <strong>{e.organizer}</strong></p>}
-        {(ticketUrl || url) && <div className={styles.actions}>
+        </>}
+    actions={(ticketUrl || url) && <>
           {ticketUrl && <a className="button button-orange" href={ticketUrl} target="_blank" rel="noopener noreferrer">Tickets and registration</a>}
           {url && url !== ticketUrl && <a className={ticketUrl ? styles.back : "button button-orange"} href={url} target="_blank" rel="noopener noreferrer">Visit event website</a>}
-        </div>}
-      </article>
-    </main>
-  );
+        </>}
+  />;
 }

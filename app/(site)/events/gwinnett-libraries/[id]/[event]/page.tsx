@@ -1,8 +1,9 @@
 import { eventDetailMetadata, libraryShareImage } from "@/lib/event-metadata";
 import LibraryBreadcrumbs from "../../LibraryBreadcrumbs";
 import { notFound, permanentRedirect } from "next/navigation";
-import { libraryFeed,enrich,dayLabel,libraryPath,libraryEventPath,jsonLd } from "@/lib/library-events";
-import styles from "./event.module.css";
+import { libraryFeed,enrich,dayLabel,libraryPath,libraryEventPath } from "@/lib/library-events";
+import { EventPage } from "../../../EventPage";
+import styles from "../../../[slug]/event.module.css";
 
 type Params = { id: string; event: string };
 
@@ -33,25 +34,23 @@ export default async function Page({params}:{params:Params}){
     postalCode: addressParts[3], addressCountry: "US",
   } : e.address || undefined;
   const schema={"@context":"https://schema.org","@type":"Event",name:e.title,url:"https://allthingsgwinnett.com"+libraryEventPath(e),sameAs:e.url,startDate:e.start+offset,description:e.description,organizer:{"@type":"Organization",name:"Gwinnett County Public Library",url:"https://www.gwinnettpl.org/"},location:e.branch?{"@type":"Place",name:e.branch,address}:undefined,audience:e.ages.map(a=>({"@type":"Audience",audienceType:a}))};
-  return <main id="main" className={styles.page}>
-    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd(schema)}}/>
-    <LibraryBreadcrumbs event={{ name: e.title, path: libraryEventPath(e) }} />
-    <header className={styles.heading}>
-      <p>{e.branch || "Gwinnett County Public Library"}</p>
-      <h1>{e.title}</h1>
-    </header>
-    <div className={styles.layout}>
-      <section className={styles.schedule} aria-label="Event schedule and location">
-        <time dateTime={e.start+offset}><strong>{dayLabel(e.day)}, {e.day.slice(0,4)}</strong><span>{e.time}</span></time>
+  return <EventPage title={e.title} schema={schema} description={e.description} organizer="Gwinnett County Public Library"
+    navigation={<LibraryBreadcrumbs event={{ name: e.title, path: libraryEventPath(e) }} />}
+    details={<>
+      <div><dt>Date &amp; time</dt><dd>
+        <time dateTime={e.start + offset}>{dayLabel(e.day)}, {e.day.slice(0,4)}</time>
+        <span className={styles.hours}>{e.time}</span>
+      </dd></div>
+      {(e.branch || e.address) && <div><dt>Location</dt><dd>
         {e.branch && <strong>{e.branch}</strong>}
-        {e.address && <a href={"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(e.address)}>{e.address} ↗</a>}
-      </section>
-      <section className={styles.about}>
-        <h2>About this event</h2>
-        {e.description && <p>{e.description}</p>}
-        {e.ages.length > 0 && <p><strong>Audience</strong> · {e.ages.join(", ")}</p>}
-        <a className={styles.action} href={e.url}>View official event details ↗</a>
-      </section>
-    </div>
-  </main>;
+        {e.address && <>
+          <span>{addressParts ? addressParts[1] : e.address}</span>
+          {addressParts && <span>{addressParts[2]}, GA {addressParts[3]}</span>}
+          <a className={styles.maps} href={"https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(e.address)} target="_blank" rel="noopener noreferrer">View on Google Maps <span aria-hidden="true">↗</span></a>
+        </>}
+      </dd></div>}
+      {e.ages.length > 0 && <div><dt>Audience</dt><dd>{e.ages.join(", ")}</dd></div>}
+    </>}
+    actions={<a className="button button-orange" href={e.url} target="_blank" rel="noopener noreferrer">View official event details</a>}
+  />;
 }
