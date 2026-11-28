@@ -132,3 +132,16 @@ html:has(.listing-lightbox[open]) { overflow: hidden; }
 .dh-pair .dh-row > div { display:flex; flex-direction:column; align-self:stretch; align-items:flex-start; }
 .dh-pair .dh-summary { max-width:100%; margin-bottom:.8rem; }
 .dh-pair .dh-profile-cta { margin-top:auto; }
+
+/* Paired cards share content tracks so each new rotation aligns naturally. */
+.dh-pair .dh-row { display:grid; grid-template-columns:50px minmax(0,1fr); column-gap:1rem; row-gap:.4rem; align-items:start; }
+.dh-pair .dh-row > div, .dh-pair .dh-row > div > div:first-child { display:contents !important; }
+.dh-pair .dh-logo-link { grid-column:1; grid-row:1 / span 2; }
+.dh-pair .dh-row h3 { grid-area:1 / 2; margin:0; overflow-wrap:anywhere; }
+.dh-pair .dh-row h3 + span { grid-area:2 / 2; justify-self:start; }
+.dh-pair .dh-kind { grid-area:3 / 2; justify-self:start; }
+.dh-pair .dh-location { grid-area:4 / 2; margin:0; }
+.dh-pair .dh-summary { grid-area:5 / 2; margin:0; white-space:normal; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.dh-pair .dh-row > div > span { grid-area:6 / 2; justify-self:start; }
+.dh-pair .dh-profile-cta { grid-area:7 / 2; justify-self:start; align-self:end; margin-top:.4rem; }
+@media(min-width:641px){.dh-pair .dh-row { grid-row:span 7; grid-template-rows:subgrid; }}
