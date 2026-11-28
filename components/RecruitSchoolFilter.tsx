@@ -6,7 +6,7 @@ type Group = { id: string; title: string; athletes: { id: string; school: string
 
 export function RecruitSchoolFilter({ groups }: { groups: Group[] }) {
   const [school, setSchool] = useState("");
-  const schools = [...new Set(groups.flatMap(group => group.athletes.map(athlete => athlete.school)).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const schools = Array.from(new Set(groups.flatMap(group => group.athletes.map(athlete => athlete.school)).filter(Boolean))).sort((a, b) => a.localeCompare(b));
   return <>
     <label className="recruit-school-filter">Filter by high school
       <select value={school} onChange={event => setSchool(event.target.value)}>
