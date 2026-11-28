@@ -81,7 +81,8 @@ function FoodListings({ businesses }: { businesses: Business[] }) {
   return <section><h2>Restaurants &amp; markets</h2>
     <ul className="sf-listings">{picks.map(b => <li key={b._id}>
       <Link href={'/directory/' + encodeURIComponent(b.slug)}>
-        {b.logo && <img src={b.logo} alt="" width="54" height="54" loading="lazy" />}
+        <img src={b.logo || "/brand/atg-avatar.png"} alt="" width="54" height="54" loading="lazy"
+          style={b.logo ? undefined : {filter:"grayscale(1)", opacity:0.5}} />
         <span><strong>{b.name}</strong>{(b.branch?.label || b.neighborhood) && <small>{b.branch?.label || b.neighborhood}</small>}</span><DirectionIcon />
       </Link></li>)}</ul></section>;
 }
