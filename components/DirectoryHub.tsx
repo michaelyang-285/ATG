@@ -29,7 +29,7 @@ export default function DirectoryHub({businesses,filters,unsupported}:{businesse
   const cities = Array.from(new Set(rows.flatMap(serviceCities))).sort();
   const filtered = rows.filter(b=>!filters.city || serviceCities(b).includes(filters.city));
   const counts = new Map<string,number>();
-  for(const b of businesses) for(const name of groupsFor(b)) counts.set(name,(counts.get(name)||0)+1);
+  for(const b of businesses) for(const name of Array.from(groupsFor(b))) counts.set(name,(counts.get(name)||0)+1);
   const groups = Array.from(counts).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0]));
   const paid = businesses.filter(b=>b.premium).sort((a,b)=>a._id.localeCompare(b._id));
   const offset = paid.length ? Math.floor(Date.now()/3600000)%paid.length : 0;
