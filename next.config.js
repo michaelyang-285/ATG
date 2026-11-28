@@ -4,6 +4,7 @@ const directoryCardFiles = ["./public/directory-art/*.jpg", "./public/fonts/DMSa
 const nextConfig = {
   experimental: {outputFileTracingIncludes: {
     "/directory/*/share-image": directoryCardFiles,
+    "/directory/category/*/share-image": directoryCardFiles,
     "/api/directory/review": directoryCardFiles,
   }},
   async redirects() {

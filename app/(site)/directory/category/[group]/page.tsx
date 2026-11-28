@@ -13,8 +13,9 @@ export async function generateMetadata({params,searchParams}:Props) {
   const {name,description}=landing(params.group);
   const title=name+" in Gwinnett County";
   const url="/directory/category/"+params.group;
-  return {title,description,alternates:{canonical:url},robots:(Object.keys(searchParams).length || !(await categoryInventory()).slugs.includes(params.group))?{index:false,follow:true}:undefined,
-    openGraph:{title,description,url,images:["/brand/og.png"]}};
+  const image = {url:url+"/share-image",width:1200,height:630,alt:name+" in Gwinnett County | All Things Gwinnett"};
+  return {title,description,twitter:{card:"summary_large_image",title,description,images:[image.url]},alternates:{canonical:url},robots:(Object.keys(searchParams).length || !(await categoryInventory()).slugs.includes(params.group))?{index:false,follow:true}:undefined,
+    openGraph:{type:"website",siteName:"All Things Gwinnett",title,description,url,images:[image]}};
 }
 export default function Page({params,searchParams}:Props) {
   const {name}=landing(params.group);
