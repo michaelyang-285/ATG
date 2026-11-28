@@ -1,5 +1,5 @@
 import { eventDetailMetadata } from "@/lib/event-metadata";
-import Link from "next/link";
+import LibraryBreadcrumbs from "../../LibraryBreadcrumbs";
 import { notFound, permanentRedirect } from "next/navigation";
 import { libraryFeed,enrich,dayLabel,libraryPath,libraryEventPath,jsonLd } from "@/lib/library-events";
 import styles from "./event.module.css";
@@ -28,7 +28,7 @@ export default async function Page({params}:{params:Params}){
   const schema={"@context":"https://schema.org","@type":"Event",name:e.title,url:"https://allthingsgwinnett.com"+libraryEventPath(e),sameAs:e.url,startDate:e.start+offset,description:e.description,organizer:{"@type":"Organization",name:"Gwinnett County Public Library",url:"https://www.gwinnettpl.org/"},location:e.branch?{"@type":"Place",name:e.branch,address:e.address||undefined}:undefined,audience:e.ages.map(a=>({"@type":"Audience",audienceType:a}))};
   return <main id="main" className={styles.page}>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:jsonLd(schema)}}/>
-    <Link className={styles.back} href={libraryPath}>← Library events</Link>
+    <LibraryBreadcrumbs event={{ name: e.title, path: libraryEventPath(e) }} />
     <header className={styles.heading}>
       <p>{e.branch || "Gwinnett County Public Library"}</p>
       <h1>{e.title}</h1>
