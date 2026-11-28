@@ -33,3 +33,7 @@ export function groupUrl(name:string) {
   const slug = Object.keys(landings).find(key => landings[key].name === name);
   return slug ? "/directory/category/" + slug : "/directory?group=" + encodeURIComponent(name);
 }
+
+export function hasDirectoryFilters(params: Record<string,unknown>) {
+  return ["q","group","category","city","area","provider","service","all","format","topic"].some(key=>Object.prototype.hasOwnProperty.call(params,key));
+}
